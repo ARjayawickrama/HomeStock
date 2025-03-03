@@ -1,122 +1,74 @@
 import React, { useState } from "react";
-import { Bell, Mail, Globe, Home as HomeIcon } from "lucide-react";
+import { Bell, Mail, Globe, Home as HomeIcon, LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import Inventory from "./Inventory";
-import Order from "./Order";
-import A from "./a";
-import B from "./b";
+import Inventory from "./inventory/Inventory";
+import Grocery_ist from "./grocery_ist/grocery_ist";
+import Budgeting from "./budgeting/budgeting";
+import Iot from "./iot/iot";
 import Home from "./home";
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("home");
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
-  const [userRole, setUserRole] = useState("user");
-  const [token, setToken] = useState(localStorage.getItem("token") || "");
-
   const navigate = useNavigate();
 
-  const logout = () => {
-    console.log("Logging out...");
-  };
-
-  const notify = () => {
-    console.log("Logged out successfully!");
-  };
-
-  const decodeToken = (token) => {
-    try {
-      const decoded = JSON.parse(atob(token.split(".")[1]));
-      return decoded;
-    } catch (error) {
-      console.error("Error decoding token:", error);
-      return {};
-    }
-  };
-
   const handleLogout = () => {
-    if (token) {
-      const decodedToken = decodeToken(token);
-      console.log("Decoded Token:", decodedToken);
-    }
-
-    logout();
     localStorage.removeItem("token");
-    setIsLoggedIn(false);
-    setUserRole("");
-    setToken("");
-
     navigate("/", { replace: true });
-
-    notify();
-  };
-
-  const handleTabChange = (tab) => {
-    setActiveTab(tab);
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      {/* Top Navigation */}
-      <nav className="bg-gray-800 text-white p-4 flex justify-between items-center">
+    <div className="min-h-screen bg-gray-100 text-gray-900">
+     
+      <nav className="bg-gray-800 text-white p-4 flex justify-between items-center shadow-md">
         <div className="flex items-center gap-4">
           <HomeIcon className="w-6 h-6" />
-          <span className="text-lg font-semibold">Logo</span>
-          <button onClick={handleLogout} className="ml-4 bg-red-500 px-3 py-1 rounded">Logout</button>
+          <span className="text-lg font-semibold">Admin Dashboard</span>
         </div>
-        <div className="flex gap-4">
-          <Globe className="w-6 h-6" />
-          <Mail className="w-6 h-6" />
+        <div className="flex items-center gap-4">
+          <Globe className="w-6 h-6 cursor-pointer" />
+          <Mail className="w-6 h-6 cursor-pointer" />
           <div className="relative">
-            <Bell className="w-6 h-6" />
-            <span className="absolute -top-1 -right-1 bg-green-500 text-xs px-1 rounded-full">3</span>
+            <Bell className="w-6 h-6 cursor-pointer" />
+            <span className="absolute -top-1 -right-1 bg-red-500 text-xs px-1 rounded-full">3</span>
           </div>
+          <button onClick={handleLogout} className="flex items-center bg-red-600 px-4 py-2 rounded-md text-sm font-medium hover:bg-red-700">
+            <LogOut className="w-4 h-4 mr-1" /> Logout
+          </button>
         </div>
       </nav>
 
       {/* Main Content */}
-      <div className="container mx-auto p-4 flex flex-col md:flex-row gap-4">
-        {/* Left Sidebar */}
-        <div className="md:w-1/4 space-y-4">
-          <div className="p-4 text-center border border-gray-300 rounded-lg">
-            <div className="w-24 h-24 mx-auto bg-gray-300 rounded-full" />
-            <h2 className="text-lg font-semibold mt-2">My Profile</h2>
-            <p>Designer, UI</p>
-            <p>London, UK</p>
-            <p>April 1, 1988</p>
+      <div className="container mx-auto p-6 flex flex-col md:flex-row gap-6">
+       
+        <aside className="md:w-1/4 bg-white shadow rounded-lg p-6">
+          <div className="flex flex-col items-center text-center">
+            <div className="w-24 h-24 bg-gray-300 rounded-full" />
+            <h2 className="text-lg font-semibold mt-3">Admin Profile</h2>
+            <p className="text-sm text-gray-600">UI/UX Designer</p>
           </div>
-          <div className="p-4 bg-gray-200 border border-gray-300 rounded-lg">
-            <ul className="space-y-2">
-              {["home", "inventory", "order", "A", "B"].map((tab) => (
-                <li
-                  key={tab}
-                  className={`p-2 rounded cursor-pointer ${
-                    activeTab === tab ? "bg-gray-400" : "bg-gray-300"
-                  }`}
-                  onClick={() => handleTabChange(tab)}
-                >
-                  {tab.charAt(0).toUpperCase() + tab.slice(1)}
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div className="p-4 border border-gray-300 rounded-lg">
-            <h3 className="font-semibold">Interests</h3>
-            <div className="flex flex-wrap gap-2 mt-2">
-              {["News", "W3Schools", "Games", "Friends", "Food", "Design", "Art"].map((tag) => (
-                <span key={tag} className="px-2 py-1 bg-gray-300 rounded text-sm">{tag}</span>
-              ))}
-            </div>
-          </div>
-        </div>
+          <ul className="mt-6 space-y-2">
+            {["Home", "inventory", "Grocery", "Budgeting", "Iot"].map((tab) => (
+              <li
+                key={tab}
+                className={`p-3 rounded-lg cursor-pointer text-center font-medium transition duration-200 hover:bg-gray-200 ${
+                  activeTab === tab ? "bg-gray-300 text-gray-900" : "bg-gray-100 text-gray-600"
+                }`}
+                onClick={() => setActiveTab(tab)}
+              >
+                {tab.charAt(0).toUpperCase() + tab.slice(1)}
+              </li>
+            ))}
+          </ul>
+        </aside>
 
-   
-        <div className="md:w-11/12 space-y-4">
+        {/* Content */}
+        <main className="md:w-3/4 bg-white shadow rounded-lg p-6">
           {activeTab === "home" && <Home />}
           {activeTab === "inventory" && <Inventory />}
-          {activeTab === "order" && <Order />}
-          {activeTab === "A" && <A />}
-          {activeTab === "B" && <B />}
-        </div>
+          {activeTab === "Grocery_ist" && <Grocery_ist />}
+          {activeTab === "budgeting" && <Budgeting/>}
+          {activeTab === "iot" && <Iot />}
+        </main>
       </div>
     </div>
   );

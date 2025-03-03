@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { HiHome } from "react-icons/hi2";
 
-import backgroundImage from '../../../src/assets/3.jpg';
+import backgroundImage from "../../../src/assets/3.jpg";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -48,68 +49,63 @@ const Login = () => {
 
   return (
     <div
-      className="flex flex-col justify-center items-center w-screen h-screen p-4 bg-cover bg-center bg-black"
+      className="flex items-center justify-center min-h-screen bg-cover bg-center"
       style={{ backgroundImage: `url(${backgroundImage})` }}
     >
-      {error && <p className="text-red-500 mb-4">{error}</p>}
-
-      <div className="w-full max-w-md bg-black bg-opacity-50 p-6 rounded-lg">
-        <form onSubmit={handleSubmit}>
-          {/* <div className="mb-4">
-            <label htmlFor="email" className="block text-white mb-2">Email Address</label>
+      <div className="bg-white p-8 rounded-lg shadow-lg w-96">
+        <div className="flex justify-center">
+          <HiHome className="text-4xl text-gray-900" />
+        </div>
+        <h2 className="text-2xl font-bold text-center text-gray-800 mt-2">
+          Sign in to Home Stock 
+        </h2>
+        {error && (
+          <p className="text-red-500 text-sm text-center mt-2">{error}</p>
+        )}
+        <form onSubmit={handleSubmit} className="mt-4">
+          <div className="mb-4">
+            <label htmlFor="email" className="block text-gray-700 font-medium">
+              Email address
+            </label>
             <input
-              id="email"
               type="email"
-              placeholder="Email Address"
-              className="w-full p-3 text-white bg-transparent border-b-2 border-white focus:outline-none focus:border-teal-500"
+              id="email"
+              placeholder="john.doe@company.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              required
+              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
             />
-          </div> */}
-          <div class="mb-6">
-        <label htmlFor="email" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Email address</label>
-        <input type="email" id="email" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="john.doe@company.com" required />
-    </div> 
-
-          <div className="mb-4">
-            <label htmlFor="password" className="block text-white mb-2">Password</label>
-            <div className="relative">
-              <input
-                id="password"
-                type={showPassword ? "text" : "password"}
-                placeholder="Password"
-                className="w-full p-3 text-white bg-transparent border-b-2 border-white focus:outline-none focus:border-teal-50"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-              <button
-                type="button"
-                className="absolute right-0 top-1/2 transform -translate-y-1/2 text-white"
-                onClick={handleShowClick}
-              >
-                {showPassword ? "Hide" : "Show"}
-              </button>
-            </div>
-            <div className="text-right mt-2">
-              <a href="/signup" className="text-white">Don't have an account? Sign Up</a>
-            </div>
           </div>
-
+          <div className="mb-4">
+            <label
+              htmlFor="password"
+              className="block text-gray-700 font-medium"
+            >
+              Password
+            </label>
+            <input
+              id="password"
+              type={showPassword ? "text" : "password"}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
+            />
+          </div>
           <button
             type="submit"
-            className="w-full p-3 mt-4 bg-teal-500 text-white font-bold rounded-lg hover:bg-teal-600 focus:outline-none flex justify-center items-center"
             disabled={loading}
+            className="w-full bg-gray-900 text-white py-2 rounded-lg hover:bg-gray-800 transition duration-200"
           >
-            {loading ? (
-              <div className="flex items-center">
-                <svg className="animate-spin h-5 w-5 mr-2 border-2 border-white border-t-transparent rounded-full" viewBox="0 0 24 24"></svg>
-                Logging in...
-              </div>
-            ) : (
-              "Login"
-            )}
+            {loading ? "Logging in..." : "Login"}
           </button>
         </form>
+        <p className="text-sm text-gray-600 text-center mt-4">
+          New to home stock ?{" "}
+          <a href="/SignUp" className="text-blue-500 hover:underline">
+            Create an account
+          </a>
+        </p>
       </div>
     </div>
   );
