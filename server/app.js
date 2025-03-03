@@ -16,10 +16,8 @@ app.use(bodyParser.json());
 app.use("/user", signupRouter);
 app.use("/auth", loginRouter);
 
-// Connect to the database
 connectDB();
 
-// Start the server
 app.listen(PORT, () => {
   console.log(`Server is running on: http://localhost:${PORT}`);
 });
