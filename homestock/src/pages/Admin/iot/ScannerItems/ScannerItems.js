@@ -4,14 +4,15 @@ import axios from "axios";
 
 const BarcodeScanner = ({ onDetected }) => {
   const scannerRef = useRef(null);
-  const [isWebcamActive, setIsWebcamActive] = useState(false); 
-  const [scannedBarcodes, setScannedBarcodes] = useState([]); 
+  const [isWebcamActive, setIsWebcamActive] = useState(false);
+  const [scannedBarcodes, setScannedBarcodes] = useState([]);
   const [lastScanned, setLastScanned] = useState(null);
+  const [productDetails, setProductDetails] = useState(null);
 
   const handleDetected = (code) => {
     console.log("Detected barcode:", code);
     checkExpiryAndSaveBarcode(code);
-    setScannedBarcodes((prev) => [...prev, code]); 
+    setScannedBarcodes((prev) => [...prev, code]);
     setLastScanned(code);
   };
 
@@ -26,6 +27,7 @@ const BarcodeScanner = ({ onDetected }) => {
           alert("This product has expired!");
         } else {
           saveBarcodeToDatabase(barcode, product);
+          setProductDetails(product);
         }
       } else {
         console.log("Product not found.");
@@ -75,12 +77,12 @@ const BarcodeScanner = ({ onDetected }) => {
       let scanTimeout;
       Quagga.onDetected((result) => {
         const detectedBarcode = result.codeResult.code;
-        
+
         if (detectedBarcode !== lastScanned) {
           clearTimeout(scanTimeout);
           scanTimeout = setTimeout(() => {
             handleDetected(detectedBarcode);
-          }, 1500); 
+          }, 1500);
         }
       });
     } else {
@@ -103,51 +105,57 @@ const BarcodeScanner = ({ onDetected }) => {
   };
 
   const toggleScanner = () => {
-    setIsWebcamActive((prev) => !prev); 
+    setIsWebcamActive((prev) => !prev);
   };
 
   const disableWebcam = () => {
-    setIsWebcamActive(false); 
+    setIsWebcamActive(false);
   };
 
   return (
-    <div className="p-4 max-w-md mx-auto">
-      <h2 className="text-lg font-bold text-center mb-4">Smart POS Barcode Scanner</h2>
-
-    
-      <div
-        ref={scannerRef}
-        className={`w-full h-64 bg-gray-200 rounded-lg ${isWebcamActive ? "block" : "hidden"}`}
-      />
-      
-     
-      <div className="mt-4 space-y-4">
-        
-        <button
-          onClick={toggleScanner}
-          className={`w-full py-2 px-4 rounded ${isWebcamActive ? "bg-red-500" : "bg-green-500"} text-white`}
-        >
-          {isWebcamActive ? "Stop Scanner" : "Start Scanner"}
-        </button>
-
-       
-        {isWebcamActive && (
+    <div className="p-4 max-w-full mx-auto">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="border rounded-lg p-4">
+          <h2 className="text-lg font-bold text-center mb-2">Barcode Scanner</h2>
+          <div
+            ref={scannerRef}
+            className={`w-full h-40 bg-gray-200 rounded-lg ${isWebcamActive ? "block" : "hidden"}`}
+          />
           <button
-            onClick={disableWebcam}
-            className="w-full py-2 px-4 rounded bg-yellow-500 text-white"
+            onClick={toggleScanner}
+            className={`w-full py-2 mt-2 rounded ${isWebcamActive ? "bg-red-500" : "bg-green-500"} text-white`}
           >
-            Disable Webcam
+            {isWebcamActive ? "Stop Scanner" : "Start Scanner"}
           </button>
-        )}
-      </div>
+          {isWebcamActive && (
+            <button
+              onClick={disableWebcam}
+              className="w-full py-2 mt-2 rounded bg-yellow-500 text-white"
+            >
+              Disable Webcam
+            </button>
+          )}
+        </div>
 
-      <div className="mt-4">
-        <h3 className="text-md font-semibold">Scanned Barcodes:</h3>
-        <ul className="list-disc pl-4">
-          {scannedBarcodes.map((barcode, index) => (
-            <li key={index} className="text-sm text-gray-700">{barcode}</li>
-          ))}
-        </ul>
+        <div className="border rounded-lg p-4">
+          <h2 className="text-lg font-bold mb-2">Scanned Barcodes</h2>
+          <table className="min-w-full table-auto">
+            <thead>
+              <tr className="bg-gray-100">
+                <th className="px-4 py-2 text-left">No</th>
+                <th className="px-4 py-2 text-left">Barcode</th>
+              </tr>
+            </thead>
+            <tbody>
+              {scannedBarcodes.map((barcode, index) => (
+                <tr key={index} className="border-t">
+                  <td className="px-4 py-2">{index + 1}</td>
+                  <td className="px-4 py-2 text-gray-700">{barcode}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

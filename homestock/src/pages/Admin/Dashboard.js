@@ -41,8 +41,8 @@ const Dashboard = () => {
         <aside className="md:w-1/4 bg-white shadow-lg rounded-lg p-6">
           <div className="flex flex-col items-center text-center">
             <div className="w-24 h-24 bg-gray-300 rounded-full mb-4" />
-            <h2 className="text-lg font-semibold mt-3">Admin Profile</h2>
-            <p className="text-sm text-gray-600">UI/UX Designer</p>
+            <h2 className="text-lg font-semibold mt-3">Home Stock</h2>
+            <p className="text-sm text-gray-600">system unit </p>
           </div>
           <ul className="mt-6 space-y-2">
             {[
