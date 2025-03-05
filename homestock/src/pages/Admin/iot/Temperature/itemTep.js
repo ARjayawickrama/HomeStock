@@ -1,7 +1,7 @@
 import React, { useState } from "react";
+import { FaThermometerFull, FaTint } from "react-icons/fa"; // Import icons
 
 function AllProductsTemperature() {
-  
   const [products, setProducts] = useState([
     { id: 1, name: "Tea Leaves", category: "Raw Material", temperature: 15, maxTemperature: 50, humidity: 40, maxHumidity: 100 },
     { id: 2, name: "Green Tea", category: "Processed", temperature: 25, maxTemperature: 50, humidity: 60, maxHumidity: 100 },
@@ -12,14 +12,16 @@ function AllProductsTemperature() {
 
   const [selectedCategory, setSelectedCategory] = useState("All Items");
 
-  
+  // Helper function to calculate percentage
+  const calculatePercentage = (value, maxValue) => (value / maxValue) * 100;
+
+  // Temperature color based on percentage
   const getTemperatureColor = (percentage) => {
     if (percentage < 30) return "bg-blue-500"; 
     if (percentage < 70) return "bg-green-500"; 
     return "bg-red-500"; 
   };
 
- 
   const getHumidityColor = (percentage) => {
     if (percentage < 30) return "bg-blue-300"; 
     if (percentage < 70) return "bg-yellow-300"; 
@@ -32,7 +34,6 @@ function AllProductsTemperature() {
 
   return (
     <div className="p-6">
-     
       <div className="mb-4">
         <select
           className="px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
@@ -48,16 +49,23 @@ function AllProductsTemperature() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {filteredProducts.slice(0, 3).map((product) => {
-          const temperaturePercentage = (product.temperature / product.maxTemperature) * 100;
-          const humidityPercentage = (product.humidity / product.maxHumidity) * 100;
+          const temperaturePercentage = calculatePercentage(product.temperature, product.maxTemperature);
+          const humidityPercentage = calculatePercentage(product.humidity, product.maxHumidity);
+
           return (
-            <div key={product.id} className="p-4 bg-white rounded-lg shadow-md">
+            <div key={product.id} className="p-4 bg-white rounded-lg shadow-2xl">
               <h2 className="text-lg font-semibold text-gray-700">{product.name}</h2>
               <p className="text-gray-500">{product.category}</p>
-              <p className="text-gray-600">Temperature: {product.temperature}°C</p>
-              <p className="text-gray-600">Humidity: {product.humidity}%</p>
+              <p className="text-gray-600">
+                <FaThermometerFull className="inline-block mr-2 text-blue-500" />
+                Temperature: {product.temperature}°C
+              </p>
+              <p className="text-gray-600">
+                <FaTint className="inline-block mr-2 text-blue-500" />
+                Humidity: {product.humidity}%
+              </p>
 
-           
+              {/* Temperature Bar */}
               <div className="mt-2">
                 <div className="relative w-full bg-gray-200 h-4 rounded-lg">
                   <div
@@ -72,6 +80,7 @@ function AllProductsTemperature() {
                 </div>
               </div>
 
+              {/* Humidity Bar */}
               <div className="mt-4">
                 <div className="relative w-full bg-gray-200 h-4 rounded-lg">
                   <div

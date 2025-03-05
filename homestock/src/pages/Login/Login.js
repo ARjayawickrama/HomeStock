@@ -4,7 +4,7 @@ import axios from "axios";
 import { HiHome } from "react-icons/hi2";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 
-import backgroundImage from "../../../src/assets/4.jpg";
+import backgroundImage from "../../../src/assets/2.jpg";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);

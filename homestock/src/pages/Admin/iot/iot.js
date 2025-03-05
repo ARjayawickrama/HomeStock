@@ -65,7 +65,7 @@ function Iot() {
       {/* ItemTep Section */}
       {activeTab === 'ItemTep' && (
         <section className="mt-8">
-          <h2 className="text-xl font-medium text-gray-800">ItemTep</h2>
+     
           <div>
             <ItemTep />
           </div>

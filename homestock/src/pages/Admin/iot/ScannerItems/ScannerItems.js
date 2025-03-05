@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { FaBarcode, FaPlay, FaStop } from "react-icons/fa"; // Import icons from react-icons
 import Quagga from "quagga";
 import axios from "axios";
 
@@ -7,46 +8,6 @@ const BarcodeScanner = ({ onDetected }) => {
   const [isWebcamActive, setIsWebcamActive] = useState(false);
   const [scannedBarcodes, setScannedBarcodes] = useState([]);
   const [lastScanned, setLastScanned] = useState(null);
-  const [productDetails, setProductDetails] = useState(null);
-
-  const handleDetected = (code) => {
-    console.log("Detected barcode:", code);
-    checkExpiryAndSaveBarcode(code);
-    setScannedBarcodes((prev) => [...prev, code]);
-    setLastScanned(code);
-  };
-
-  const checkExpiryAndSaveBarcode = async (barcode) => {
-    try {
-      const response = await axios.get(`http://localhost:5000/api/product/${barcode}`);
-      const product = response.data;
-      if (product) {
-        const currentDate = new Date();
-        const expiryDate = new Date(product.expiryDate);
-        if (expiryDate < currentDate) {
-          alert("This product has expired!");
-        } else {
-          saveBarcodeToDatabase(barcode, product);
-          setProductDetails(product);
-        }
-      } else {
-        console.log("Product not found.");
-      }
-    } catch (error) {
-      console.error("Error checking expiry date:", error);
-    }
-  };
-
-  const saveBarcodeToDatabase = async (barcode, product) => {
-    try {
-      await axios.post("http://localhost:5000/api/save-scan", {
-        barcode,
-        product,
-      });
-    } catch (error) {
-      console.error("Error saving barcode:", error);
-    }
-  };
 
   useEffect(() => {
     if (isWebcamActive) {
@@ -62,7 +23,13 @@ const BarcodeScanner = ({ onDetected }) => {
             target: scannerRef.current,
           },
           decoder: {
-            readers: ["ean_reader", "code_128_reader", "upc_reader", "code_39_reader", "codabar_reader"],
+            readers: [
+              "ean_reader",
+              "code_128_reader",
+              "upc_reader",
+              "code_39_reader",
+              "codabar_reader",
+            ],
           },
         },
         (err) => {
@@ -77,11 +44,11 @@ const BarcodeScanner = ({ onDetected }) => {
       let scanTimeout;
       Quagga.onDetected((result) => {
         const detectedBarcode = result.codeResult.code;
-
         if (detectedBarcode !== lastScanned) {
           clearTimeout(scanTimeout);
           scanTimeout = setTimeout(() => {
-            handleDetected(detectedBarcode);
+            setScannedBarcodes((prev) => [...prev, detectedBarcode]);
+            setLastScanned(detectedBarcode);
           }, 1500);
         }
       });
@@ -108,54 +75,70 @@ const BarcodeScanner = ({ onDetected }) => {
     setIsWebcamActive((prev) => !prev);
   };
 
-  const disableWebcam = () => {
-    setIsWebcamActive(false);
-  };
-
   return (
-    <div className="p-4 max-w-full mx-auto">
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="border rounded-lg p-4">
-          <h2 className="text-lg font-bold text-center mb-2">Barcode Scanner</h2>
+    <div className="p-4 max-w-6xl mx-auto">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+        {/* Scanner Section */}
+        <div className="border rounded-lg p-4 shadow-md bg-white">
+          <h2 className="text-lg font-bold text-center mb-3">
+            <FaBarcode className="inline-block mr-2" /> Barcode Scanner
+          </h2>
+          
+          {/* Responsive Scanner Box */}
           <div
             ref={scannerRef}
-            className={`w-full h-40 bg-gray-200 rounded-lg ${isWebcamActive ? "block" : "hidden"}`}
+            className={`w-full h-14 sm:h-52 bg-gray-200 rounded-lg flex items-center ${
+              isWebcamActive ? "block" : "hidden"
+            }`}
           />
-          <button
-            onClick={toggleScanner}
-            className={`w-full py-2 mt-2 rounded ${isWebcamActive ? "bg-red-500" : "bg-green-500"} text-white`}
-          >
-            {isWebcamActive ? "Stop Scanner" : "Start Scanner"}
-          </button>
-          {isWebcamActive && (
+
+          {/* Controls */}
+          <div className="flex flex-col sm:flex-row gap-2 mt-3">
             <button
-              onClick={disableWebcam}
-              className="w-full py-2 mt-2 rounded bg-yellow-500 text-white"
+              onClick={toggleScanner}
+              className={`flex-1 py-2 text-white font-semibold rounded ${
+                isWebcamActive ? "bg-red-500 hover:bg-red-600" : "bg-green-500 hover:bg-green-600"
+              }`}
             >
-              Disable Webcam
+              {isWebcamActive ? (
+                <>
+                  <FaStop className="inline-block mr-2" />
+                  Stop Scanner
+                </>
+              ) : (
+                <>
+                  <FaPlay className="inline-block mr-2" />
+                  Start Scanner
+                </>
+              )}
             </button>
-          )}
+          </div>
         </div>
 
-        <div className="border rounded-lg p-4">
-          <h2 className="text-lg font-bold mb-2">Scanned Barcodes</h2>
-          <table className="min-w-full table-auto">
-            <thead>
-              <tr className="bg-gray-100">
-                <th className="px-4 py-2 text-left">No</th>
-                <th className="px-4 py-2 text-left">Barcode</th>
-              </tr>
-            </thead>
-            <tbody>
-              {scannedBarcodes.map((barcode, index) => (
-                <tr key={index} className="border-t">
-                  <td className="px-4 py-2">{index + 1}</td>
-                  <td className="px-4 py-2 text-gray-700">{barcode}</td>
+        {/* Scanned Barcodes */}
+        <div className="border rounded-lg p-4 shadow-md bg-white">
+          <h2 className="text-lg font-bold mb-3">Scanned Barcodes</h2>
+          <div className="overflow-auto max-h-64">
+            <table className="w-full table-auto border-collapse">
+              <thead>
+                <tr className="bg-gray-100">
+                  <th className="px-4 py-2 text-left text-sm">No</th>
+                  <th className="px-4 py-2 text-left text-sm">Barcode</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {scannedBarcodes.map((barcode, index) => (
+                  <tr key={index} className="border-t">
+                    <td className="px-4 py-2 text-sm">{index + 1}</td>
+                    <td className="px-4 py-2 text-sm text-gray-700">{barcode}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
+
       </div>
     </div>
   );

@@ -3,7 +3,7 @@ import axios from "axios";
 import { useForm } from "react-hook-form";
 import { HiHome } from "react-icons/hi2";
 import { useNavigate } from "react-router-dom";
-import backgroundImage from "../../../src/assets/4.jpg";
+import backgroundImage from "../../../src/assets/2.jpg";
 
 const SignUp = () => {
   const [showPassword, setShowPassword] = useState(false);
