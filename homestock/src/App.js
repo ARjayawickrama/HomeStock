@@ -8,10 +8,10 @@ function App() {
     <Router>
       
         <Routes>
-        <Route path="/Login" element={<Login />} />
+        <Route path="/" element={<Login />} />
      
           <Route path="/SignUp" element={<SignUp />} />
-          <Route path="/" element={<Dashboard />} />
+          <Route path="/Dashboard" element={<Dashboard />} />
           <Route path="/ScannerItems" component={ScannerItems} />
         
         </Routes>

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Bell, Mail, Globe, Home as HomeIcon, LogOut, Box, ShoppingCart, DollarSign, Cpu } from "lucide-react"; // Importing necessary icons
+import { Bell, Mail, Globe, Home as HomeIcon, LogOut, Box, ShoppingCart, DollarSign, Cpu ,User } from "lucide-react"; // Importing necessary icons
 import { useNavigate } from "react-router-dom";
 import Inventory from "./inventory/Inventory";
 import Grocery_ist from "./grocery_ist/grocery_ist";
@@ -18,7 +18,7 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 text-gray-900">
-      <nav className="bg-gray-800 text-white p-4 flex justify-between items-center shadow-md">
+      <nav className="bg-black text-white p-4 flex justify-between items-center shadow-md">
         <div className="flex items-center gap-4">
           <HomeIcon className="w-6 h-6" />
           <span className="text-lg font-semibold">Home Stock</span>
@@ -51,13 +51,14 @@ const Dashboard = () => {
               { name: "Grocery", icon: <ShoppingCart className="w-5 h-5" /> },
               { name: "Budgeting", icon: <DollarSign className="w-5 h-5" /> },
               { name: "Iot", icon: <Cpu className="w-5 h-5" /> },
+              { name: "User", icon: <User className="w-5 h-5" /> },
             ].map((tab) => (
               <li
                 key={tab.name}
-                className={`p-3 rounded-lg cursor-pointer text-center font-medium transition duration-200 hover:bg-gray-200 flex items-center gap-3 ${
+                className={`p-3 rounded-lg cursor-pointer text-center font-medium transition duration-200 hover:bg-black flex items-center gap-3 ${
                   activeTab === tab.name.toLowerCase()
-                    ? "bg-gray-300 text-gray-900"
-                    : "bg-gray-100 text-gray-600"
+                    ? "bg-black text-white"
+                    : "bg-gray-100 text-black"
                 }`}
                 onClick={() => setActiveTab(tab.name.toLowerCase())}
               >
