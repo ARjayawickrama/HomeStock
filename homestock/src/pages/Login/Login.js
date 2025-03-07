@@ -29,7 +29,7 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post("http://localhost:5004/auth/login", {
+      const response = await axios.post("http://localhost:5006/auth/login", {
         email,
         password,
       });

@@ -19,7 +19,7 @@ const SignUp = () => {
 
   const onSubmit = async (data) => {
     try {
-      const response = await axios.post("http://localhost:5004/user/register", data);
+      const response = await axios.post("http://localhost:5006/user/register", data);
       console.log("Signup successful:", response.data);
       alert("Signup successful");
       navigate("/");
