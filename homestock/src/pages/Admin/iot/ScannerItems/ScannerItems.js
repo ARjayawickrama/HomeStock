@@ -3,7 +3,6 @@ import { FaBarcode, FaPlay, FaStop, FaEdit, FaTrash } from "react-icons/fa";
 import Quagga from "quagga";
 import axios from "axios";
 
-
 const API_URL = "http://localhost:5004/barcodes"; // Backend API
 
 const ScannerItems = () => {
@@ -33,7 +32,13 @@ const ScannerItems = () => {
             target: scannerRef.current,
           },
           decoder: {
-            readers: ["ean_reader", "code_128_reader", "upc_reader", "code_39_reader", "codabar_reader"],
+            readers: [
+              "ean_reader",
+              "code_128_reader",
+              "upc_reader",
+              "code_39_reader",
+              "codabar_reader",
+            ],
           },
         },
         (err) => {
@@ -75,8 +80,11 @@ const ScannerItems = () => {
 
   // Save barcode with new format: "YYYY MM DD ProductNumber"
   const saveBarcode = async (code) => {
+    console.log("Scanned Barcode:", code); // Log the barcode to check its format
+
+    // Ensure barcode has the minimum expected length (adjust as needed)
     if (code.length < 9) {
-      console.error("Invalid barcode format");
+      console.error("Invalid barcode format:", code);
       return;
     }
 
@@ -89,7 +97,13 @@ const ScannerItems = () => {
     const formattedCode = `${year} ${month} ${day} ${productNumber}`;
 
     try {
-      const response = await axios.post(API_URL, { code: formattedCode, productNumber, month, day, year });
+      const response = await axios.post(API_URL, {
+        code: formattedCode,
+        productNumber,
+        month,
+        day,
+        year,
+      });
       setScannedBarcodes([...scannedBarcodes, response.data]);
     } catch (error) {
       console.error("Error saving barcode:", error);
@@ -112,7 +126,9 @@ const ScannerItems = () => {
 
     try {
       const response = await axios.put(`${API_URL}/${id}`, { code: updatedCode, ...editData });
-      setScannedBarcodes(scannedBarcodes.map((b) => (b._id === id ? response.data : b)));
+      setScannedBarcodes(
+        scannedBarcodes.map((b) => (b._id === id ? response.data : b))
+      );
       setEditId(null);
       setEditData({ productNumber: "", month: "", day: "", year: "" });
     } catch (error) {
@@ -143,20 +159,37 @@ const ScannerItems = () => {
   return (
     <div className="p-4 max-w-6xl mx-auto">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      
-        
         {/* Scanner Section */}
         <div className="border rounded-lg p-4 shadow-md bg-white">
           <h2 className="text-lg font-bold text-center mb-3">
             <FaBarcode className="inline-block mr-2" /> Barcode Scanner
           </h2>
 
-          <div ref={scannerRef} className={`w-full h-14 sm:h-52 bg-gray-200 rounded-lg flex items-center ${isWebcamActive ? "block" : "hidden"}`} />
+          <div
+            ref={scannerRef}
+            className={`w-full h-14 sm:h-52 bg-gray-200 rounded-lg flex items-center ${
+              isWebcamActive ? "block" : "hidden"
+            }`}
+          />
 
           <div className="flex flex-col sm:flex-row gap-2 mt-3">
-            <button onClick={() => setIsWebcamActive(!isWebcamActive)}
-              className={`flex-1 py-2 text-white font-semibold rounded ${isWebcamActive ? "bg-red-500 hover:bg-red-600" : "bg-green-500 hover:bg-green-600"}`}>
-              {isWebcamActive ? <><FaStop className="inline-block mr-2" /> Stop Scanner</> : <><FaPlay className="inline-block mr-2" /> Start Scanner</>}
+            <button
+              onClick={() => setIsWebcamActive(!isWebcamActive)}
+              className={`flex-1 py-2 text-white font-semibold rounded ${
+                isWebcamActive
+                  ? "bg-red-500 hover:bg-red-600"
+                  : "bg-green-500 hover:bg-green-600"
+              }`}
+            >
+              {isWebcamActive ? (
+                <>
+                  <FaStop className="inline-block mr-2" /> Stop Scanner
+                </>
+              ) : (
+                <>
+                  <FaPlay className="inline-block mr-2" /> Start Scanner
+                </>
+              )}
             </button>
           </div>
         </div>
@@ -175,11 +208,17 @@ const ScannerItems = () => {
               </thead>
               <tbody>
                 {scannedBarcodes.map((barcode, index) => (
-                  <tr key={barcode._id} className="border-t odd:bg-white even:bg-gray-50 hover:bg-gray-100 transition">
+                  <tr
+                    key={barcode._id}
+                    className="border-t odd:bg-white even:bg-gray-50 hover:bg-gray-100 transition"
+                  >
                     <td className="px-6 py-3 text-sm">{index + 1}</td>
                     <td className="px-6 py-3 text-sm">{barcode.code}</td>
                     <td className="px-6 py-3 text-sm">
-                      <button onClick={() => deleteBarcode(barcode._id)} className="text-red-500 hover:text-red-700 transition">
+                      <button
+                        onClick={() => deleteBarcode(barcode._id)}
+                        className="text-red-500 hover:text-red-700 transition"
+                      >
                         <FaTrash size={18} />
                       </button>
                     </td>
@@ -189,7 +228,6 @@ const ScannerItems = () => {
             </table>
           </div>
         </div>
-
       </div>
     </div>
   );

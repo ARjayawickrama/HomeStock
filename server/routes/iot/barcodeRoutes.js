@@ -1,10 +1,13 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const barcodeController = require("../../controllers/iot/barcodeController");
 
-router.post("/", barcodeController.addBarcode);
-router.get("/", barcodeController.getAllBarcodes);
-router.put("/:id", barcodeController.updateBarcode);
-router.delete("/:id", barcodeController.deleteBarcode);
+router.post('/', (req, res) => {
+    const { barcode } = req.body;
+    console.log(barcode);
+    if (!barcode) {
+        return res.status(400).json({ error: 'Barcode is required' });
+    }
+    res.status(201).json({ message: 'Barcode saved successfully', barcode });
+});
 
 module.exports = router;
