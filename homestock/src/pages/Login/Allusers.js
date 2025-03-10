@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom"; // Import useNavigate
+import { useNavigate } from "react-router-dom"; 
 
 const Allusers = () => {
   const [users, setUsers] = useState([]);
-  const [editingUserId, setEditingUserId] = useState(null); // Track which user is being edited
-  const [editedUser, setEditedUser] = useState(null); // To store the changes made to the user
-  const [loading, setLoading] = useState(true); // To handle loading state
-  const navigate = useNavigate(); // Initialize navigate
+  const [editingUserId, setEditingUserId] = useState(null); 
+  const [editedUser, setEditedUser] = useState(null); 
+  const [loading, setLoading] = useState(true); 
+  const navigate = useNavigate();
 
-  // Fetch all users when the component is mounted
+
   useEffect(() => {
     axios
       .get("http://localhost:5000/api/user")
@@ -30,7 +30,7 @@ const Allusers = () => {
       });
   }, []);
 
-  // Delete user
+
   const handleDelete = (userId) => {
     axios
       .delete(`http://localhost:5000/api/user/${userId}`)
@@ -43,14 +43,13 @@ const Allusers = () => {
       });
   };
 
-  // Handle Edit user - Set the user being edited
+
   const handleEdit = (userId) => {
     setEditingUserId(userId);
     const userToEdit = users.find((user) => user._id === userId);
-    setEditedUser({ ...userToEdit }); // Create a copy of the user to be edited
+    setEditedUser({ ...userToEdit }); 
   };
 
-  // Handle input change in edit form
   const handleEditChange = (e) => {
     const { name, value } = e.target;
     setEditedUser({
@@ -59,7 +58,7 @@ const Allusers = () => {
     });
   };
 
-  // Handle submit form to update user
+
   const handleEditSubmit = (e, userId) => {
     e.preventDefault();
     axios
@@ -71,7 +70,7 @@ const Allusers = () => {
             user._id === userId ? { ...user, ...editedUser } : user
           )
         );
-        setEditingUserId(null); // Stop editing
+        setEditingUserId(null); 
       })
       .catch((error) => {
         console.error("Error updating user:", error);
@@ -151,7 +150,7 @@ const Allusers = () => {
                         </button>
                         <button
                           className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600"
-                          onClick={() => setEditingUserId(null)} // Cancel editing
+                          onClick={() => setEditingUserId(null)} 
                         >
                           Cancel
                         </button>

@@ -81,7 +81,7 @@ const Dashboard = () => {
           {activeTab === "grocery" && <Grocery_ist />}
           {activeTab === "budgeting" && <Budgeting />}
           {activeTab === "iot" && <Iot />}
-          {activeTab === "allusers" && <Allusers />}  {/* Added Arduino component */}
+          {activeTab === "allusers" && <Allusers />} 
         </main>
       </div>
     </div>
