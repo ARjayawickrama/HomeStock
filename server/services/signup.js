@@ -1,5 +1,4 @@
 const User = require("../models/user");
-const bcrypt = require("bcrypt");
 
 async function createUser(userData) {
   try {
@@ -31,10 +30,50 @@ async function createUser(userData) {
     // 🔹 5. Save user to the database
     const savedUser = await createdUser.save();
 
-    return savedUser; 
+    return savedUser;
   } catch (error) {
     throw new Error(error.message);
   }
 }
 
-module.exports = { createUser };
+// Get all users
+async function getAllUsers() {
+  try {
+    const users = await User.find();
+    return users;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+}
+
+// Get a user by ID
+async function getUserById(userId) {
+  try {
+    const user = await User.findById(userId);
+    return user;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+}
+
+// Update a user
+async function updateUser(userId, updatedData) {
+  try {
+    const updatedUser = await User.findByIdAndUpdate(userId, updatedData, { new: true });
+    return updatedUser;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+}
+
+// Delete a user
+async function deleteUser(userId) {
+  try {
+    const deletedUser = await User.findByIdAndDelete(userId);
+    return deletedUser;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+}
+
+module.exports = { createUser, getAllUsers, getUserById, updateUser, deleteUser };

@@ -6,7 +6,8 @@ import Grocery_ist from "./grocery_ist/grocery_ist";
 import Budgeting from "./budgeting/budgeting";
 import Iot from "./iot/iot";
 import Home from "./home";
-import { FaUser, FaHome, FaBox, FaShoppingCart, FaDollarSign, FaMicrochip } from "react-icons/fa";
+import Allusers from "../Login/Allusers"; 
+import { FaHome, FaBox, FaShoppingCart, FaDollarSign,FaUser,FaMicrochip } from "react-icons/fa";
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("home");
@@ -43,7 +44,7 @@ const Dashboard = () => {
           <div className="flex flex-col items-center text-center">
             <div className="w-24 h-24 bg-gray-300 rounded-full mb-4" />
             <h2 className="text-lg font-semibold mt-3">Home Stock</h2>
-            <p className="text-sm text-gray-600">system unit </p>
+            <p className="text-sm text-gray-600">system unit</p>
           </div>
           <ul className="mt-6 space-y-2">
   {[
@@ -52,20 +53,22 @@ const Dashboard = () => {
     { name: "Grocery", icon: <FaShoppingCart className="w-5 h-5" /> },
     { name: "Budgeting", icon: <FaDollarSign className="w-5 h-5" /> },
     { name: "IoT", icon: <FaMicrochip className="w-5 h-5" /> },
-    { name: "User", icon: <FaUser className="w-5 h-5" /> },
+    { name: "Allusers", icon: <FaUser className="w-5 h-5" /> }, 
   ].map((tab) => (
-    <li
-      key={tab.name}
-      className={`p-3 rounded-lg cursor-pointer text-center font-medium transition duration-200 flex items-center gap-3 ${
-        activeTab === tab.name.toLowerCase()
-          ? "bg-slate-900 text-white"
-          : "bg-gray-100 text-black hover:bg-black hover:text-white"
-      }`}
-      onClick={() => setActiveTab(tab.name.toLowerCase())}
-    >
-      {tab.icon}
-      {tab.name}
-    </li>
+    tab.name && (
+      <li
+        key={tab.name}
+        className={`p-3 rounded-lg cursor-pointer text-center font-medium transition duration-200 flex items-center gap-3 ${
+          activeTab === tab.name.toLowerCase()
+            ? "bg-slate-900 text-white"
+            : "bg-gray-100 text-black hover:bg-black hover:text-white"
+        }`}
+        onClick={() => setActiveTab(tab.name.toLowerCase())}
+      >
+        {tab.icon}
+        {tab.name}
+      </li>
+    )
   ))}
 </ul>
 
@@ -78,6 +81,7 @@ const Dashboard = () => {
           {activeTab === "grocery" && <Grocery_ist />}
           {activeTab === "budgeting" && <Budgeting />}
           {activeTab === "iot" && <Iot />}
+          {activeTab === "allusers" && <Allusers />}  {/* Added Arduino component */}
         </main>
       </div>
     </div>

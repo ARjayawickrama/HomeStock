@@ -14,7 +14,7 @@ app.use(cors());
 app.use(bodyParser.json());
 
 // Use the signup route for "/user"
-app.use("/user", signupRouter);
+app.use("/api", signupRouter);
 app.use("/auth", loginRouter);
 app.use("/barcode", barcodeRoutes);
 
