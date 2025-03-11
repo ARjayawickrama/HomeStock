@@ -83,11 +83,11 @@ const Allusers = () => {
 
   return (
     <main className="bg-white p-4 rounded-lg">
-      <div className="max-w-7xl mx-auto p-6">
-       
-        {users.length === 0 ? (
-          <p className="text-center text-gray-500">No users found.</p>
-        ) : (
+    <div className="max-w-7xl mx-auto p-6 overflow-x-auto">
+      {users.length === 0 ? (
+        <p className="text-center text-gray-500">No users found.</p>
+      ) : (
+        <div className="max-h-[500px] overflow-y-auto"> {/* Vertical Scroll */}
           <table className="min-w-full bg-white border border-gray-200 rounded-lg shadow-lg">
             <thead>
               <tr className="bg-blue-600 text-white">
@@ -100,85 +100,34 @@ const Allusers = () => {
             <tbody>
               {users.map((user) => (
                 <tr key={user._id} className="border-t hover:bg-gray-100">
-                  <td className="py-3 px-6">
-                    {editingUserId === user._id ? (
-                      <input
-                        type="text"
-                        name="name"
-                        value={editedUser.name}
-                        onChange={handleEditChange}
-                        className="w-full p-3 border border-gray-300 rounded-md"
-                      />
-                    ) : (
-                      user.name
-                    )}
-                  </td>
-                  <td className="py-3 px-6">
-                    {editingUserId === user._id ? (
-                      <input
-                        type="email"
-                        name="email"
-                        value={editedUser.email}
-                        onChange={handleEditChange}
-                        className="w-full p-3 border border-gray-300 rounded-md"
-                      />
-                    ) : (
-                      user.email
-                    )}
-                  </td>
-                  <td className="py-3 px-6">
-                    {editingUserId === user._id ? (
-                      <input
-                        type="text"
-                        name="phone"
-                        value={editedUser.phone}
-                        onChange={handleEditChange}
-                        className="w-full p-3 border border-gray-300 rounded-md"
-                      />
-                    ) : (
-                      user.phone
-                    )}
-                  </td>
+                  <td className="py-3 px-6">{user.name}</td>
+                  <td className="py-3 px-6">{user.email}</td>
+                  <td className="py-3 px-6">{user.phone}</td>
                   <td className="py-3 px-6 text-center">
-                    {editingUserId === user._id ? (
-                      <div className="flex gap-2">
-                        <button
-                          className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600"
-                          onClick={(e) => handleEditSubmit(e, user._id)}
-                        >
-                          Update
-                        </button>
-                        <button
-                          className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600"
-                          onClick={() => setEditingUserId(null)} 
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="flex gap-2">
-                        <button
-                          className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
-                          onClick={() => handleEdit(user._id)}
-                        >
-                          Edit
-                        </button>
-                        <button
-                          className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
-                          onClick={() => handleDelete(user._id)}
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    )}
+                    <div className="flex gap-2">
+                      <button
+                        className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+                        onClick={() => handleEdit(user._id)}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
+                        onClick={() => handleDelete(user._id)}
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
-        )}
-      </div>
-    </main>
+        </div>
+      )}
+    </div>
+  </main>
+  
   );
 };
 

@@ -32,11 +32,11 @@ const BarcodeTable = () => {
 
   return (
     <div className="container mx-auto p-6 bg-white shadow-lg rounded-lg">
- 
+      <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">Barcode List</h1>
       <div className="overflow-x-auto">
         <table className="w-full border-collapse border border-gray-300 shadow-md rounded-lg">
           <thead>
-            <tr className="bg-blue-600 text-white">
+            <tr className="bg-green-700 text-white">
               <th className="border border-gray-300 px-6 py-3 text-left">Barcode</th>
               <th className="border border-gray-300 px-6 py-3 text-left">Date Scanned</th>
             </tr>
