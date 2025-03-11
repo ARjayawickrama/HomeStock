@@ -19,15 +19,16 @@ const SignUp = () => {
 
   const onSubmit = async (data) => {
     try {
-      const response = await axios.post("http://localhost:5000/user/register", data);
+      const response = await axios.post("http://localhost:5000/api/register", data);
       console.log("Signup successful:", response.data);
       alert("Signup successful");
       navigate("/");
     } catch (error) {
       console.error("Signup failed:", error.response?.data || error.message);
-      alert("Signup failed");
+      alert(`Signup failed: ${error.response?.data?.message || error.message}`);
     }
   };
+  
 
   return (
     <div className="relative flex items-center justify-center min-h-screen">
