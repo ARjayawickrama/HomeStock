@@ -16,6 +16,7 @@ async function createUser(req, res) {
   }
 }
 
+
 // Get all users
 async function getAllUsers(req, res) {
   try {
@@ -27,11 +28,11 @@ async function getAllUsers(req, res) {
   }
 }
 
-// Get user by ID
+
 async function getUserById(req, res) {
   try {
     const userId = req.params.id;
-    const user = await User.findById(userId); // Retrieves a user by ID
+    const user = await User.findById(userId); 
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -44,7 +45,6 @@ async function getUserById(req, res) {
   }
 }
 
-// Update user by ID
 async function updateUser(req, res) {
   try {
     const userId = req.params.id;
@@ -66,7 +66,7 @@ async function updateUser(req, res) {
   }
 }
 
-// Delete user by ID
+
 async function deleteUser(req, res) {
   try {
     const userId = req.params.id;
