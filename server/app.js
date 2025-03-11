@@ -15,7 +15,15 @@ app.use(bodyParser.json());
 
 app.use("/api", signupRouter);
 app.use("/auth", loginRouter);
-app.use("/barcode", barcodeRoutes);
+app.post('/api/scan', (req, res) => {
+  const { barcode } = req.body;
+  console.log('Received barcode:', barcode);
+  
+ 
+
+  res.status(200).json({ message: 'Barcode received successfully', barcode });
+});
+
 
 connectDB();
 
