@@ -1,5 +1,4 @@
 const userService = require("../services/signup");
-const User = require("../models/user");
 
 async function createUser(req, res) {
   try {
@@ -16,49 +15,29 @@ async function createUser(req, res) {
   }
 }
 
-// Get all users
 async function getAllUsers(req, res) {
-  try {
-    const users = await User.find(); // Retrieves all users
-    res.status(200).json({ users });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error fetching users", error: error.message });
+    try {
+      const users = await User.find();
+      console.log(users); // Log the users to see the actual data structure
+      res.status(200).json(users);
+    } catch (error) {
+      res.status(400).json({ message: error.message });
+    }
   }
-}
+  
 
-// Get user by ID
+// Get a user by ID
 async function getUserById(req, res) {
   try {
     const userId = req.params.id;
-    const user = await User.findById(userId); // Retrieves a user by ID
-
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    res.status(200).json({ user });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error fetching user", error: error.message });
-  }
-}
-
-// Update user by ID
-async function updateUser(req, res) {
-  try {
-    const userId = req.params.id;
-    const updatedData = req.body;
-
-    const user = await User.findByIdAndUpdate(userId, updatedData, { new: true });
+    const user = await userService.getUserById(userId);
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
     res.status(200).json({
-      user,
-      message: "User updated successfully"
+      user: user,
     });
   } catch (error) {
     console.error(error);
@@ -66,23 +45,43 @@ async function updateUser(req, res) {
   }
 }
 
-// Delete user by ID
-async function deleteUser(req, res) {
+// Update a user
+async function updateUser(req, res) {
   try {
     const userId = req.params.id;
+    const updatedData = req.body;
+    const updatedUser = await userService.updateUser(userId, updatedData);
 
-    const user = await User.findByIdAndDelete(userId);
-
-    if (!user) {
+    if (!updatedUser) {
       return res.status(404).json({ message: "User not found" });
     }
 
     res.status(200).json({
-      message: "User deleted successfully"
+      user: updatedUser,
+      message: "User updated successfully",
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Error deleting user", error: error.message });
+    res.status(400).json({ message: error.message });
+  }
+}
+
+// Delete a user
+async function deleteUser(req, res) {
+  try {
+    const userId = req.params.id;
+    const deletedUser = await userService.deleteUser(userId);
+
+    if (!deletedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json({
+      message: "User deleted successfully",
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({ message: error.message });
   }
 }
 

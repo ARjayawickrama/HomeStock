@@ -12,6 +12,9 @@ function App() {
      
           <Route path="/SignUp" element={<SignUp />} />
           <Route path="/Dashboard" element={<Dashboard />} />
+  
+        
+        
         </Routes>
    
     </Router>
