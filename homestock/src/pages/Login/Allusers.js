@@ -103,7 +103,7 @@ const Allusers = () => {
                   <td className="py-3 px-6">{user.name}</td>
                   <td className="py-3 px-6">{user.email}</td>
                   <td className="py-3 px-6">{user.phone}</td>
-                  <td className="py-3 px-6 text-center">
+                  <td className="border border-gray-300 px-6 py-3">
                     <div className="flex gap-2">
                       <button
                         className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"

@@ -3,16 +3,26 @@ const Barcode = require("../../models/iot/Barcode");  // Barcode Model
 
 const router = express.Router();
 
+// POST route for scanning barcode
+// POST route for scanning barcode
 router.post('/scan', async (req, res) => {
     try {
         const { barcode } = req.body;
         console.log('📌 Received barcode:', barcode);
 
-        if (!barcode) {
-            return res.status(400).json({ message: '❌ Barcode is required' });
+        // Check if barcode is not null or empty
+        if (!barcode || barcode === null || barcode === '') {
+            return res.status(400).json({ message: '❌ Barcode is required and cannot be null or empty' });
         }
 
-        const newBarcode = new Barcode({ barcode });
+        // Check if barcode already exists in the database
+        const existingBarcode = await Barcode.findOne({ code: barcode });
+        if (existingBarcode) {
+            return res.status(400).json({ message: '❌ Barcode already exists' });
+        }
+
+        // Create a new Barcode document
+        const newBarcode = new Barcode({ code: barcode });
         await newBarcode.save();
         
         res.status(200).json({ message: '✅ Barcode saved successfully', barcode });
@@ -22,6 +32,8 @@ router.post('/scan', async (req, res) => {
     }
 });
 
+
+// GET route for retrieving all barcodes
 router.get('/barcodes', async (req, res) => {
     try {
         const barcodes = await Barcode.find();
