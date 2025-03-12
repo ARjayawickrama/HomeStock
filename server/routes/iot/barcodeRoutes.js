@@ -1,48 +1,42 @@
 const express = require("express");
-const Barcode = require("../../models/iot/Barcode");  // Barcode Model
+const Barcode = require("../../models/iot/Barcode");
 
 const router = express.Router();
 
-// POST route for scanning barcode
-// POST route for scanning barcode
+// POST route for inserting a barcode
 router.post('/scan', async (req, res) => {
     try {
         const { barcode } = req.body;
-        console.log('📌 Received barcode:', barcode);
 
-        // Check if barcode is not null or empty
-        if (!barcode || barcode === null || barcode === '') {
-            return res.status(400).json({ message: '❌ Barcode is required and cannot be null or empty' });
+        if (!barcode || barcode.trim() === '') {
+            return res.status(400).json({ message: '❌ Barcode cannot be null or empty' });
         }
 
-        // Check if barcode already exists in the database
+        // Check if barcode already exists
         const existingBarcode = await Barcode.findOne({ code: barcode });
         if (existingBarcode) {
-            return res.status(400).json({ message: '❌ Barcode already exists' });
+            return res.status(409).json({ message: '❌ Barcode already exists' });
         }
 
-        // Create a new Barcode document
+        // Insert barcode with timestamp
         const newBarcode = new Barcode({ code: barcode });
         await newBarcode.save();
         
-        res.status(200).json({ message: '✅ Barcode saved successfully', barcode });
+        res.status(201).json({ message: '✅ Barcode saved successfully', barcode, createdAt: newBarcode.createdAt });
     } catch (err) {
         console.error('❌ Backend Error:', err);
         res.status(500).json({ message: '❌ Internal Server Error', error: err.message });
     }
 });
 
-
 // GET route for retrieving all barcodes
 router.get('/barcodes', async (req, res) => {
     try {
-        const barcodes = await Barcode.find();
+        const barcodes = await Barcode.find().sort({ createdAt: -1 }); // Sort by latest first
         if (barcodes.length === 0) {
-            console.log('No barcodes found');
             return res.status(404).json({ message: '❌ No barcodes found' });
         }
 
-        console.log('All barcodes:', barcodes);
         res.status(200).json({ message: 'All barcodes retrieved successfully', barcodes });
     } catch (err) {
         console.error('❌ Error retrieving barcodes:', err);

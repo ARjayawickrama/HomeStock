@@ -6,6 +6,7 @@ const BarcodeTable = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Fetch barcodes from backend
   useEffect(() => {
     const fetchBarcodes = async () => {
       try {
@@ -13,14 +14,14 @@ const BarcodeTable = () => {
         setBarcodes(response.data.barcodes);
       } catch (err) {
         setError('Error fetching data');
-        console.error('Error fetching barcodes:', err);
+        console.error('❌ Error fetching barcodes:', err);
       } finally {
         setLoading(false);
       }
     };
 
     fetchBarcodes();
-  }, []);
+  }, []); // Runs only on initial load
 
   if (loading) {
     return <div className="flex justify-center items-center h-screen text-lg font-semibold">Loading...</div>;
@@ -32,21 +33,24 @@ const BarcodeTable = () => {
 
   return (
     <div className="container mx-auto p-6 bg-white shadow-lg rounded-lg">
- 
+      <h2 className="text-2xl font-bold text-gray-800 mb-4">📌 Scanned Barcodes</h2>
+
       <div className="overflow-x-auto">
         <table className="min-w-full bg-white border border-gray-200 rounded-lg shadow-lg">
           <thead>
             <tr className="bg-blue-600 text-white">
-              <th className="py-3 px-6 text-left">Barcode</th>
-              <th className="py-3 px-6 text-left">Date Scanned</th>
+              <th className="py-3 px-6 text-left">📌 Barcode</th>
+              <th className="py-3 px-6 text-left">📅 Date Scanned</th>
             </tr>
           </thead>
           <tbody>
             {barcodes.length > 0 ? (
               barcodes.map((barcode) => (
                 <tr key={barcode._id} className="hover:bg-gray-100 transition">
-                  <td className="border border-gray-300 px-6 py-3">{barcode.barcode}</td>
-                  <td className="border border-gray-300 px-6 py-3">{new Date(barcode.createdAt).toLocaleString()}</td>
+                  <td className="border border-gray-300 px-6 py-3">{barcode.code}</td>
+                  <td className="border border-gray-300 px-6 py-3">
+                    {barcode.createdAt ? new Date(barcode.createdAt).toLocaleString() : 'N/A'}
+                  </td>
                 </tr>
               ))
             ) : (
