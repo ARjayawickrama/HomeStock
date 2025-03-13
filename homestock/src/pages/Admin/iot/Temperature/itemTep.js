@@ -34,46 +34,47 @@ function AllProductsTemperature() {
 
   return (
     <div className="p-6">
-      <div className="mb-4">
-        <select
-          className="px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-          value={selectedCategory}
-          onChange={(e) => setSelectedCategory(e.target.value)}
-        >
-          <option value="All Items">All Items</option>
-          <option value="Raw Material">Raw Material</option>
-          <option value="Processed">Processed</option>
-          <option value="Herbal">Herbal</option>
-        </select>
+      <div className="mb-6">
+      <select
+  className="px-6 py-3 border-2 border-gray-300 rounded-lg bg-white text-gray-800 shadow-sm transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-green-600 hover:border-green-500 hover:shadow-md"
+  value={selectedCategory}
+  onChange={(e) => setSelectedCategory(e.target.value)}
+>
+  <option className="bg-white text-gray-800" value="All Items">All Items</option>
+  <option className="bg-white text-gray-800" value="Raw Material">Raw Material</option>
+  <option className="bg-white text-gray-800" value="Processed">Processed</option>
+  <option className="bg-white text-gray-800" value="Herbal">Herbal</option>
+</select>
+
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
         {filteredProducts.slice(0, 3).map((product) => {
           const temperaturePercentage = calculatePercentage(product.temperature, product.maxTemperature);
           const humidityPercentage = calculatePercentage(product.humidity, product.maxHumidity);
 
           return (
-            <div key={product.id} className="p-4 bg-white rounded-lg shadow-2xl">
-              <h2 className="text-lg font-semibold text-gray-700">{product.name}</h2>
-              <p className="text-gray-500">{product.category}</p>
-              <p className="text-gray-600">
-                <FaThermometerFull className="inline-block mr-2 text-blue-500" />
+            <div key={product.id} className="p-6 bg-gradient-to-r from-sky-500 to-green-200  rounded-lg shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300">
+              <h2 className="text-xl font-semibold text-white mb-2">{product.name}</h2>
+              <p className="text-white mb-2">{product.category}</p>
+              <p className="text-white mb-4">
+                <FaThermometerFull className="inline-block mr-2 text-blue-600" />
                 Temperature: {product.temperature}°C
               </p>
-              <p className="text-gray-600">
-                <FaTint className="inline-block mr-2 text-blue-500" />
+              <p className="text-white mb-4">
+                <FaTint className="inline-block mr-2 text-blue-600" />
                 Humidity: {product.humidity}%
               </p>
 
               {/* Temperature Bar */}
-              <div className="mt-2">
+              <div className="mt-4">
                 <div className="relative w-full bg-gray-200 h-4 rounded-lg">
                   <div
-                    className={`${getTemperatureColor(temperaturePercentage)} h-4 rounded-lg transition-all duration-300`}
+                    className={`${getTemperatureColor(temperaturePercentage)} h-4 rounded-lg transition-all duration-500`}
                     style={{ width: `${temperaturePercentage}%` }}
                   ></div>
                 </div>
-                <div className="flex justify-between mt-1 text-xs text-gray-600">
+                <div className="flex justify-between mt-1 text-xs text-white">
                   <span>Cold</span>
                   <span>Normal</span>
                   <span>Hot</span>
@@ -84,11 +85,11 @@ function AllProductsTemperature() {
               <div className="mt-4">
                 <div className="relative w-full bg-gray-200 h-4 rounded-lg">
                   <div
-                    className={`${getHumidityColor(humidityPercentage)} h-4 rounded-lg transition-all duration-300`}
+                    className={`${getHumidityColor(humidityPercentage)} h-4 rounded-lg transition-all duration-500`}
                     style={{ width: `${humidityPercentage}%` }}
                   ></div>
                 </div>
-                <div className="flex justify-between mt-1 text-xs text-gray-600">
+                <div className="flex justify-between mt-1 text-xs text-white">
                   <span>Low</span>
                   <span>Normal</span>
                   <span>High</span>
