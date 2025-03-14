@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { FaPlus, FaSearch, FaEdit, FaTrash, FaTimes } from "react-icons/fa";
+import { FaPlus, FaSearch, FaEdit, FaTrash, FaTimes, FaDownload } from "react-icons/fa";
 
 const Inventory = () => {
   const [items, setItems] = useState([]);
@@ -138,11 +138,16 @@ const Inventory = () => {
     setSortOrder(sortOrder === "asc" ? "desc" : "asc"); // Toggle between ascending and descending
   };
 
+  const handleDownload = () => {
+    // Logic to generate and download the report can be implemented here
+    console.log("Download Report/PDF");
+  };
+
   return (
     <main className="bg-white p-6 rounded-lg shadow-lg w-full max-w-5xl mx-auto">
       <h1 className="text-2xl font-bold mb-4">HomeStock</h1>
 
-      {/* Search & Add Button */}
+      {/* Search, Add Button, and Download Button */}
       <div className="flex justify-between mb-4">
         <div className="relative w-2/3">
           <input
@@ -153,12 +158,20 @@ const Inventory = () => {
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-        <button
-          className="flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
-          onClick={toggleForm}
-        >
-          {showForm ? <FaTimes /> : <FaPlus />} {showForm ? "Close Form" : "Add Item"}
-        </button>
+        <div className="flex gap-4">
+          <button
+            className="flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
+            onClick={toggleForm}
+          >
+            {showForm ? <FaTimes /> : <FaPlus />} {showForm ? "Close Form" : "Add Item"}
+          </button>
+          <button
+            className="flex items-center gap-2 bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600"
+            onClick={handleDownload}
+          >
+            <FaDownload /> Download Report
+          </button>
+        </div>
       </div>
 
       {/* Display Warning Message */}
@@ -251,21 +264,27 @@ const Inventory = () => {
             </tr>
           </thead>
           <tbody>
-            {sortItems().filter((item) => item.name.toLowerCase().includes(search.toLowerCase())).map((item) => (
-              <tr key={item.id} className="border-b">
-                <td className="p-2">{item.name}</td>
-                <td className="p-2">{item.category}</td>
-                <td className="p-2">{item.quantity}</td>
-                <td className="p-2">{item.manufactureDate || "N/A"}</td>
-                <td className="p-2 text-red-500">{item.expiryDate || "N/A"}</td>
-                <td className="p-2">{item.temperature || "N/A"}</td>
-                <td className={`p-2 ${item.status === "Low Stock" ? "text-red-500" : "text-green-500"}`}>{item.status}</td>
-                <td className="p-2 flex gap-2">
-                  <button className="text-yellow-500 hover:text-yellow-700"><FaEdit /></button>
-                  <button className="text-red-500 hover:text-red-700"><FaTrash /></button>
-                </td>
-              </tr>
-            ))}
+            {sortItems()
+              .filter((item) => item.name.toLowerCase().includes(search.toLowerCase()))
+              .map((item) => (
+                <tr key={item.id} className="border-b">
+                  <td className="p-2">{item.name}</td>
+                  <td className="p-2">{item.category}</td>
+                  <td className="p-2">{item.quantity}</td>
+                  <td className="p-2">{item.manufactureDate}</td>
+                  <td className="p-2">{item.expiryDate}</td>
+                  <td className="p-2">{item.temperature}</td>
+                  <td className="p-2">{item.status}</td>
+                  <td className="p-2">
+                    <button className="text-blue-500">
+                      <FaEdit />
+                    </button>
+                    <button className="text-red-500 ml-2">
+                      <FaTrash />
+                    </button>
+                  </td>
+                </tr>
+              ))}
           </tbody>
         </table>
       </div>
