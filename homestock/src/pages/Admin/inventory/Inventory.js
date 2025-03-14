@@ -17,6 +17,7 @@ const Inventory = () => {
     status: "Available",
   });
   const [sortOrder, setSortOrder] = useState("asc"); // Added state to manage sorting order
+  const [showLowStockModal, setShowLowStockModal] = useState(false); // State to control modal visibility
 
   const temperatureRanges = {
     Milk: "Refrigerated (0-4°C)",
@@ -27,6 +28,10 @@ const Inventory = () => {
 
   const toggleForm = () => {
     setShowForm(!showForm);
+  };
+
+  const toggleLowStockModal = () => {
+    setShowLowStockModal(!showLowStockModal);
   };
 
   const validateField = (name, value) => {
@@ -143,6 +148,9 @@ const Inventory = () => {
     console.log("Download Report/PDF");
   };
 
+  // Filter for low stock items
+  const lowStockItems = items.filter((item) => item.status === "Low Stock");
+
   return (
     <main className="bg-white p-6 rounded-lg shadow-lg w-full max-w-5xl mx-auto">
       <h1 className="text-2xl font-bold mb-4">HomeStock</h1>
@@ -170,6 +178,13 @@ const Inventory = () => {
             onClick={handleDownload}
           >
             <FaDownload /> Download Report
+          </button>
+          {/* Low Stock Button */}
+          <button
+            className="flex items-center gap-2 bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600"
+            onClick={toggleLowStockModal}
+          >
+            Low Stock Items
           </button>
         </div>
       </div>
@@ -288,6 +303,32 @@ const Inventory = () => {
           </tbody>
         </table>
       </div>
+
+      {/* Low Stock Modal */}
+      {showLowStockModal && (
+        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex justify-center items-center z-50">
+          <div className="bg-white p-6 rounded-lg w-96">
+            <h2 className="text-xl font-bold mb-4">Low Stock Items</h2>
+            {lowStockItems.length > 0 ? (
+              <ul>
+                {lowStockItems.map((item) => (
+                  <li key={item.id} className="mb-2">
+                    {item.name} - {item.quantity} left
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p>No low stock items.</p>
+            )}
+            <button
+              onClick={toggleLowStockModal}
+              className="mt-4 bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </main>
   );
 };
