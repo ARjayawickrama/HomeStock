@@ -6,6 +6,7 @@ const Inventory = () => {
   const [search, setSearch] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [errors, setErrors] = useState({});
+  const [warning, setWarning] = useState(""); // For storing warning message
   const [newItem, setNewItem] = useState({
     name: "",
     category: "",
@@ -15,6 +16,13 @@ const Inventory = () => {
     temperature: "",
     status: "Available",
   });
+
+  const temperatureRanges = {
+    Milk: "Refrigerated (0-4°C)",
+    Eggs: "Cool (10-15°C)",
+    Bread: "Room Temperature (15-25°C)",
+    Cheese: "Refrigerated (0-4°C)",
+  };
 
   const toggleForm = () => {
     setShowForm(!showForm);
@@ -39,11 +47,63 @@ const Inventory = () => {
   };
 
   const handleAddItem = () => {
-    if (Object.values(errors).some((error) => error) || Object.values(newItem).some((value) => !value)) {
-      alert("Please fill in all required fields correctly.");
+    let validationErrors = {};
+    let temperatureAlert = "";
+
+    // Validate Item Name
+    if (!newItem.name) {
+      validationErrors.name = "Item name is required";
+    }
+
+    // Validate Category
+    if (!newItem.category) {
+      validationErrors.category = "Category is required";
+    }
+
+    // Validate Quantity
+    if (!newItem.quantity) {
+      validationErrors.quantity = "Quantity is required";
+    } else if (isNaN(newItem.quantity) || newItem.quantity <= 0) {
+      validationErrors.quantity = "Quantity must be a positive number";
+    }
+
+    // Validate Manufacture Date
+    if (!newItem.manufactureDate) {
+      validationErrors.manufactureDate = "Manufacture date is required";
+    }
+
+    // Validate Expiry Date
+    if (!newItem.expiryDate) {
+      validationErrors.expiryDate = "Expiry date is required";
+    } else if (new Date(newItem.expiryDate) <= new Date(newItem.manufactureDate)) {
+      validationErrors.expiryDate = "Expiry date must be after manufacture date";
+    }
+
+    // Validate Temperature
+    if (!newItem.temperature) {
+      validationErrors.temperature = "Temperature selection is required";
+    } else {
+      // Check if the temperature is correct for the item
+      const expectedTemperature = temperatureRanges[newItem.name];
+      if (newItem.temperature !== expectedTemperature) {
+        temperatureAlert = `Warning: ${newItem.name} should be stored at ${expectedTemperature}.`;
+      }
+    }
+
+    // If validation fails, set errors and return
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
       return;
     }
 
+    // If temperature is not correct, set the warning
+    if (temperatureAlert) {
+      setWarning(temperatureAlert); // Set warning to be displayed
+    } else {
+      setWarning(""); // Clear warning if temperature is correct
+    }
+
+    // If all validations pass, proceed with adding the item
     const newItemData = {
       ...newItem,
       id: items.length + 1,
@@ -54,11 +114,12 @@ const Inventory = () => {
     setItems([...items, newItemData]);
     setNewItem({ name: "", category: "", quantity: "", manufactureDate: "", expiryDate: "", temperature: "", status: "Available" });
     setShowForm(false);
+    setErrors({});
   };
 
   return (
     <main className="bg-white p-6 rounded-lg shadow-lg w-full max-w-5xl mx-auto">
-      <h1 className="text-2xl font-bold mb-4">Inventory Management</h1>
+      <h1 className="text-2xl font-bold mb-4">HomeStock</h1>
 
       {/* Search & Add Button */}
       <div className="flex justify-between mb-4">
@@ -79,22 +140,64 @@ const Inventory = () => {
         </button>
       </div>
 
+      {/* Display Warning Message */}
+      {warning && (
+        <div className="bg-red-500 text-white text-center p-2 mb-4 animate-pulse">
+          {warning}
+        </div>
+      )}
+
       {/* Add Item Form */}
       {showForm && (
         <div className="bg-gray-100 p-4 rounded-lg mb-4">
           <h2 className="text-lg font-semibold mb-2">Add New Item</h2>
           <div className="grid grid-cols-2 gap-4">
-            <input type="text" name="name" placeholder="Item Name" className="p-2 border rounded" value={newItem.name} onChange={handleInputChange} />
+            {/* Select Item Name */}
+            <select name="name" className="p-2 border rounded" value={newItem.name} onChange={handleInputChange}>
+              <option value="">Select Item</option>
+              <option value="Milk">Milk</option>
+              <option value="Eggs">Eggs</option>
+              <option value="Bread">Bread</option>
+              <option value="Cheese">Cheese</option>
+            </select>
             {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
-            <input type="text" name="category" placeholder="Category" className="p-2 border rounded" value={newItem.category} onChange={handleInputChange} />
+
+            {/* Select Category */}
+            <select name="category" className="p-2 border rounded" value={newItem.category} onChange={handleInputChange}>
+              <option value="">Select Category</option>
+              <option value="Dairy">Dairy</option>
+              <option value="Bakery">Bakery</option>
+              <option value="Frozen">Frozen</option>
+              <option value="Beverages">Beverages</option>
+            </select>
             {errors.category && <p className="text-red-500 text-sm">{errors.category}</p>}
-            <input type="number" name="quantity" placeholder="Quantity" className="p-2 border rounded" value={newItem.quantity} onChange={handleInputChange} />
+
+            {/* Select Quantity */}
+            <select name="quantity" className="p-2 border rounded" value={newItem.quantity} onChange={handleInputChange}>
+              <option value="">Select Quantity</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="5">5</option>
+              <option value="10">10</option>
+            </select>
             {errors.quantity && <p className="text-red-500 text-sm">{errors.quantity}</p>}
+
+            {/* Manufacture & Expiry Dates */}
             <input type="date" name="manufactureDate" className="p-2 border rounded" value={newItem.manufactureDate} onChange={handleInputChange} />
             <input type="date" name="expiryDate" className="p-2 border rounded" value={newItem.expiryDate} onChange={handleInputChange} />
             {errors.expiryDate && <p className="text-red-500 text-sm">{errors.expiryDate}</p>}
-            <input type="text" name="temperature" placeholder="Temperature" className="p-2 border rounded" value={newItem.temperature} onChange={handleInputChange} />
+
+            {/* Temperature Selection */}
+            <select name="temperature" className="p-2 border rounded" value={newItem.temperature} onChange={handleInputChange}>
+              <option value="">Select Storage Temperature</option>
+              <option value="Frozen (-18°C)">Frozen (-18°C)</option>
+              <option value="Refrigerated (0-4°C)">Refrigerated (0-4°C)</option>
+              <option value="Cool (10-15°C)">Cool (10-15°C)</option>
+              <option value="Room Temperature (15-25°C)">Room Temperature (15-25°C)</option>
+              <option value="Warm (25-40°C)">Warm (25-40°C)</option>
+            </select>
           </div>
+
           <button className="mt-3 bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600" onClick={handleAddItem}>
             Add Item
           </button>
