@@ -16,6 +16,7 @@ const Inventory = () => {
     temperature: "",
     status: "Available",
   });
+  const [sortOrder, setSortOrder] = useState("asc"); // Added state to manage sorting order
 
   const temperatureRanges = {
     Milk: "Refrigerated (0-4°C)",
@@ -117,6 +118,26 @@ const Inventory = () => {
     setErrors({});
   };
 
+  // Sort items based on expiry date
+  const sortItems = () => {
+    const sortedItems = [...items].sort((a, b) => {
+      const expiryA = new Date(a.expiryDate);
+      const expiryB = new Date(b.expiryDate);
+
+      if (sortOrder === "asc") {
+        return expiryA - expiryB; // Ascending order
+      } else {
+        return expiryB - expiryA; // Descending order
+      }
+    });
+
+    return sortedItems;
+  };
+
+  const toggleSortOrder = () => {
+    setSortOrder(sortOrder === "asc" ? "desc" : "asc"); // Toggle between ascending and descending
+  };
+
   return (
     <main className="bg-white p-6 rounded-lg shadow-lg w-full max-w-5xl mx-auto">
       <h1 className="text-2xl font-bold mb-4">HomeStock</h1>
@@ -204,6 +225,16 @@ const Inventory = () => {
         </div>
       )}
 
+      {/* Sort Button */}
+      <div className="mb-4 flex justify-end">
+        <button
+          className="bg-gray-300 px-4 py-2 rounded-lg hover:bg-gray-400"
+          onClick={toggleSortOrder}
+        >
+          Sort by Expiry Date ({sortOrder === "asc" ? "Ascending" : "Descending"})
+        </button>
+      </div>
+
       {/* Inventory Table */}
       <div className="overflow-x-auto">
         <table className="w-full border-collapse">
@@ -220,7 +251,7 @@ const Inventory = () => {
             </tr>
           </thead>
           <tbody>
-            {items.filter((item) => item.name.toLowerCase().includes(search.toLowerCase())).map((item) => (
+            {sortItems().filter((item) => item.name.toLowerCase().includes(search.toLowerCase())).map((item) => (
               <tr key={item.id} className="border-b">
                 <td className="p-2">{item.name}</td>
                 <td className="p-2">{item.category}</td>
