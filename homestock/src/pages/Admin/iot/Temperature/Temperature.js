@@ -20,19 +20,20 @@ function Temperature({
   const handleToggle = (setter) => setter((prev) => !prev);
 
   return (
-    <section className="mt-8 px-6 py-8 bg-slate-50 rounded-2xl shadow-xl space-y-6">
-      {/* Header with temperature-inspired gradient */}
-      <div className="bg-gradient-to-r from-orange-500 to-blue-600 p-6 rounded-2xl shadow-lg">
+    <section className="mt-8 px-6 py-8 rounded-2xl shadow-sm space-y-6">
+      <div className=" p-6 rounded-2xl ">
         <div className="flex items-center justify-between">
-          <h2 className="text-3xl font-bold text-white flex items-center space-x-3">
+          <h2 className="text-3xl font-bold text-black flex items-center space-x-3">
             <FaTemperatureHigh className="text-4xl text-amber-300" />
             <span>Temperature Control Overview</span>
           </h2>
-          <p className="text-lg text-blue-100 italic hidden lg:block">
+
+          <p className="text-lg text-black italic hidden lg:block">
             Monitor and adjust temperature settings in real-time
           </p>
         </div>
       </div>
+      <hr className="h-px my-8 bg-black border-0 dark:bg-gray-700" />
 
       {/* Content Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -62,6 +63,7 @@ function Temperature({
                   temperaturePercentage
                 )} transition-all duration-500`}
                 style={{ width: `${temperaturePercentage}%` }}
+                aria-label={`Temperature: ${temperaturePercentage}%`}
               />
             </div>
           </div>
@@ -106,6 +108,7 @@ function Temperature({
             </div>
             <button
               onClick={() => handleToggle(setFireAlarm)}
+              aria-label={`Fire alarm ${fireAlarm ? "on" : "off"}`}
               className={`relative w-12 h-6 rounded-full transition-colors duration-200 ${
                 fireAlarm ? "bg-red-500" : "bg-slate-300"
               }`}
@@ -133,6 +136,9 @@ function Temperature({
             </div>
             <button
               onClick={() => handleToggle(setTemperatureControl)}
+              aria-label={`Climate control ${
+                temperatureControl ? "on" : "off"
+              }`}
               className={`relative w-12 h-6 rounded-full transition-colors duration-200 ${
                 temperatureControl ? "bg-blue-500" : "bg-slate-300"
               }`}
@@ -158,6 +164,7 @@ function Temperature({
             </div>
             <button
               onClick={() => handleToggle(setFan)}
+              aria-label={`Cooling fan ${fan ? "on" : "off"}`}
               className={`relative w-12 h-6 rounded-full transition-colors duration-200 ${
                 fan ? "bg-emerald-500" : "bg-slate-300"
               }`}
