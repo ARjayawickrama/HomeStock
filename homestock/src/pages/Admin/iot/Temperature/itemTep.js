@@ -77,7 +77,7 @@ function AllProductsTemperature() {
     <div className="p-6">
       <div className="mb-6">
         <select
-          className="px-6 py-3 border-2 border-gray-300 rounded-lg bg-black text-gray-800 shadow-sm transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-green-600 hover:border-green-500 hover:shadow-md"
+          className="px-6 py-3 border-2 border-gray-300 rounded-lg bg-white text-gray-800 shadow-sm transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-green-600 hover:border-green-500 hover:shadow-md"
           value={selectedCategory}
           onChange={(e) => setSelectedCategory(e.target.value)}
         >
