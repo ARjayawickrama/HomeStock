@@ -71,7 +71,7 @@ const Dashboard = () => {
                   key={tab.name}
                   className={`flex items-center gap-3 p-3 rounded-md cursor-pointer transition-colors duration-300 ${
                     activeTab === tab.name.toLowerCase()
-                      ? "bg-indigo-100 text-indigo-700 font-medium"
+                      ? "bg-gradient-to-r from-black to-indigo-900 text-white font-medium"
                       : "hover:bg-gray-100 text-gray-700"
                   }`}
                   onClick={() => setActiveTab(tab.name.toLowerCase())}
