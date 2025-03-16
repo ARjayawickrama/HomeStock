@@ -25,10 +25,12 @@ function Temperature({
         <div className="flex items-center justify-between">
           <h2 className="text-3xl font-bold text-black flex items-center space-x-3">
             <FaTemperatureHigh className="text-4xl text-amber-300" />
-            <span>Temperature Control Overview</span>
+            <span className="text-2xl font-semibold text-gray-800 bg-yellow-200 px-4 py-2 rounded-lg shadow-md">
+              Temperature Control Overview
+            </span>
           </h2>
 
-          <p className="text-lg text-black italic hidden lg:block">
+          <p className="text-lg font-medium text-black italic hidden lg:block bg-gray-100 px-6 py-3 rounded-lg shadow-md hover:bg-gray-200 transition-all">
             Monitor and adjust temperature settings in real-time
           </p>
         </div>
