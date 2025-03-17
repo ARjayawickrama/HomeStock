@@ -8,6 +8,7 @@ import Iot from "./iot/iot";
 import Home from "./home";
 import Allusers from "../Login/Allusers";
 import backgroundImage from "../../../src/assets/map2.png";
+import Logo from "../../../src/assets/2.jpg";
 import {
   FaHome,
   FaBox,
@@ -29,13 +30,13 @@ const Dashboard = () => {
   return (
     <div className="h-screen flex">
       {/* Sidebar (Fixed) */}
-      <aside className="w-64 h-screen fixed left-0 top-0 bg-gradient-to-r from-black to-slate-800 shadow-md p-6">
+      <aside className="w-64 h-screen fixed left-0 top-0 bg-gradient-to-r  from-black to-slate-800 shadow-md p-6">
         <div className="flex flex-col items-center text-center mb-6">
           <div className="w-24 h-24 rounded-full overflow-hidden mb-4">
             <div
               className="w-full h-full  flex items-center justify-center"
               style={{
-                backgroundImage: `url(${backgroundImage})`,
+                backgroundImage: `url(${Logo})`,
                 backgroundSize: "cover",
                 backgroundPosition: "center",
               }}

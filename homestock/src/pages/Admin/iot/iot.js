@@ -43,8 +43,7 @@ function Iot() {
   ];
 
   return (
-    <main className="bg-white bg-opacity-90 p-6 rounded-lg">
-   
+    <main className="bg-white bg-opacity-80 p-6 rounded-lg">
       <div className="flex justify-center sm:justify-start space-x-6 mt-6">
         {tabs.map((tab) => (
           <button
