@@ -30,7 +30,7 @@ const Dashboard = () => {
   return (
     <div className="h-screen flex">
       {/* Sidebar (Fixed) */}
-      <aside className="w-64 h-screen fixed left-0 top-0 bg-gradient-to-r  from-black to-slate-800 shadow-md p-6">
+      <aside className="w-64 h-screen fixed left-0 top-0 bg-gradient-to-r  from-black to-slate-800 shadow-2xl p-6">
         <div className="flex flex-col items-center text-center mb-6">
           <div className="w-24 h-24 rounded-full overflow-hidden mb-4">
             <div
@@ -100,13 +100,7 @@ const Dashboard = () => {
         </nav>
 
         {/* Scrollable Content Section */}
-        <main
-          style={{
-            backgroundImage: `url(${backgroundImage})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          }}
-        >
+        <main className=" bg-white p-4 rounded-lg  ">
           {activeTab === "home" && <Home />}
           {activeTab === "inventory" && <Inventory />}
           {activeTab === "grocery" && <Grocery_ist />}

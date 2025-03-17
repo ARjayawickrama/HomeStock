@@ -5,7 +5,11 @@ import {
   FaLeaf,
   FaMugHot,
   FaFilter,
+  FaFilePdf,
+  FaSearch,
 } from "react-icons/fa";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 
 function ProductTable() {
   const [products] = useState([
@@ -62,6 +66,23 @@ function ProductTable() {
   ]);
 
   const [selectedCategory, setSelectedCategory] = useState("All Items");
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const downloadPDF = () => {
+    const doc = new jsPDF();
+    doc.text("Product Report", 14, 15);
+    doc.autoTable({
+      startY: 20,
+      head: [["Product", "Category", "Temperature (°C)", "Humidity (%)"]],
+      body: filteredProducts.map((p) => [
+        p.name,
+        p.category,
+        p.temperature,
+        p.humidity,
+      ]),
+    });
+    doc.save("product_report.pdf");
+  };
 
   const calculatePercentage = (value, maxValue) => (value / maxValue) * 100;
   const getTemperatureColor = (percentage) =>
@@ -77,14 +98,20 @@ function ProductTable() {
       ? "bg-yellow-300"
       : "bg-red-300";
 
-  const filteredProducts =
-    selectedCategory === "All Items"
-      ? products
-      : products.filter((product) => product.category === selectedCategory);
+  // Category & Search Term Filter
+  const filteredProducts = products
+    .filter(
+      (product) =>
+        selectedCategory === "All Items" ||
+        product.category === selectedCategory
+    )
+    .filter((product) =>
+      product.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
   return (
     <div className="p-6">
-      {/* Filter Dropdown */}
+      {/* Filter & Search Bar */}
       <div className="mb-4 flex items-center space-x-3">
         <FaFilter className="text-green-600 text-xl" />
         <select
@@ -97,7 +124,28 @@ function ProductTable() {
           <option value="Processed">Processed</option>
           <option value="Herbal">Herbal</option>
         </select>
+
+        {/* Search Bar */}
+        <div className="relative">
+          <input
+            type="text"
+            placeholder="Search product..."
+            className="pl-10 pr-4 py-2 border border-gray-400 rounded-lg bg-white text-gray-800 shadow-md focus:ring-2 focus:ring-green-600"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+          <FaSearch className="absolute left-3 top-3 text-gray-500" />
+        </div>
+        <button
+        onClick={downloadPDF}
+        className="flex items-center px-4 py-2  bg-red-500 text-white rounded-lg shadow-md hover:bg-red-600 transition"
+      >
+        <FaFilePdf className="mr-2" /> Download PDF
+      </button>
       </div>
+
+      {/* Download PDF Button */}
+      
 
       {/* Table */}
       <div className="overflow-x-auto">
@@ -168,6 +216,11 @@ function ProductTable() {
             })}
           </tbody>
         </table>
+
+        {/* No Results Message */}
+        {filteredProducts.length === 0 && (
+          <p className="text-center text-red-500 mt-4">No products found.</p>
+        )}
       </div>
     </div>
   );

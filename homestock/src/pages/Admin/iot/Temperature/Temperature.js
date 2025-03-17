@@ -1,6 +1,13 @@
 import React, { useState } from "react";
-import { FaFire, FaFan, FaTemperatureHigh } from "react-icons/fa";
-
+import Switches from "../Switches/Switches";
+import {
+  FaFire,
+  FaFan,
+  FaTemperatureHigh,
+  FaMapMarkerAlt,
+} from "react-icons/fa";
+import backgroundImage from "../../../../assets/g2.png";
+import AAA from "../../../../assets/map2.png";
 function Temperature({
   currentTemperature,
   maxTemperature,
@@ -20,19 +27,28 @@ function Temperature({
   const handleToggle = (setter) => setter((prev) => !prev);
 
   return (
-    <section className="mt-8 px-6 py-8 rounded-2xl shadow-sm space-y-6">
+    <section className=" px-6 py-8 rounded-2xl shadow-sm space-y-6 relative bottom-11">
       <div className=" p-6 rounded-2xl ">
         <div className="flex items-center justify-between">
-          <h2 className="text-3xl font-bold text-black flex items-center space-x-3">
-            <FaTemperatureHigh className="text-4xl text-amber-300" />
-            <span className="text-2xl font-semibold text-gray-800 bg-yellow-200 px-4 py-2 rounded-lg shadow-md">
-              Temperature Control Overview
-            </span>
-          </h2>
+          <div className="relative w-36 h-1  bottom-20 ">
+            <img
+              src={backgroundImage}
+              alt="EV Car"
+              className="w-full   rounded-lg "
+            />
+            <div className=" relative left-32  bottom-11">
+              <p className="  text-white  font-bold bg-slate-900/60 px-4 rounded-md">
+                Available Range: <span className="text-yellow-300">30%</span>
+              </p>
+            </div>
+          </div>
 
-          <p className="text-lg font-medium text-black italic hidden lg:block bg-gray-100 px-6 py-3 rounded-lg shadow-md hover:bg-gray-200 transition-all">
-            Monitor and adjust temperature settings in real-time
-          </p>
+          <div
+            className="bg-slate-200 bg-opacity-80 p-4 rounded-xl bg-cover bg-center"
+            style={{ backgroundImage: `url(${AAA})` }}
+          >
+            <Switches />
+          </div>
         </div>
       </div>
       <hr className="h-px my-8 bg-black border-0 dark:bg-gray-700" />
