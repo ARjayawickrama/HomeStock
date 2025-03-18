@@ -2,9 +2,7 @@ import React, { useState } from 'react';
 import { Plus, FileText, Pencil, Trash2, ArrowLeft } from 'lucide-react';
 import AddBudgetModal from './component/AddBudgetModal'; // Import the modal component
 
-
 const BudgetDetails = ({ setActiveTab }) => {
-
   const [budgets, setBudgets] = useState([
     { id: 1, category: 'Groceries', amount: 400, spent: 350, period: 'Monthly' },
     { id: 2, category: 'Household', amount: 300, spent: 275, period: 'Monthly' },
@@ -12,20 +10,27 @@ const BudgetDetails = ({ setActiveTab }) => {
     { id: 4, category: 'Entertainment', amount: 100, spent: 95, period: 'Monthly' },
   ]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingBudget, setEditingBudget] = useState(null);
 
   const handleAddBudget = (newBudget) => {
-    setBudgets((prevBudgets) => [
-      ...prevBudgets,
-      { id: prevBudgets.length + 1, ...newBudget },
-    ]);
+    setBudgets([...budgets, { ...newBudget, id: Date.now() }]);
+    setIsModalOpen(false);
   };
 
-    
+  const handleEditBudget = (updatedBudget) => {
+    setBudgets(budgets.map((b) => (b.id === updatedBudget.id ? updatedBudget : b)));
+    setEditingBudget(null);
+    setIsModalOpen(false);
+  };
+
+  const handleDeleteBudget = (id) => {
+    setBudgets(budgets.filter((b) => b.id !== id));
+  };
 
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
-        <button 
+        <button
           onClick={() => setActiveTab('BudgetDash')}
           className="p-2 transition-colors rounded-full hover:bg-gray-100"
         >
@@ -44,8 +49,11 @@ const BudgetDetails = ({ setActiveTab }) => {
             <FileText className="w-5 h-5 mr-2" />
             Generate Report
           </button>
-          <button 
-            onClick={() => setIsModalOpen(true)} // Open the modal
+          <button
+            onClick={() => {
+              setEditingBudget(null); // Clear editing state for adding a new budget
+              setIsModalOpen(true); // Open the modal for adding a new budget
+            }}
             className="flex items-center px-4 py-2 text-white bg-indigo-600 rounded-lg hover:bg-indigo-700"
           >
             <Plus className="w-5 h-5 mr-2" />
@@ -109,10 +117,19 @@ const BudgetDetails = ({ setActiveTab }) => {
                 </td>
                 <td className="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
                   <div className="flex justify-end gap-3">
-                    <button className="text-indigo-600 hover:text-indigo-900">
+                    <button
+                      onClick={() => {
+                        setEditingBudget(budget); // Set the budget to edit
+                        setIsModalOpen(true); // Open the modal for editing
+                      }}
+                      className="text-indigo-600 hover:text-indigo-900"
+                    >
                       <Pencil className="w-5 h-5" />
                     </button>
-                    <button className="text-red-600 hover:text-red-900">
+                    <button
+                      onClick={() => handleDeleteBudget(budget.id)}
+                      className="text-red-600 hover:text-red-900"
+                    >
                       <Trash2 className="w-5 h-5" />
                     </button>
                   </div>
@@ -123,11 +140,13 @@ const BudgetDetails = ({ setActiveTab }) => {
         </table>
       </div>
 
-      <AddBudgetModal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
-        onAddBudget={handleAddBudget} 
-      />
+      {isModalOpen && (
+        <AddBudgetModal
+          onSubmit={editingBudget ? handleEditBudget : handleAddBudget}
+          onClose={() => setIsModalOpen(false)}
+          initialData={editingBudget}
+        />
+      )}
     </div>
   );
 };
