@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { FaPlus, FaSearch, FaEdit, FaTrash, FaTimes, FaDownload } from "react-icons/fa";
+import { FaPlus, FaSearch, FaEdit, FaTrash, FaTimes } from "react-icons/fa";
 
 const Inventory = () => {
   const [items, setItems] = useState([]);
@@ -143,11 +143,6 @@ const Inventory = () => {
     setSortOrder(sortOrder === "asc" ? "desc" : "asc"); // Toggle between ascending and descending
   };
 
-  const handleDownload = () => {
-    // Logic to generate and download the report can be implemented here
-    console.log("Download Report/PDF");
-  };
-
   // Filter for low stock items
   const lowStockItems = items.filter((item) => item.status === "Low Stock");
 
@@ -155,7 +150,7 @@ const Inventory = () => {
     <main className="bg-white p-6 rounded-lg shadow-lg w-full max-w-5xl mx-auto">
       <h1 className="text-2xl font-bold mb-4">HomeStock</h1>
 
-      {/* Search, Add Button, and Download Button */}
+      {/* Search, Add Button */}
       <div className="flex justify-between mb-4">
         <div className="relative w-2/3">
           <input
@@ -172,12 +167,6 @@ const Inventory = () => {
             onClick={toggleForm}
           >
             {showForm ? <FaTimes /> : <FaPlus />} {showForm ? "Close Form" : "Add Item"}
-          </button>
-          <button
-            className="flex items-center gap-2 bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600"
-            onClick={handleDownload}
-          >
-            <FaDownload /> Download Report
           </button>
           {/* Low Stock Button */}
           <button
@@ -306,23 +295,23 @@ const Inventory = () => {
 
       {/* Low Stock Modal */}
       {showLowStockModal && (
-        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex justify-center items-center z-50">
-          <div className="bg-white p-6 rounded-lg w-96">
-            <h2 className="text-xl font-bold mb-4">Low Stock Items</h2>
-            {lowStockItems.length > 0 ? (
-              <ul>
-                {lowStockItems.map((item) => (
-                  <li key={item.id} className="mb-2">
-                    {item.name} - {item.quantity} left
+        <div className="fixed inset-0 bg-gray-700 bg-opacity-50 flex justify-center items-center">
+          <div className="bg-white p-6 rounded-lg shadow-lg">
+            <h3 className="text-xl font-bold mb-4">Low Stock Items</h3>
+            <ul>
+              {lowStockItems.length > 0 ? (
+                lowStockItems.map((item) => (
+                  <li key={item.id}>
+                    <p>{item.name} - {item.quantity} left</p>
                   </li>
-                ))}
-              </ul>
-            ) : (
-              <p>No low stock items.</p>
-            )}
+                ))
+              ) : (
+                <li>No low stock items</li>
+              )}
+            </ul>
             <button
-              onClick={toggleLowStockModal}
               className="mt-4 bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600"
+              onClick={toggleLowStockModal}
             >
               Close
             </button>
