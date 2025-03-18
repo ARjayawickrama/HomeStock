@@ -13,12 +13,13 @@ const PORT = process.env.PORT || 5000;
 // MongoDB connection
 connectDB();
 
-
-app.use(cors({
-  origin: ['http://localhost:3000', 'http://192.168.52.152:19000'],  // Allow React and React Native apps
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],  
-  credentials: true, 
-}));
+app.use(
+  cors({
+    origin: ["http://localhost:3000", "http://192.168.8.118:19000"], // Allow React and React Native apps
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
+  })
+);
 
 app.use(bodyParser.json());
 
@@ -26,7 +27,6 @@ app.use(bodyParser.json());
 app.use("/api", signupRouter);
 app.use("/auth", loginRouter);
 app.use("/api", barcodeRoutes);
-
 
 app.listen(PORT, () => {
   console.log(`Server is running on: http://localhost:${PORT}`);
