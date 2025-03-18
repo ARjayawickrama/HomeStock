@@ -110,7 +110,7 @@ function ProductTable() {
     );
 
   return (
-    <div className="p-6">
+    <div className="p-6  relative bottom-10">
       {/* Filter & Search Bar */}
       <div className="mb-4 flex items-center space-x-3">
         <FaFilter className="text-green-600 text-xl" />
@@ -137,20 +137,20 @@ function ProductTable() {
           <FaSearch className="absolute left-3 top-3 text-gray-500" />
         </div>
         <button
-        onClick={downloadPDF}
-        className="flex items-center px-4 py-2  bg-red-500 text-white rounded-lg shadow-md hover:bg-red-600 transition"
-      >
-        <FaFilePdf className="mr-2" /> Download PDF
-      </button>
+          onClick={downloadPDF}
+          className="flex items-center px-4 py-2  bg-red-500 text-white rounded-lg shadow-md hover:bg-red-600 transition"
+        >
+          <FaFilePdf className="mr-2" /> Download PDF
+        </button>
       </div>
 
       {/* Download PDF Button */}
-      
+      <hr className="h-px my-8 bg-black border-0 dark:bg-gray-700" />
 
       {/* Table */}
       <div className="overflow-x-auto">
         <table className="min-w-full bg-white border border-gray-200 shadow-lg rounded-lg">
-          <thead className="bg-gradient-to-r from-black to-indigo-900 text-white">
+          <thead className="bg-gradient-to-r bg-gray-700 text-white">
             <tr>
               <th className="py-3 px-4 text-left">Product</th>
               <th className="py-3 px-4 text-left">Category</th>

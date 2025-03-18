@@ -6,6 +6,7 @@ const BarcodeTable = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [deletingBarcode, setDeletingBarcode] = useState(null); // Track the barcode being deleted
 
   // Fetch barcodes from backend
   useEffect(() => {
@@ -20,38 +21,48 @@ const BarcodeTable = () => {
         setLoading(false);
       }
     };
-
     fetchBarcodes();
   }, []);
 
+  // Handle search input change
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
   };
 
+  // Check if the expiry date is expired
   const checkIfExpired = (expiryDate) => {
+    const [day, month, year] = expiryDate.split(/[-/]/).map(Number);
+    const expiry = new Date(year, month - 1, day);
     const today = new Date();
-    const expDate = new Date(expiryDate);
-    return expDate < today; // Expired නම් true වේ
+    return expiry < today;
   };
 
+  // Format Expiry Date from barcode
   const formatExpiryDate = (barcode) => {
-    // Item Number: 20 | Month: 03 | Day: 18 | Year: 2025
-    const itemNumber = barcode.slice(0, 2);
-    const month = barcode.slice(2, 4);
-    const day = barcode.slice(4, 6);
-    const year = barcode.slice(6, 10);
+    const cleanedBarcode = barcode.replace(/[^0-9]/g, ""); // Remove non-numeric characters
 
-    // Formatted Expiry Date
-    const expiryDate = `${month}/${day}/${year}`;
+    if (cleanedBarcode.length < 10) return "Invalid Barcode";
+
+    const itemNumber = cleanedBarcode.slice(0, 2);
+    const month = cleanedBarcode.slice(2, 4);
+    const day = cleanedBarcode.slice(4, 6);
+    const year = cleanedBarcode.slice(6, 10);
+
+    const expiryDate = `${day}-${month}/${year}`;
     const isExpired = checkIfExpired(expiryDate);
 
     return (
-      <span className={isExpired ? "text-red-500 font-bold" : "text-green-500"}>
+      <span
+        className={
+          isExpired ? "text-red-500 font-bold" : "text-green-500 font-bold"
+        }
+      >
         {expiryDate} {isExpired ? "(Expired)" : "(Valid)"}
       </span>
     );
   };
 
+  // Filter barcodes based on search query
   const filteredBarcodes = barcodes.filter(
     (barcode) =>
       barcode.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -62,24 +73,49 @@ const BarcodeTable = () => {
           .includes(searchQuery.toLowerCase()))
   );
 
-  return (
-    <div className="bg-gradient-to-r from-slate-300 to-slate-500 p-8 rounded-xl shadow-lg">
-      <h2 className="text-3xl font-extrabold text-white mb-6 text-center">
-        Scanned Barcodes
-      </h2>
+  // Function to apply color coding based on conditions
+  const getBarcodeColor = (barcode) => {
+    if (barcode.code.startsWith("A")) {
+      return "bg-blue-500 text-white"; // Example: Barcode starting with "A" could be blue
+    } else if (barcode.code.startsWith("B")) {
+      return "bg-yellow-500 text-white"; // Example: Barcode starting with "B" could be yellow
+    }
+    return "bg-gray-200 text-gray-800"; // Default color for others
+  };
 
-      {/* Search Bar */}
-      <div className="mb-6 flex justify-center">
+  // Delete barcode by ID with confirmation and loading state
+  const deleteBarcode = async (barcodeId) => {
+    // Show a confirmation before deletion
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this barcode?"
+    );
+    if (!confirmed) return;
+
+    try {
+      setDeletingBarcode(barcodeId); // Set barcode as being deleted
+      await axios.delete(`http://localhost:5000/api/barcodes/${barcodeId}`);
+      setBarcodes(barcodes.filter((barcode) => barcode._id !== barcodeId)); // Remove deleted barcode from state
+    } catch (err) {
+      setError("❌ Error deleting barcode");
+      console.error("❌ Error deleting barcode:", err);
+    } finally {
+      setDeletingBarcode(null); // Reset deleting state
+    }
+  };
+
+  return (
+    <div className="relative bottom-14">
+      <div className="relative left-3/4 ml-20">
         <input
           type="text"
-          className="w-3/4 sm:w-1/2 p-4 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-600 placeholder-gray-500"
+          className="p-4 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-600 placeholder-gray-500"
           placeholder="Search by Barcode or Date"
           value={searchQuery}
           onChange={handleSearchChange}
         />
       </div>
 
-      {/* Loading, Error, and Barcode Display */}
+      {/* Loading, Error, and Barcode Table */}
       {loading ? (
         <div className="text-center text-white font-semibold text-lg animate-pulse">
           Loading barcodes...
@@ -89,32 +125,57 @@ const BarcodeTable = () => {
           {error}
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredBarcodes.length > 0 ? (
-            filteredBarcodes.map((barcode) => (
-              <div
-                key={barcode._id}
-                className="bg-white p-6 rounded-lg shadow-xl hover:scale-105 transform transition-all duration-300"
-              >
-                <p className="font-semibold text-gray-800 text-lg">
-                  Barcode: {barcode.code}
-                </p>
-                <p className="text-gray-700 mb-2">
-                  Expiry Date: {formatExpiryDate(barcode.code)}
-                </p>
-                <p className="text-gray-700">
-                  Scanned At:{" "}
-                  {barcode.createdAt
-                    ? new Date(barcode.createdAt).toLocaleString()
-                    : "N/A"}
-                </p>
-              </div>
-            ))
-          ) : (
-            <div className="col-span-3 text-center text-gray-500">
-              No barcodes available
-            </div>
-          )}
+        <div className="overflow-x-auto">
+          <table className="min-w-full table-auto border-collapse">
+            <thead>
+              <tr className="bg-gray-700 text-white">
+                <th className="p-4 text-left">Barcode</th>
+                <th className="p-4 text-left">Expiry Date</th>
+                <th className="p-4 text-left">Scanned At</th>
+                <th className="p-4 text-left">Action</th>{" "}
+                {/* Added Action column */}
+              </tr>
+            </thead>
+            <tbody>
+              {filteredBarcodes.length > 0 ? (
+                filteredBarcodes.map((barcode) => (
+                  <tr
+                    key={barcode._id}
+                    className={`hover:bg-gray-100 ${getBarcodeColor(barcode)}`}
+                  >
+                    <td className="p-4">{barcode.code}</td>
+                    <td className="p-4">{formatExpiryDate(barcode.code)}</td>
+                    <td className="p-4">
+                      {barcode.createdAt
+                        ? new Date(barcode.createdAt).toLocaleString()
+                        : "N/A"}
+                    </td>
+                    <td className="p-4">
+                      <button
+                        onClick={() => deleteBarcode(barcode._id)}
+                        className={`bg-red-500 text-white p-2 rounded hover:bg-red-700 ${
+                          deletingBarcode === barcode._id
+                            ? "opacity-50 cursor-not-allowed"
+                            : ""
+                        }`}
+                        disabled={deletingBarcode === barcode._id} // Disable the button while deleting
+                      >
+                        {deletingBarcode === barcode._id
+                          ? "Deleting..."
+                          : "Delete"}
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="4" className="text-center text-gray-500 p-4">
+                    No barcodes available
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
       )}
     </div>
