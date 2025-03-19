@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import Temperature from "./Temperature/Temperature";
 import ScannerItem from "./ScannerItems/ScannerItems";
 import ItemTep from "./Temperature/itemTep";
-import Switches from "./Switches/Switches";
+
 import {
   FaThermometerHalf,
   FaBox,

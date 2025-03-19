@@ -6,9 +6,9 @@ const BarcodeTable = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [deletingBarcode, setDeletingBarcode] = useState(null); // Track the barcode being deleted
+  const [deletingBarcode, setDeletingBarcode] = useState(null); 
 
-  // Fetch barcodes from backend
+ 
   useEffect(() => {
     const fetchBarcodes = async () => {
       try {
@@ -24,12 +24,12 @@ const BarcodeTable = () => {
     fetchBarcodes();
   }, []);
 
-  // Handle search input change
+  
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
   };
 
-  // Check if the expiry date is expired
+ 
   const checkIfExpired = (expiryDate) => {
     const [day, month, year] = expiryDate.split(/[-/]/).map(Number);
     const expiry = new Date(year, month - 1, day);
@@ -37,9 +37,8 @@ const BarcodeTable = () => {
     return expiry < today;
   };
 
-  // Format Expiry Date from barcode
   const formatExpiryDate = (barcode) => {
-    const cleanedBarcode = barcode.replace(/[^0-9]/g, ""); // Remove non-numeric characters
+    const cleanedBarcode = barcode.replace(/[^0-9]/g, ""); 
 
     if (cleanedBarcode.length < 10) return "Invalid Barcode";
 
@@ -62,7 +61,6 @@ const BarcodeTable = () => {
     );
   };
 
-  // Filter barcodes based on search query
   const filteredBarcodes = barcodes.filter(
     (barcode) =>
       barcode.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -73,33 +71,33 @@ const BarcodeTable = () => {
           .includes(searchQuery.toLowerCase()))
   );
 
-  // Function to apply color coding based on conditions
+
   const getBarcodeColor = (barcode) => {
     if (barcode.code.startsWith("A")) {
-      return "bg-blue-500 text-white"; // Example: Barcode starting with "A" could be blue
+      return "bg-blue-500 text-white"; 
     } else if (barcode.code.startsWith("B")) {
-      return "bg-yellow-500 text-white"; // Example: Barcode starting with "B" could be yellow
+      return "bg-yellow-500 text-white"; 
     }
-    return "bg-gray-200 text-gray-800"; // Default color for others
+    return "bg-gray-200 text-gray-800";
   };
 
-  // Delete barcode by ID with confirmation and loading state
+
   const deleteBarcode = async (barcodeId) => {
-    // Show a confirmation before deletion
+  
     const confirmed = window.confirm(
       "Are you sure you want to delete this barcode?"
     );
     if (!confirmed) return;
 
     try {
-      setDeletingBarcode(barcodeId); // Set barcode as being deleted
+      setDeletingBarcode(barcodeId); 
       await axios.delete(`http://localhost:5000/api/barcodes/${barcodeId}`);
-      setBarcodes(barcodes.filter((barcode) => barcode._id !== barcodeId)); // Remove deleted barcode from state
+      setBarcodes(barcodes.filter((barcode) => barcode._id !== barcodeId)); 
     } catch (err) {
       setError("❌ Error deleting barcode");
       console.error("❌ Error deleting barcode:", err);
     } finally {
-      setDeletingBarcode(null); // Reset deleting state
+      setDeletingBarcode(null); 
     }
   };
 
@@ -115,7 +113,6 @@ const BarcodeTable = () => {
         />
       </div>
 
-      {/* Loading, Error, and Barcode Table */}
       {loading ? (
         <div className="text-center text-white font-semibold text-lg animate-pulse">
           Loading barcodes...
@@ -133,7 +130,7 @@ const BarcodeTable = () => {
                 <th className="p-4 text-left">Expiry Date</th>
                 <th className="p-4 text-left">Scanned At</th>
                 <th className="p-4 text-left">Action</th>{" "}
-                {/* Added Action column */}
+           
               </tr>
             </thead>
             <tbody>

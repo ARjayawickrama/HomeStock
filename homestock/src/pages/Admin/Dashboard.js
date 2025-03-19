@@ -29,7 +29,7 @@ const Dashboard = () => {
 
   return (
     <div className="h-screen flex">
-      {/* Sidebar (Fixed) */}
+    
       <aside className="w-64 h-screen fixed left-0 top-0 bg-gradient-to-r  from-black to-slate-800 shadow-2xl p-6">
         <div className="flex flex-col items-center text-center mb-6">
           <div className="w-24 h-24 rounded-full overflow-hidden mb-4">
@@ -41,7 +41,7 @@ const Dashboard = () => {
                 backgroundPosition: "center",
               }}
             >
-              {/* Add content here if needed */}
+             
             </div>
           </div>
           <h2 className="text-xl font-semibold text-white">Home Stock</h2>
@@ -72,9 +72,8 @@ const Dashboard = () => {
         </ul>
       </aside>
 
-      {/* Main Content (Scrollable) */}
       <div className="flex-1 ml-64 flex flex-col h-screen">
-        {/* Top Navigation Bar */}
+        
         <nav className="bg-gradient-to-r from-slate-800 to-black text-white p-4 flex justify-between items-center shadow-md">
           <div className="flex items-center gap-4">
             <span className="text-lg font-semibold relative right-4">
@@ -99,7 +98,7 @@ const Dashboard = () => {
           </div>
         </nav>
 
-        {/* Scrollable Content Section */}
+   
         <main className=" bg-white p-4 rounded-lg  ">
           {activeTab === "home" && <Home />}
           {activeTab === "inventory" && <Inventory />}

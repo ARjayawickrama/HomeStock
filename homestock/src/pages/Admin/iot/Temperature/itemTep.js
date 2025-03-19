@@ -98,7 +98,6 @@ function ProductTable() {
       ? "bg-yellow-300"
       : "bg-red-300";
 
-  // Category & Search Term Filter
   const filteredProducts = products
     .filter(
       (product) =>
@@ -111,7 +110,7 @@ function ProductTable() {
 
   return (
     <div className="p-6  relative bottom-10">
-      {/* Filter & Search Bar */}
+  
       <div className="mb-4 flex items-center space-x-3">
         <FaFilter className="text-green-600 text-xl" />
         <select
@@ -147,7 +146,7 @@ function ProductTable() {
       {/* Download PDF Button */}
       <hr className="h-px my-8 bg-black border-0 dark:bg-gray-700" />
 
-      {/* Table */}
+   
       <div className="overflow-x-auto">
         <table className="min-w-full bg-white border border-gray-200 shadow-lg rounded-lg">
           <thead className="bg-gradient-to-r bg-gray-700 text-white">
@@ -180,7 +179,7 @@ function ProductTable() {
                   </td>
                   <td className="py-3 px-4">{product.category}</td>
 
-                  {/* Temperature Progress Bar */}
+                
                   <td className="py-3 px-4">
                     <div className="flex items-center space-x-2">
                       <FaThermometerHalf className="text-blue-600" />
@@ -196,7 +195,7 @@ function ProductTable() {
                     </div>
                   </td>
 
-                  {/* Humidity Progress Bar */}
+                
                   <td className="py-3 px-4">
                     <div className="flex items-center space-x-2">
                       <FaTint className="text-blue-600" />
@@ -217,7 +216,7 @@ function ProductTable() {
           </tbody>
         </table>
 
-        {/* No Results Message */}
+
         {filteredProducts.length === 0 && (
           <p className="text-center text-red-500 mt-4">No products found.</p>
         )}
