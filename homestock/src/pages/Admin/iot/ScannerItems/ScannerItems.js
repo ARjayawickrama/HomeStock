@@ -1,236 +1,182 @@
-import React, { useEffect, useRef, useState } from "react";
-import { FaBarcode, FaPlay, FaStop, FaEdit, FaTrash } from "react-icons/fa";
-import Quagga from "quagga";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 
-const API_URL = "http://localhost:5004/barcodes"; // Backend API
+const BarcodeTable = () => {
+  const [barcodes, setBarcodes] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [deletingBarcode, setDeletingBarcode] = useState(null); 
 
-const ScannerItems = () => {
-  const scannerRef = useRef(null);
-  const [isWebcamActive, setIsWebcamActive] = useState(false);
-  const [scannedBarcodes, setScannedBarcodes] = useState([]);
-  const [lastScanned, setLastScanned] = useState(null);
-  const [editId, setEditId] = useState(null);
-  const [editData, setEditData] = useState({
-    productNumber: "",
-    month: "",
-    day: "",
-    year: "",
-  });
-
+ 
   useEffect(() => {
+    const fetchBarcodes = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/api/barcodes");
+        setBarcodes(response.data.barcodes);
+      } catch (err) {
+        setError("Error fetching data");
+        console.error("❌ Error fetching barcodes:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
     fetchBarcodes();
   }, []);
 
-  useEffect(() => {
-    if (isWebcamActive) {
-      Quagga.init(
-        {
-          inputStream: {
-            type: "LiveStream",
-            constraints: { width: 640, height: 480, facingMode: "environment" },
-            target: scannerRef.current,
-          },
-          decoder: {
-            readers: [
-              "ean_reader",
-              "code_128_reader",
-              "upc_reader",
-              "code_39_reader",
-              "codabar_reader",
-            ],
-          },
-        },
-        (err) => {
-          if (err) {
-            console.error("Quagga initialization failed:", err);
-            return;
-          }
-          Quagga.start();
+  
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
+  };
+
+ 
+  const checkIfExpired = (expiryDate) => {
+    const [day, month, year] = expiryDate.split(/[-/]/).map(Number);
+    const expiry = new Date(year, month - 1, day);
+    const today = new Date();
+    return expiry < today;
+  };
+
+  const formatExpiryDate = (barcode) => {
+    const cleanedBarcode = barcode.replace(/[^0-9]/g, ""); 
+
+    if (cleanedBarcode.length < 10) return "Invalid Barcode";
+
+    const itemNumber = cleanedBarcode.slice(0, 2);
+    const month = cleanedBarcode.slice(2, 4);
+    const day = cleanedBarcode.slice(4, 6);
+    const year = cleanedBarcode.slice(6, 10);
+
+    const expiryDate = `${day}-${month}/${year}`;
+    const isExpired = checkIfExpired(expiryDate);
+
+    return (
+      <span
+        className={
+          isExpired ? "text-red-500 font-bold" : "text-green-500 font-bold"
         }
-      );
-
-      let scanTimeout;
-      Quagga.onDetected((result) => {
-        const detectedBarcode = result.codeResult.code;
-        if (detectedBarcode !== lastScanned) {
-          clearTimeout(scanTimeout);
-          scanTimeout = setTimeout(() => {
-            saveBarcode(detectedBarcode);
-            setLastScanned(detectedBarcode);
-          }, 1500);
-        }
-      });
-    } else {
-      stopScanner();
-    }
-
-    return () => stopScanner();
-  }, [isWebcamActive, lastScanned]);
-
-  // Fetch existing barcodes from backend
-  const fetchBarcodes = async () => {
-    try {
-      const response = await axios.get(API_URL);
-      setScannedBarcodes(response.data);
-    } catch (error) {
-      console.error("Error fetching barcodes:", error);
-    }
+      >
+        {expiryDate} {isExpired ? "(Expired)" : "(Valid)"}
+      </span>
+    );
   };
 
-  // Save barcode with new format: "YYYY MM DD ProductNumber"
-  const saveBarcode = async (code) => {
-    console.log("Scanned Barcode:", code); // Log the barcode to check its format
+  const filteredBarcodes = barcodes.filter(
+    (barcode) =>
+      barcode.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (barcode.createdAt &&
+        new Date(barcode.createdAt)
+          .toLocaleString()
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase()))
+  );
 
-    // Ensure barcode has the minimum expected length (adjust as needed)
-    if (code.length < 9) {
-      console.error("Invalid barcode format:", code);
-      return;
+
+  const getBarcodeColor = (barcode) => {
+    if (barcode.code.startsWith("A")) {
+      return "bg-blue-500 text-white"; 
+    } else if (barcode.code.startsWith("B")) {
+      return "bg-yellow-500 text-white"; 
     }
+    return "bg-gray-200 text-gray-800";
+  };
 
-    const productNumber = code.slice(0, 1); // Extract first character as Product Number
-    const month = code.slice(1, 3);
-    const day = code.slice(3, 5);
-    const year = code.slice(5, 9);
 
-    // New Format: "YYYY MM DD ProductNumber"
-    const formattedCode = `${year} ${month} ${day} ${productNumber}`;
+  const deleteBarcode = async (barcodeId) => {
+  
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this barcode?"
+    );
+    if (!confirmed) return;
 
     try {
-      const response = await axios.post(API_URL, {
-        code: formattedCode,
-        productNumber,
-        month,
-        day,
-        year,
-      });
-      setScannedBarcodes([...scannedBarcodes, response.data]);
-    } catch (error) {
-      console.error("Error saving barcode:", error);
+      setDeletingBarcode(barcodeId); 
+      await axios.delete(`http://localhost:5000/api/barcodes/${barcodeId}`);
+      setBarcodes(barcodes.filter((barcode) => barcode._id !== barcodeId)); 
+    } catch (err) {
+      setError("❌ Error deleting barcode");
+      console.error("❌ Error deleting barcode:", err);
+    } finally {
+      setDeletingBarcode(null); 
     }
-  };
-
-  // Delete barcode
-  const deleteBarcode = async (id) => {
-    try {
-      await axios.delete(`${API_URL}/${id}`);
-      setScannedBarcodes(scannedBarcodes.filter((barcode) => barcode._id !== id));
-    } catch (error) {
-      console.error("Error deleting barcode:", error);
-    }
-  };
-
-  // Update barcode with new format
-  const updateBarcode = async (id) => {
-    const updatedCode = `${editData.year} ${editData.month} ${editData.day} ${editData.productNumber}`;
-
-    try {
-      const response = await axios.put(`${API_URL}/${id}`, { code: updatedCode, ...editData });
-      setScannedBarcodes(
-        scannedBarcodes.map((b) => (b._id === id ? response.data : b))
-      );
-      setEditId(null);
-      setEditData({ productNumber: "", month: "", day: "", year: "" });
-    } catch (error) {
-      console.error("Error updating barcode:", error);
-    }
-  };
-
-  // Stop the scanner
-  const stopScanner = () => {
-    if (Quagga) {
-      try {
-        Quagga.stop();
-      } catch (error) {
-        console.warn("Quagga stop error:", error);
-      }
-    }
-  };
-
-  // Handle edit input changes
-  const handleEditChange = (e) => {
-    const { name, value } = e.target;
-    setEditData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
   };
 
   return (
-    <div className="p-4 max-w-6xl mx-auto">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Scanner Section */}
-        <div className="border rounded-lg p-4 shadow-md bg-white">
-          <h2 className="text-lg font-bold text-center mb-3">
-            <FaBarcode className="inline-block mr-2" /> Barcode Scanner
-          </h2>
+    <div className="relative bottom-14">
+      <div className="relative left-3/4 ml-20">
+        <input
+          type="text"
+          className="p-4 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-600 placeholder-gray-500"
+          placeholder="Search by Barcode or Date"
+          value={searchQuery}
+          onChange={handleSearchChange}
+        />
+      </div>
 
-          <div
-            ref={scannerRef}
-            className={`w-full h-14 sm:h-52 bg-gray-200 rounded-lg flex items-center ${
-              isWebcamActive ? "block" : "hidden"
-            }`}
-          />
-
-          <div className="flex flex-col sm:flex-row gap-2 mt-3">
-            <button
-              onClick={() => setIsWebcamActive(!isWebcamActive)}
-              className={`flex-1 py-2 text-white font-semibold rounded ${
-                isWebcamActive
-                  ? "bg-red-500 hover:bg-red-600"
-                  : "bg-green-500 hover:bg-green-600"
-              }`}
-            >
-              {isWebcamActive ? (
-                <>
-                  <FaStop className="inline-block mr-2" /> Stop Scanner
-                </>
-              ) : (
-                <>
-                  <FaPlay className="inline-block mr-2" /> Start Scanner
-                </>
-              )}
-            </button>
-          </div>
+      {loading ? (
+        <div className="text-center text-white font-semibold text-lg animate-pulse">
+          Loading barcodes...
         </div>
-
-        {/* Scanned Barcodes */}
-        <div className="border rounded-lg p-4 shadow-md bg-white">
-          <h2 className="text-lg font-bold mb-3">Scanned Barcodes</h2>
-          <div className="overflow-auto max-h-64">
-            <table className="w-full border-collapse shadow-lg rounded-lg">
-              <thead className="bg-gray-100">
-                <tr className="text-left">
-                  <th className="px-6 py-3 text-sm font-semibold text-gray-600">#</th>
-                  <th className="px-6 py-3 text-sm font-semibold text-gray-600">Barcode</th>
-                  <th className="px-6 py-3 text-sm font-semibold text-gray-600">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {scannedBarcodes.map((barcode, index) => (
+      ) : error ? (
+        <div className="text-center text-red-500 font-semibold text-lg">
+          {error}
+        </div>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="min-w-full table-auto border-collapse">
+            <thead>
+              <tr className="bg-gray-700 text-white">
+                <th className="p-4 text-left">Barcode</th>
+                <th className="p-4 text-left">Expiry Date</th>
+                <th className="p-4 text-left">Scanned At</th>
+                <th className="p-4 text-left">Action</th>{" "}
+           
+              </tr>
+            </thead>
+            <tbody>
+              {filteredBarcodes.length > 0 ? (
+                filteredBarcodes.map((barcode) => (
                   <tr
                     key={barcode._id}
-                    className="border-t odd:bg-white even:bg-gray-50 hover:bg-gray-100 transition"
+                    className={`hover:bg-gray-100 ${getBarcodeColor(barcode)}`}
                   >
-                    <td className="px-6 py-3 text-sm">{index + 1}</td>
-                    <td className="px-6 py-3 text-sm">{barcode.code}</td>
-                    <td className="px-6 py-3 text-sm">
+                    <td className="p-4">{barcode.code}</td>
+                    <td className="p-4">{formatExpiryDate(barcode.code)}</td>
+                    <td className="p-4">
+                      {barcode.createdAt
+                        ? new Date(barcode.createdAt).toLocaleString()
+                        : "N/A"}
+                    </td>
+                    <td className="p-4">
                       <button
                         onClick={() => deleteBarcode(barcode._id)}
-                        className="text-red-500 hover:text-red-700 transition"
+                        className={`bg-red-500 text-white p-2 rounded hover:bg-red-700 ${
+                          deletingBarcode === barcode._id
+                            ? "opacity-50 cursor-not-allowed"
+                            : ""
+                        }`}
+                        disabled={deletingBarcode === barcode._id} // Disable the button while deleting
                       >
-                        <FaTrash size={18} />
+                        {deletingBarcode === barcode._id
+                          ? "Deleting..."
+                          : "Delete"}
                       </button>
                     </td>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="4" className="text-center text-gray-500 p-4">
+                    No barcodes available
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
-      </div>
+      )}
     </div>
   );
 };
 
-export default ScannerItems;
+export default BarcodeTable;

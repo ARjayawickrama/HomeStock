@@ -1,14 +1,13 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom"; 
-
+import { useNavigate } from "react-router-dom";
+import backgroundImage from "../../../src/assets/map2.png";
 const Allusers = () => {
   const [users, setUsers] = useState([]);
-  const [editingUserId, setEditingUserId] = useState(null); 
-  const [editedUser, setEditedUser] = useState(null); 
-  const [loading, setLoading] = useState(true); 
+  const [editingUserId, setEditingUserId] = useState(null);
+  const [editedUser, setEditedUser] = useState(null);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-
 
   useEffect(() => {
     axios
@@ -30,7 +29,6 @@ const Allusers = () => {
       });
   }, []);
 
-
   const handleDelete = (userId) => {
     axios
       .delete(`http://localhost:5000/api/user/${userId}`)
@@ -43,11 +41,10 @@ const Allusers = () => {
       });
   };
 
-
   const handleEdit = (userId) => {
     setEditingUserId(userId);
     const userToEdit = users.find((user) => user._id === userId);
-    setEditedUser({ ...userToEdit }); 
+    setEditedUser({ ...userToEdit });
   };
 
   const handleEditChange = (e) => {
@@ -57,7 +54,6 @@ const Allusers = () => {
       [name]: value,
     });
   };
-
 
   const handleEditSubmit = (e, userId) => {
     e.preventDefault();
@@ -70,7 +66,7 @@ const Allusers = () => {
             user._id === userId ? { ...user, ...editedUser } : user
           )
         );
-        setEditingUserId(null); 
+        setEditingUserId(null);
       })
       .catch((error) => {
         console.error("Error updating user:", error);
@@ -82,80 +78,30 @@ const Allusers = () => {
   }
 
   return (
-    <main className="bg-white p-4 rounded-lg">
-      <div className="max-w-7xl mx-auto p-6">
-       
+    <main className="bg-white bg-opacity-80 p-4 rounded-lg">
+      <div className="max-w-7xl mx-auto p-6 overflow-x-auto">
         {users.length === 0 ? (
           <p className="text-center text-gray-500">No users found.</p>
         ) : (
-          <table className="min-w-full bg-white border border-gray-200 rounded-lg shadow-lg">
-            <thead>
-              <tr className="bg-blue-600 text-white">
-                <th className="py-3 px-6 text-left">Name</th>
-                <th className="py-3 px-6 text-left">Email</th>
-                <th className="py-3 px-6 text-left">Phone</th>
-                <th className="py-3 px-6 text-center">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {users.map((user) => (
-                <tr key={user._id} className="border-t hover:bg-gray-100">
-                  <td className="py-3 px-6">
-                    {editingUserId === user._id ? (
-                      <input
-                        type="text"
-                        name="name"
-                        value={editedUser.name}
-                        onChange={handleEditChange}
-                        className="w-full p-3 border border-gray-300 rounded-md"
-                      />
-                    ) : (
-                      user.name
-                    )}
-                  </td>
-                  <td className="py-3 px-6">
-                    {editingUserId === user._id ? (
-                      <input
-                        type="email"
-                        name="email"
-                        value={editedUser.email}
-                        onChange={handleEditChange}
-                        className="w-full p-3 border border-gray-300 rounded-md"
-                      />
-                    ) : (
-                      user.email
-                    )}
-                  </td>
-                  <td className="py-3 px-6">
-                    {editingUserId === user._id ? (
-                      <input
-                        type="text"
-                        name="phone"
-                        value={editedUser.phone}
-                        onChange={handleEditChange}
-                        className="w-full p-3 border border-gray-300 rounded-md"
-                      />
-                    ) : (
-                      user.phone
-                    )}
-                  </td>
-                  <td className="py-3 px-6 text-center">
-                    {editingUserId === user._id ? (
-                      <div className="flex gap-2">
-                        <button
-                          className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600"
-                          onClick={(e) => handleEditSubmit(e, user._id)}
-                        >
-                          Update
-                        </button>
-                        <button
-                          className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600"
-                          onClick={() => setEditingUserId(null)} 
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    ) : (
+          <div className="max-h-[500px] overflow-y-auto">
+            {" "}
+            {/* Vertical Scroll */}
+            <table className="min-w-full bg-white border border-gray-200 rounded-lg shadow-lg">
+              <thead>
+                <tr className="bg-blue-600 text-white">
+                  <th className="py-3 px-6 text-left">Name</th>
+                  <th className="py-3 px-6 text-left">Email</th>
+                  <th className="py-3 px-6 text-left">Phone</th>
+                  <th className="py-3 px-6 text-center">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {users.map((user) => (
+                  <tr key={user._id} className="border-t hover:bg-gray-100">
+                    <td className="py-3 px-6">{user.name}</td>
+                    <td className="py-3 px-6">{user.email}</td>
+                    <td className="py-3 px-6">{user.phone}</td>
+                    <td className="border border-gray-300 px-6 py-3">
                       <div className="flex gap-2">
                         <button
                           className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
@@ -170,12 +116,12 @@ const Allusers = () => {
                           Delete
                         </button>
                       </div>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
     </main>

@@ -1,96 +1,199 @@
-import React, { useState } from 'react';
-import { FaFire, FaFan, FaTemperatureHigh } from 'react-icons/fa'; // Import the necessary icons
+import React, { useState, useEffect } from "react";
+import TmpChart from "../Charts/TmpChart";
+import { FaFire, FaFan, FaTemperatureHigh } from "react-icons/fa";
+import axios from "axios";
+import backgroundImage from "../../../../assets/g2.png";
 
-function Temperature({ currentTemperature, maxTemperature, temperaturePercentage }) {
-  // Define the status color based on the temperature percentage
+function Temperature({ temperaturePercentage }) {
   const getStatusColor = (percentage) => {
-    if (percentage > 80) {
-      return 'bg-red-500'; // Red for high temperatures
-    } else if (percentage > 50) {
-      return 'bg-yellow-500'; // Yellow for moderate temperatures
-    }
-    return 'bg-green-500'; // Green for low temperatures
+    if (percentage > 80) return "bg-red-600";
+    if (percentage > 50) return "bg-amber-500";
+    return "bg-emerald-600";
   };
 
-  // State to manage the switches
   const [fireAlarm, setFireAlarm] = useState(false);
   const [temperatureControl, setTemperatureControl] = useState(false);
   const [fan, setFan] = useState(false);
+  const [data, setData] = useState({ temperature: null, humidity: null });
+  const [gasValue, setGasValue] = useState(null);
+  const [error, setError] = useState(null);
 
-  // Toggle switch state function
-  const handleToggle = (setter) => {
-    setter((prevState) => !prevState);
-  };
+  const handleToggle = (setter) => setter((prev) => !prev);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get("http://192.168.181.103/data");
+        setData(response.data);
+        setError(null);
+      } catch (err) {
+        setError("Failed to fetch data from the ESP32 server.");
+      }
+    };
+
+    const fetchGasValue = async () => {
+      try {
+        const response = await axios.get("http://192.168.181.103/gas");
+        setGasValue(response.data.gas_value);
+      } catch (error) {
+        console.error("Error fetching gas value:", error);
+      }
+    };
+
+    fetchData();
+    fetchGasValue();
+    const dataInterval = setInterval(fetchData, 5000);
+    const gasInterval = setInterval(fetchGasValue, 2000);
+
+    return () => {
+      clearInterval(dataInterval);
+      clearInterval(gasInterval);
+    };
+  }, []);
 
   return (
-    <section className="mt-8 px-6 py-8 bg-white rounded-xl shadow-lg space-y-6">
-      {/* Temperature Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {/* Card: Current Temperature */}
-        <div className="bg-blue-50 p-6 rounded-xl shadow-lg flex flex-col items-center">
-          <h3 className="text-xl font-semibold text-blue-600 flex items-center">
-            <FaTemperatureHigh className="mr-2 text-blue-600" /> {/* Temperature icon */}
-            Current Temperature
-          </h3>
-          <div className="flex items-center justify-center w-32 h-32 bg-blue-100 rounded-full shadow-md mt-4">
-            <p className="text-3xl font-bold text-blue-500">{currentTemperature}°C</p>
-          </div>
-          <div className={`mt-6 p-3 rounded-full ${getStatusColor(temperaturePercentage)} text-center w-full`}>
-            <p className="text-sm font-medium text-white">Status: Normal</p>
-          </div>
-        </div>
+    <section className="px-6 py-8 rounded-2xl shadow-sm space-y-6 relative bottom-20">
+      <div className="p-6 rounded-2xl">
+        <div className="flex items-center justify-between">
+          <div className="relative w-36 h-1 bottom-20">
+            <img
+              src={backgroundImage}
+              alt="Background"
+              className=" rounded-lg h-40 mt-16"
+            />
 
-        {/* Card: Max Temperature */}
-        <div className="bg-green-50 p-6 rounded-xl shadow-lg flex flex-col items-center">
-          <h3 className="text-xl font-semibold text-green-600 flex items-center">
-            <FaTemperatureHigh className="mr-2 text-green-600" /> {/* Temperature icon */}
-            Max Temperature
-          </h3>
-          <div className="flex items-center justify-center w-32 h-32 bg-green-100 rounded-full shadow-md mt-4">
-            <p className="text-3xl font-bold text-green-500">{maxTemperature}°C</p>
+            <div className="relative left-32 bottom-32">
+              <p className="text-white font-bold bg-slate-900/60 px-4 rounded-md">
+                {gasValue !== null ? (
+                  <div>
+                    <p className="text-xl">
+                      Gas Value: <span className="font-bold">{gasValue}</span>
+                    </p>
+                    <p className="mt-2">
+                      Status:{" "}
+                      <span
+                        className={`font-semibold ${
+                          gasValue >= 2000 ? "text-red-600" : ""
+                        }`}
+                      >
+                        {gasValue < 300 && "Clean Air"}
+                        {gasValue >= 300 &&
+                          gasValue < 1000 &&
+                          "Low Concentration"}
+                        {gasValue >= 1000 &&
+                          gasValue < 2000 &&
+                          "Moderate Concentration"}
+                        {gasValue >= 2000 &&
+                          "High Concentration - Possible Hazard!"}
+                      </span>
+                    </p>
+                  </div>
+                ) : (
+                  "Loading..."
+                )}
+              </p>
+            </div>
           </div>
-          <div className={`mt-6 p-3 rounded-full ${getStatusColor(temperaturePercentage)} text-center w-full`}>
-            <p className="text-sm font-medium text-white">Status: Normal</p>
-          </div>
+          <div class="h-80 border-l border-black mx-4 absolute left-80"></div>
+
+          <TmpChart />
         </div>
       </div>
+      <hr className="h-px my-8 bg-black border-0 dark:bg-gray-700" />
 
-      {/* Switches Section */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        {/* Fire Alarm */}
-        <div className="flex items-center space-x-4">
-          <FaFire className={`text-2xl ${fireAlarm ? 'text-red-600' : 'text-gray-500'}`} />
-          <button
-            className={`text-sm font-semibold ${fireAlarm ? 'text-red-600' : 'text-gray-500'}`}
-            onClick={() => handleToggle(setFireAlarm)}
-          >
-            Fire Alarm
-          </button>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* Current Temperature */}
+        <div className="bg-gradient-to-br from-white  to  p-6 rounded-xl shadow-lg border">
+          <h3 className="text-lg font-semibold text-slate-700 flex items-center gap-2 mb-4">
+            <FaTemperatureHigh className="text-2xl text-orange-500" /> Current
+            Temp
+          </h3>
+          <div className="text-center py-6">
+            <span className="text-5xl font-bold text-slate-800">
+              {data.temperature}
+            </span>
+            <span className="text-xl text-slate-500">°C</span>
+            <div className="mt-4 w-3/4 mx-auto h-2 bg-slate-200 rounded-full overflow-hidden">
+              <div
+                className={`h-full ${getStatusColor(
+                  temperaturePercentage
+                )} transition-all duration-500`}
+                style={{ width: `${temperaturePercentage}%` }}
+              />
+            </div>
+          </div>
         </div>
 
-        {/* Temperature Control */}
-        <div className="flex items-center space-x-4">
-          <FaTemperatureHigh className={`text-2xl ${temperatureControl ? 'text-yellow-600' : 'text-gray-500'}`} />
-          <button
-            className={`text-sm font-semibold ${temperatureControl ? 'text-yellow-600' : 'text-gray-500'}`}
-            onClick={() => handleToggle(setTemperatureControl)}
-          >
-            Temperature Control
-          </button>
+        {/* Max Temperature */}
+        <div className="bg-gradient-to-br from-white to-blue-200 p-6 rounded-xl shadow-lg border">
+          <h3 className="text-lg font-semibold text-slate-700 flex items-center gap-2 mb-4">
+            <FaTemperatureHigh className="text-2xl text-blue-500" /> Humidity
+          </h3>
+          <div className="text-center py-6">
+            <span className="text-5xl font-bold text-slate-800">
+              {data.humidity}
+            </span>
+            <span className="text-xl text-slate-500">°C</span>
+            <p className="text-sm text-slate-600 mt-4">System Safety Limit</p>
+          </div>
         </div>
 
-        {/* Fan */}
-        <div className="flex items-center space-x-4">
-          <FaFan className={`text-2xl ${fan ? 'text-blue-600' : 'text-gray-500'}`} />
-          <button
-            className={`text-sm font-semibold ${fan ? 'text-blue-600' : 'text-gray-500'}`}
-            onClick={() => handleToggle(setFan)}
-          >
-            Fan
-          </button>
+        {/* Control Switches */}
+        <div className="bg-white p-6 rounded-xl shadow-lg border space-y-6">
+          {/* Fire Alarm */}
+          <SwitchControl
+            icon={<FaFire className="text-xl text-red-600" />}
+            label="power 1"
+            subLabel="Emergency shutdown"
+            isOn={fireAlarm}
+            toggle={() => handleToggle(setFireAlarm)}
+          />
+
+          {/* Temperature Control */}
+          <SwitchControl
+            icon={<FaTemperatureHigh className="text-xl text-blue-600" />}
+            label="Power 2"
+            subLabel="Auto regulation"
+            isOn={temperatureControl}
+            toggle={() => handleToggle(setTemperatureControl)}
+          />
+          <SwitchControl
+            icon={<FaTemperatureHigh className="text-xl text-blue-600" />}
+            label="Power 2"
+            subLabel="Auto regulation"
+            isOn={temperatureControl}
+            toggle={() => handleToggle(setTemperatureControl)}
+          />
         </div>
       </div>
     </section>
+  );
+}
+
+// Switch Control Component
+function SwitchControl({ icon, label, subLabel, isOn, toggle }) {
+  return (
+    <div className="flex items-center justify-between">
+      <div className="flex items-center gap-3">
+        <div className="p-3 rounded-xl bg-slate-100">{icon}</div>
+        <div>
+          <h4 className="font-semibold text-slate-700">{label}</h4>
+          <p className="text-sm text-slate-500">{subLabel}</p>
+        </div>
+      </div>
+      <button
+        onClick={toggle}
+        className={`relative w-12 h-6 rounded-full transition-colors ${
+          isOn ? "bg-blue-500" : "bg-slate-300"
+        }`}
+      >
+        <div
+          className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-transform ${
+            isOn ? "translate-x-6" : "translate-x-1"
+          }`}
+        />
+      </button>
+    </div>
   );
 }
 
