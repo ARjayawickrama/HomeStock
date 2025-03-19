@@ -1,11 +1,21 @@
-import React from 'react'
+import React, { useState } from 'react';
+import BudgetDash from './BadgetDash';
+import BudgetDetails from './BudgetDetails';
+import ExpensesList from './ExpensesList';
 
-function budgeting() {
+const Budgeting = () => {  // Renamed to start with uppercase
+  const [activeTab, setActiveTab] = useState('BudgetDash'); 
   return (
-    <main className="bg-white p-4 rounded-lg ">
-    budgeting Home
-   </main>
-  )
-}
+    <div>
+      {activeTab === 'BudgetDash' ? (
+        <BudgetDash setActiveTab={setActiveTab} />
+      ) : activeTab === 'BudgetDetails' ? (
+        <BudgetDetails setActiveTab={setActiveTab} />
+      ) : (
+        <ExpensesList setActiveTab={setActiveTab} />
+      )}
+    </div>
+  );
+};
 
-export default budgeting
+export default Budgeting;
