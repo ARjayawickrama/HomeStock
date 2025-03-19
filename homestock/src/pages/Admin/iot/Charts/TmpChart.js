@@ -9,6 +9,7 @@ import {
   ResponsiveContainer,
   Legend,
 } from "recharts";
+import { WiThermometer, WiHumidity } from "react-icons/wi"; // Importing icons
 import axios from "axios";
 
 function TmpTracker() {
@@ -43,26 +44,34 @@ function TmpTracker() {
     // Update the chart data with the new values
     setData((prevData) => [
       ...prevData,
-      { name: new Date().toLocaleTimeString(), Temperature: temperature, Humidity: humidity },
+      {
+        name: new Date().toLocaleTimeString(),
+        Temperature: temperature,
+        Humidity: humidity,
+      },
     ]);
   }, [temperature, humidity]);
 
   return (
-    <div className="w-3/4 h-64 p-4 rounded-lg">
-      <h2 className="text-lg  font-semibold mb-4">
-      <p className="text-center text-red-800 text-gray-600">
-          Current: {temperature}°C • {humidity}% Humidity
+    <div className="w-3/4 h-64 p-4 rounded-lg bg-white shadow-md">
+      <h2 className="text-lg font-semibold mb-4 text-center">
+        <p className="text-center text-red-800 flex justify-center items-center gap-2">
+          <WiThermometer className="text-red-500 text-3xl" /> {temperature}°C •
+          <WiHumidity className="text-blue-500 text-3xl" /> {humidity}% Humidity
         </p>
       </h2>
       <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+        <LineChart
+          data={data}
+          margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+        >
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="name" />
-          <YAxis  />
-          <Tooltip  />
+          <YAxis />
+          <Tooltip />
           <Legend />
-          <Line type="monotone" dataKey="Temperature" stroke="#8884d8" />
-          <Line type="monotone" dataKey="Humidity" stroke="#82ca9d" />
+          <Line type="monotone" dataKey="Temperature" stroke="#FF5733" />
+          <Line type="monotone" dataKey="Humidity" stroke="#3498DB" />
         </LineChart>
       </ResponsiveContainer>
     </div>
