@@ -23,7 +23,7 @@ function Temperature({ temperaturePercentage }) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get("http://192.168.181.103/data");
+        const response = await axios.get("http://192.168.181.103/temperature");
         setData(response.data);
         setError(null);
       } catch (err) {
@@ -94,6 +94,7 @@ function Temperature({ temperaturePercentage }) {
               </p>
             </div>
           </div>
+
           <div class="h-80 border-l border-black mx-4 absolute left-80"></div>
 
           <TmpChart />
@@ -103,16 +104,15 @@ function Temperature({ temperaturePercentage }) {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {/* Current Temperature */}
-        <div className="bg-gradient-to-br from-white  to  p-6 rounded-xl shadow-lg border">
-          <h3 className="text-lg font-semibold text-slate-700 flex items-center gap-2 mb-4">
-            <FaTemperatureHigh className="text-2xl text-orange-500" /> Current
-            Temp
+        <div className="bg-gradient-to-br from-red-900 to-black  p-6 rounded-xl shadow-lg border">
+          <h3 className="text-lg font-semibold text-white flex items-center gap-2 mb-4">
+            <FaTemperatureHigh className="text-2xl text-white" /> Current Temp
           </h3>
           <div className="text-center py-6">
-            <span className="text-5xl font-bold text-slate-800">
+            <span className="text-5xl font-bold text-white">
               {data.temperature}
             </span>
-            <span className="text-xl text-slate-500">°C</span>
+            <span className="text-2xl text-white">°C</span>
             <div className="mt-4 w-3/4 mx-auto h-2 bg-slate-200 rounded-full overflow-hidden">
               <div
                 className={`h-full ${getStatusColor(
@@ -125,75 +125,38 @@ function Temperature({ temperaturePercentage }) {
         </div>
 
         {/* Max Temperature */}
-        <div className="bg-gradient-to-br from-white to-blue-200 p-6 rounded-xl shadow-lg border">
-          <h3 className="text-lg font-semibold text-slate-700 flex items-center gap-2 mb-4">
-            <FaTemperatureHigh className="text-2xl text-blue-500" /> Humidity
+        <div className="bg-gradient-to-br from-blue-900 to-black  p-6 rounded-xl shadow-lg border border-blue-400">
+          <h3 className="text-xl font-semibold text-white flex items-center gap-2 mb-4">
+            <FaTemperatureHigh className="text-3xl text-white drop-shadow-md" />{" "}
+            Humidity
           </h3>
           <div className="text-center py-6">
-            <span className="text-5xl font-bold text-slate-800">
+            <span className="text-6xl font-extrabold text-white drop-shadow-lg">
               {data.humidity}
             </span>
-            <span className="text-xl text-slate-500">°C</span>
-            <p className="text-sm text-slate-600 mt-4">System Safety Limit</p>
+            <span className="text-2xl text-white font-medium">%</span>
           </div>
         </div>
 
         {/* Control Switches */}
-        <div className="bg-white p-6 rounded-xl shadow-lg border space-y-6">
-          {/* Fire Alarm */}
-          <SwitchControl
-            icon={<FaFire className="text-xl text-red-600" />}
-            label="power 1"
-            subLabel="Emergency shutdown"
-            isOn={fireAlarm}
-            toggle={() => handleToggle(setFireAlarm)}
-          />
-
-          {/* Temperature Control */}
-          <SwitchControl
-            icon={<FaTemperatureHigh className="text-xl text-blue-600" />}
-            label="Power 2"
-            subLabel="Auto regulation"
-            isOn={temperatureControl}
-            toggle={() => handleToggle(setTemperatureControl)}
-          />
-          <SwitchControl
-            icon={<FaTemperatureHigh className="text-xl text-blue-600" />}
-            label="Power 2"
-            subLabel="Auto regulation"
-            isOn={temperatureControl}
-            toggle={() => handleToggle(setTemperatureControl)}
-          />
+        <div className="bg-gradient-to-br from-slate-800 to-black p-6 rounded-xl shadow-lg border border-blue-300 space-y-6">
+          <label className="inline-flex items-center cursor-pointer">
+            <input
+              type="checkbox"
+              className="sr-only peer"
+              checked={temperatureControl}
+              onChange={() => handleToggle(setTemperatureControl)}
+            />
+            <div className="relative w-12 h-7 bg-gray-300 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-400 dark:peer-focus:ring-blue-700 dark:bg-gray-700 peer-checked:bg-blue-500 transition-all duration-300">
+              <div className="absolute top-0.5 start-[3px] w-6 h-6 bg-white border border-gray-300 rounded-full transition-all duration-300 peer-checked:translate-x-5 peer-checked:border-blue-500 shadow-md"></div>
+            </div>
+            <span className="ms-3 text-base font-semibold text-gray-800 dark:text-gray-300">
+              Power ON & OFF
+            </span>
+          </label>
         </div>
       </div>
     </section>
-  );
-}
-
-// Switch Control Component
-function SwitchControl({ icon, label, subLabel, isOn, toggle }) {
-  return (
-    <div className="flex items-center justify-between">
-      <div className="flex items-center gap-3">
-        <div className="p-3 rounded-xl bg-slate-100">{icon}</div>
-        <div>
-          <h4 className="font-semibold text-slate-700">{label}</h4>
-          <p className="text-sm text-slate-500">{subLabel}</p>
-        </div>
-      </div>
-      <button
-        onClick={toggle}
-        className={`relative w-12 h-6 rounded-full transition-colors ${
-          isOn ? "bg-blue-500" : "bg-slate-300"
-        }`}
-      >
-        <div
-          className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-transform ${
-            isOn ? "translate-x-6" : "translate-x-1"
-          }`}
-        />
-      </button>
-    </div>
   );
 }
 

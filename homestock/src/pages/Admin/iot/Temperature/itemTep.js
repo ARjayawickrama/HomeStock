@@ -14,7 +14,7 @@ const ProductDashboard = () => {
       setData(response.data);
       setError(null);
     } catch (err) {
-      setError("Connection error - unable to retrieve sensor data");
+     
     } finally {
       setIsLoading(false);
     }
@@ -42,7 +42,7 @@ const ProductDashboard = () => {
   };
 
   return (
-    <div className="p-6 bg-gradient-to-br from-gray-50 to-blue-50 rounded-2xl shadow-2xl shadow-blue-100/50">
+    <div className="p-6 bg-gradient-to-br from-gray-50  relative  top-11 to-blue-50 rounded-2xl shadow-2xl shadow-blue-100/50">
       {error && (
         <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-xl flex items-center">
           <span className="animate-pulse">⚠️</span>

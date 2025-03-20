@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import Temperature from "./Temperature/Temperature";
 import ScannerItem from "./ScannerItems/ScannerItems";
 import ItemTep from "./Temperature/itemTep";
-
+import War from "../iot/Messages/WarningMessage";
 import {
   FaThermometerHalf,
   FaBox,
@@ -35,11 +35,10 @@ function Iot() {
       icon: <FaBarcode className="text-2xl" />,
       component: <ScannerItem />,
     },
-  
   ];
 
   return (
-    <main className="bg-white bg-opacity-80 p-6 rounded-lg">
+    <main className="bg-white bg-opacity-80 p-6 rounded-lg ">
       <div className="flex justify-center sm:justify-start space-x-6  relative bottom-6 ">
         {tabs.map((tab) => (
           <button
@@ -54,6 +53,11 @@ function Iot() {
             {tab.icon}
           </button>
         ))}
+
+        <div className=" absolute top-16 ">
+          <War />
+          <hr className=" h-px w-72 my-8 bg-black border-0 dark:bg-gray-700"></hr>
+        </div>
       </div>
 
       {/* Dynamic Content Rendering */}

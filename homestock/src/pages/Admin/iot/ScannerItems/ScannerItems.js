@@ -102,7 +102,7 @@ const BarcodeTable = () => {
   };
 
   return (
-    <div className="relative bottom-14">
+    <div className="relative ">
       <div className="relative left-3/4 ml-20">
         <input
           type="text"

@@ -20,7 +20,7 @@ function TmpTracker() {
   // Function to fetch new data at regular intervals
   const fetchData = async () => {
     try {
-      const response = await axios.get("http://192.168.181.103/data");
+      const response = await axios.get("http://192.168.181.103/temperature");
       setTemperature(response.data.temperature);
       setHumidity(response.data.humidity);
     } catch (error) {
