@@ -1,8 +1,8 @@
-import React ,{ useState } from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 import { Wallet, TrendingUp,ArrowUpRight,ArrowDownRight, Receipt, PieChart,Calendar, Filter } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import BudgetDetails from './BudgetDetails'
-import ExpensesList from './ExpensesList'
+
 
 function BudgetDash({ setActiveTab }) {
   
@@ -16,6 +16,10 @@ function BudgetDash({ setActiveTab }) {
   const totalBudget = 1000;
   const totalSpent = expenses.reduce((sum, expense) => sum + expense.amount, 0);
   const remaining = totalBudget - totalSpent;
+
+  BudgetDash.propTypes = {
+    setActiveTab: PropTypes.func.isRequired,
+  };
 
   const monthlyData = [
     { name: 'Jan', budget: 1000, expenses: 850 },
@@ -53,7 +57,7 @@ function BudgetDash({ setActiveTab }) {
             <ArrowUpRight className="w-6 h-6" />
           </div>
           <p className="text-lg font-medium opacity-90">Total Budget</p>
-          <p className="mt-2 text-3xl font-bold">${totalBudget.toLocaleString()}</p>
+          <p className="mt-2 text-3xl font-bold">Rs.{totalBudget.toLocaleString()}</p>
           <p className="mt-2 text-sm opacity-75">Monthly allocation</p>
         </div>
 
@@ -64,7 +68,7 @@ function BudgetDash({ setActiveTab }) {
             <ArrowDownRight className="w-6 h-6" />
           </div>
           <p className="text-lg font-medium opacity-90">Total Spent</p>
-          <p className="mt-2 text-3xl font-bold">${totalSpent.toLocaleString()}</p>
+          <p className="mt-2 text-3xl font-bold">Rs.{totalSpent.toLocaleString()}</p>
           <p className="mt-2 text-sm opacity-75">This month</p>
         </div>
         {/* remain card */}
@@ -74,7 +78,7 @@ function BudgetDash({ setActiveTab }) {
             <TrendingUp className="w-6 h-6" />
           </div>
           <p className="text-lg font-medium opacity-90">Remaining</p>
-          <p className="mt-2 text-3xl font-bold">${remaining.toLocaleString()}</p>
+          <p className="mt-2 text-3xl font-bold">Rs.{remaining.toLocaleString()}</p>
           <p className="mt-2 text-sm opacity-75">Available balance</p>
         </div>
       </div>
@@ -111,7 +115,7 @@ function BudgetDash({ setActiveTab }) {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="font-medium text-gray-900">{category}</p>
-                      <p className="text-sm text-gray-500">${categoryTotal.toLocaleString()}</p>
+                      <p className="text-sm text-gray-500">Rs.{categoryTotal.toLocaleString()}</p>
                     </div>
                     <span className="text-sm font-medium text-gray-900">
                       {percentage.toFixed(1)}%

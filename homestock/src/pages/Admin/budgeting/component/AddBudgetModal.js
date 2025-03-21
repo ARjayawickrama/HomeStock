@@ -4,7 +4,7 @@ const AddBudgetModal =  ({ onSubmit, onClose, initialData }) =>  {
     const [formData, setFormData] = useState({
       category: '',
       amount: '',
-      period: 'Monthly',
+      period: 'Select',
     });
   
     useEffect(() => {
