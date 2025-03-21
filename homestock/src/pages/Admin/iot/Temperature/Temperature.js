@@ -105,8 +105,9 @@ function Temperature({ temperaturePercentage }) {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {/* Current Temperature */}
         <div className="bg-gradient-to-br from-red-900 to-black  p-6 rounded-xl shadow-lg border">
-          <h3 className="text-lg font-semibold text-white flex items-center gap-2 mb-4">
-            <FaTemperatureHigh className="text-2xl text-white" /> Current Temp
+          <h3 className="ext-xl font-semibold text-white flex items-center gap-2 mb-4">
+            <FaTemperatureHigh className="text-3xl text-white drop-shadow-md" />{" "}
+            Current Temp
           </h3>
           <div className="text-center py-6">
             <span className="text-5xl font-bold text-white">

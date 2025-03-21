@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
-
 const ProductDashboard = () => {
   const [data, setData] = useState({});
   const [error, setError] = useState(null);
@@ -10,11 +9,10 @@ const ProductDashboard = () => {
   const fetchData = async () => {
     try {
       setIsLoading(true);
-      const response = await axios.get("http://192.168.181.103/data");
+      const response = await axios.get("http://192.168.181.103/temperature");
       setData(response.data);
       setError(null);
     } catch (err) {
-     
     } finally {
       setIsLoading(false);
     }
@@ -81,24 +79,17 @@ const ProductDashboard = () => {
                   {renderGauge(data.temperature || 0, 100, [
                     "#3b82f6",
                     "#10b981",
-              
                   ])}
                 </td>
                 <td className="py-3 px-4">
                   {data.humidity || 0}%
-                  {renderGauge(data.humidity || 0, 100, [
-                    
-                    "#fbbf24",
-                    "#f97316",
-                  ])}
+                  {renderGauge(data.humidity || 0, 100, ["#fbbf24", "#f97316"])}
                 </td>
               </tr>
             )}
           </tbody>
         </table>
       </div>
-
-
     </div>
   );
 };
