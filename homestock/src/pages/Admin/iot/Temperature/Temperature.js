@@ -148,7 +148,11 @@ function Temperature({ temperaturePercentage }) {
               onChange={() => handleToggle(setTemperatureControl)}
             />
             <div className="relative w-12 h-7 bg-gray-300 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-400 dark:peer-focus:ring-blue-700 dark:bg-gray-700 peer-checked:bg-blue-500 transition-all duration-300">
-              <div className="absolute top-0.5 start-[3px] w-6 h-6 bg-white border border-gray-300 rounded-full transition-all duration-300 peer-checked:translate-x-5 peer-checked:border-blue-500 shadow-md"></div>
+              <div
+                className={`absolute top-0.5 ${
+                  temperatureControl && "left-[21px]"
+                } start-[3px] w-6 h-6 bg-white border border-gray-300 rounded-full transition-all duration-300 peer-checked:translate-x-5 peer-checked:border-blue-500 shadow-md`}
+              ></div>
             </div>
             <span className="ms-3 text-base font-semibold text-gray-800 dark:text-gray-300">
               Power ON & OFF
