@@ -1,6 +1,6 @@
 // models/inventoryModel.js
 
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
 const inventorySchema = new mongoose.Schema({
   itemNumber: { type: String, required: true },
@@ -13,6 +13,6 @@ const inventorySchema = new mongoose.Schema({
   status: { type: String, default: "Available" },
 });
 
-const Inventory = mongoose.model("Inventory", inventorySchema);
+const Inventory = mongoose.model('Inventory', inventorySchema);
 
 module.exports = Inventory;

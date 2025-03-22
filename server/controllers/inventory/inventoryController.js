@@ -1,6 +1,6 @@
 // controllers/inventoryController.js
 
-const Inventory = require('../../models/inventory/inventoryModel');
+const Inventory = require("../../models/inventory/inventoryModel");
 
 // Fetch all inventory items
 exports.getInventory = async (req, res) => {
@@ -26,7 +26,11 @@ exports.addItem = async (req, res) => {
 // Update existing inventory item
 exports.updateItem = async (req, res) => {
   try {
-    const updatedItem = await Inventory.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const updatedItem = await Inventory.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true }
+    );
     if (!updatedItem) {
       return res.status(404).json({ message: "Item not found" });
     }

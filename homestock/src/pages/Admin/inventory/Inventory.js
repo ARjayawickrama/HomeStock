@@ -287,7 +287,9 @@ const Inventory = () => {
             ))
           ) : (
             <tr>
-              <td colSpan="8" className="text-center p-4">No items found</td>
+              <td colSpan="8" className="text-center p-4">
+                No items found
+              </td>
             </tr>
           )}
         </tbody>
