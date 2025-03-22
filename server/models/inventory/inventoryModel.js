@@ -1,19 +1,18 @@
-const mongoose = require('mongoose');
+// models/inventoryModel.js
 
-// Define the schema for Inventory
-const InventorySchema = new mongoose.Schema({
-    productId: { type: String, required: true },
-    itemName: { type: String, required: true },
-    category: {type: String, required: true},
-    quantity: { type: Number, required: true },
-    manufactureDate: { type: String, required: true },
-    expireDate: { type: String, required: true },
-    temperature: { type: String, required: true },
+const mongoose = require("mongoose");
 
-    
+const inventorySchema = new mongoose.Schema({
+  itemNumber: { type: String, required: true },
+  name: { type: String, required: true },
+  category: { type: String, required: true },
+  quantity: { type: Number, required: true },
+  manufactureDate: { type: Date, required: true },
+  expiryDate: { type: Date, required: true },
+  temperature: { type: String, required: true },
+  status: { type: String, default: "Available" },
 });
 
-// Create the model using the schema
-const Inventory = mongoose.model('Inventory', InventorySchema);
+const Inventory = mongoose.model("Inventory", inventorySchema);
 
 module.exports = Inventory;
