@@ -149,26 +149,34 @@ const Inventory = () => {
     setShowLowStockModal(!showLowStockModal);
   };
 
+  const getCurrentDate = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = (today.getMonth() + 1).toString().padStart(2, '0');
+    const day = today.getDate().toString().padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
   return (
-    <main className="bg-white p-6 rounded-lg shadow-lg w-full max-w-5xl mx-auto">
-      <h1 className="text-2xl font-bold mb-4">Inventory</h1>
+    <main className="bg-white p-6 rounded-lg shadow-lg w-full max-w-7xl mx-auto">
+      <h1 className="text-2xl font-bold mb-4">Inventory Management</h1>
 
       <div className="flex justify-between mb-4">
-        <div className="relative w-2/3">
+        <div className="relative ">
           <input
             type="text"
             placeholder="Search items..."
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="w-[260px] px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-        <div className="flex gap-4">
+        <div className="flex gap-4 text-sm font-semibold">
           <button
             className="flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
             onClick={toggleForm}
           >
-            {showForm ? <FaTimes /> : <FaPlus />}{" "}
+            {showForm ? <FaTimes /> : <FaPlus />}
             {showForm ? "Close Form" : "Add Item"}
           </button>
           <button
@@ -182,6 +190,12 @@ const Inventory = () => {
             onClick={toggleLowStockModal}
           >
             Low Stock Items
+          </button>
+          <button
+            className="bg-gray-300 px-4 py-2 rounded-lg hover:bg-gray-400"
+            onClick={toggleSortOrder}
+          >
+            Export PDF
           </button>
         </div>
       </div>
@@ -248,6 +262,7 @@ const Inventory = () => {
               className="p-2 border rounded"
               value={newItem.manufactureDate}
               onChange={handleInputChange}
+              max={getCurrentDate()}
             />
             <input
               type="date"
@@ -255,6 +270,7 @@ const Inventory = () => {
               className="p-2 border rounded"
               value={newItem.expiryDate}
               onChange={handleInputChange}
+              min={getCurrentDate()}
             />
             <select
               name="temperature"
@@ -312,6 +328,7 @@ const Inventory = () => {
             <th className="px-4 py-2 text-left">Name</th>
             <th className="px-4 py-2 text-left">Category</th>
             <th className="px-4 py-2 text-left">Quantity</th>
+            <th className="px-4 py-2 text-left">Manufacture Date</th>
             <th className="px-4 py-2 text-left">Expiry Date</th>
             <th className="px-4 py-2 text-left">Temperature</th>
             <th className="px-4 py-2 text-left">Status</th>
@@ -326,7 +343,8 @@ const Inventory = () => {
                 <td className="px-4 py-2">{item.name}</td>
                 <td className="px-4 py-2">{item.category}</td>
                 <td className="px-4 py-2">{item.quantity}</td>
-                <td className="px-4 py-2">{item.expiryDate}</td>
+                <td className="px-4 py-2">{item.manufactureDate.split("T")[0]}</td>
+                <td className="px-4 py-2">{item.expiryDate.split("T")[0]}</td>
                 <td className="px-4 py-2">{item.temperature}</td>
                 <td className="px-4 py-2">{item.status}</td>
                 <td className="px-4 py-2 flex gap-2">
