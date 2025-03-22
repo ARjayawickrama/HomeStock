@@ -112,56 +112,64 @@ function GroceryList() {
       </div>
 
       {/* Add New Item Form */}
-      <div className="mb-4">
+      <div className="mb-6 flex items-center space-x-4 bg-white p-4 rounded-lg shadow-md">
         <input
           type="text"
           placeholder="Item Name"
           value={newItem.name}
           onChange={(e) => setNewItem({ ...newItem, name: e.target.value })}
-          className="border p-2 mr-2"
+          className="border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-300 rounded-lg p-3 w-1/3 outline-none transition duration-200"
         />
         <input
           type="number"
           placeholder="Quantity"
           value={newItem.quantity}
           onChange={(e) => setNewItem({ ...newItem, quantity: e.target.value })}
-          className="border p-2 mr-2"
+          className="border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-300 rounded-lg p-3 w-1/4 outline-none transition duration-200"
         />
-        <button onClick={addItem} className="bg-green-500 text-white p-2">
-          Add
+        <button
+          onClick={addItem}
+          className="bg-green-600 hover:bg-green-500 text-white font-bold px-5 py-3 rounded-lg shadow-md transition duration-300 transform hover:scale-105"
+        >
+          Add Item
         </button>
       </div>
 
-      <table className="min-w-full table-auto border-collapse">
-        <thead>
+      <table className="min-w-full border border-gray-300 shadow-lg rounded-xl overflow-hidden">
+        <thead className="bg-gradient-to-r from-blue-900 to-blue-950 text-white">
           <tr>
-            <th className="px-4 py-2 text-left border-b font-semibold">Item</th>
-            <th className="px-4 py-2 text-left border-b font-semibold">
+            <th className="px-6 py-4 text-left font-extrabold uppercase tracking-wider">
+              Item
+            </th>
+            <th className="px-6 py-4 text-left font-extrabold uppercase tracking-wider">
               Quantity
             </th>
-            <th className="px-4 py-2 text-left border-b font-semibold">
+            <th className="px-6 py-4 text-left font-extrabold uppercase tracking-wider">
               Actions
             </th>
           </tr>
         </thead>
-        <tbody>
+        <tbody className="bg-white divide-y divide-gray-200">
           {groceryList.map((item) => (
-            <tr key={item.id} className="hover:bg-gray-100">
-              <td className="px-4 py-2 border-b">{item.name}</td>
-              <td className="px-4 py-2 border-b text-green-600 font-semibold">
+            <tr
+              key={item.id}
+              className="hover:bg-gray-50 transition duration-300 ease-in-out"
+            >
+              <td className="px-6 py-4 text-gray-800 text-lg">{item.name}</td>
+              <td className="px-6 py-4 text-green-700 font-bold text-lg">
                 {item.quantity}
               </td>
-              <td className="px-4 py-2 border-b">
-                <div className="flex space-x-2">
+              <td className="px-6 py-4">
+                <div className="flex space-x-4">
                   <button
                     onClick={() => openEditModal(item.id)}
-                    className="bg-yellow-500 text-white p-2 rounded-md hover:bg-yellow-400 transition duration-200"
+                    className="bg-yellow-500 text-white px-3 py-2 rounded-full shadow-md hover:bg-yellow-400 transition transform hover:scale-105 duration-300"
                   >
                     <FaEdit />
                   </button>
                   <button
                     onClick={() => deleteItem(item.id)}
-                    className="bg-red-500 text-white p-2 rounded-md hover:bg-red-400 transition duration-200"
+                    className="bg-red-600 text-white px-3 py-2 rounded-full shadow-md hover:bg-red-500 transition transform hover:scale-105 duration-300"
                   >
                     <FaTrash />
                   </button>
