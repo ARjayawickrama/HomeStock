@@ -18,6 +18,9 @@ const Inventory = () => {
   });
   const [editItem, setEditItem] = useState(null);
   const [warning, setWarning] = useState("");
+  const [sortOrder, setSortOrder] = useState("asc"); // For sorting
+  const [showLowStockModal, setShowLowStockModal] = useState(false); // For low stock modal
+  const [lowStockItems, setLowStockItems] = useState([]); // For low stock items
 
   // Fetch inventory data on mount
   useEffect(() => {
@@ -25,6 +28,7 @@ const Inventory = () => {
       try {
         const response = await axios.get("http://localhost:5000/api/inventory");
         setItems(response.data);
+        setLowStockItems(response.data.filter(item => item.quantity < 5)); // Filter low stock items
       } catch (error) {
         console.error("Error fetching items:", error);
       }
@@ -47,6 +51,11 @@ const Inventory = () => {
         status: "Available",
       });
     }
+  };
+
+  // Toggle the sort order between ascending and descending
+  const toggleSortOrder = () => {
+    setSortOrder(sortOrder === "asc" ? "desc" : "asc");
   };
 
   // Handle form input changes
@@ -113,6 +122,13 @@ const Inventory = () => {
     item.name.toLowerCase().includes(search.toLowerCase())
   );
 
+  // Sort items by expiry date
+  const sortedItems = [...filteredItems].sort((a, b) => {
+    const dateA = new Date(a.expiryDate);
+    const dateB = new Date(b.expiryDate);
+    return sortOrder === "asc" ? dateA - dateB : dateB - dateA;
+  });
+
   // Reset the form to its initial state
   const resetForm = () => {
     setNewItem({
@@ -126,6 +142,11 @@ const Inventory = () => {
       status: "Available",
     });
     setEditItem(null);
+  };
+
+  // Toggle low stock modal visibility
+  const toggleLowStockModal = () => {
+    setShowLowStockModal(!showLowStockModal);
   };
 
   return (
@@ -149,6 +170,18 @@ const Inventory = () => {
           >
             {showForm ? <FaTimes /> : <FaPlus />}{" "}
             {showForm ? "Close Form" : "Add Item"}
+          </button>
+          <button
+            className="bg-gray-300 px-4 py-2 rounded-lg hover:bg-gray-400"
+            onClick={toggleSortOrder}
+          >
+            Sort by Expiry Date ({sortOrder === "asc" ? "Ascending" : "Descending"})
+          </button>
+          <button
+            className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600"
+            onClick={toggleLowStockModal}
+          >
+            Low Stock Items
           </button>
         </div>
       </div>
@@ -245,6 +278,33 @@ const Inventory = () => {
         </div>
       )}
 
+      {/* Low Stock Modal */}
+      {showLowStockModal && (
+        <div className="fixed inset-0 bg-gray-700 bg-opacity-50 flex justify-center items-center">
+          <div className="bg-white p-6 rounded-lg shadow-lg">
+            <h3 className="text-xl font-bold mb-4">Low Stock Items</h3>
+            <ul>
+              {lowStockItems.length > 0 ? (
+                lowStockItems.map((item) => (
+                  <li key={item._id}>
+                    <p>{item.name} - {item.quantity} left</p>
+                  </li>
+                ))
+              ) : (
+                <li>No low stock items</li>
+              )}
+            </ul>
+            <button
+              className="mt-4 bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600"
+              onClick={toggleLowStockModal}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Display sorted items in table */}
       <table className="w-full table-auto mt-6">
         <thead>
           <tr className="bg-gray-200">
@@ -259,8 +319,8 @@ const Inventory = () => {
           </tr>
         </thead>
         <tbody>
-          {filteredItems.length > 0 ? (
-            filteredItems.map((item) => (
+          {sortedItems.length > 0 ? (
+            sortedItems.map((item) => (
               <tr key={item._id}>
                 <td className="px-4 py-2">{item.itemNumber}</td>
                 <td className="px-4 py-2">{item.name}</td>
