@@ -102,7 +102,7 @@ const BarcodeTable = () => {
   };
 
   return (
-    <div className="relative bottom-14">
+    <div className="relative ">
       <div className="relative left-3/4 ml-20">
         <input
           type="text"
@@ -122,10 +122,11 @@ const BarcodeTable = () => {
           {error}
         </div>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="min-w-full table-auto border-collapse">
-            <thead>
-              <tr className="bg-gray-700 text-white">
+        <div className="overflow-x-auto bg-white rounded-xl shadow-lg">
+        <table className="min-w-full table-auto border-collapse">
+          <thead className="bg-gray-800 text-white">
+            
+              <tr>
                 <th className="p-4 text-left">Barcode</th>
                 <th className="p-4 text-left">Expiry Date</th>
                 <th className="p-4 text-left">Scanned At</th>
