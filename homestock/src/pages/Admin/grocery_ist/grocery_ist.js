@@ -1,55 +1,60 @@
 import React, { useState, useEffect } from "react";
-import { FaEdit, FaTrash, FaFilePdf } from "react-icons/fa"; // Import icons
+import { FaEdit, FaTrash, FaFilePdf } from "react-icons/fa";
 import jsPDF from "jspdf";
 
 function GroceryList() {
   const [inventory, setInventory] = useState([]);
   const [groceryList, setGroceryList] = useState([]);
   const [newItem, setNewItem] = useState({ name: "", quantity: "" });
-  const [isModalOpen, setIsModalOpen] = useState(false); // Modal visibility state
-  const [itemToEdit, setItemToEdit] = useState(null); // Item to be edited
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [itemToEdit, setItemToEdit] = useState(null);
+  const [items, setItems] = useState(["Tea", "Coffee", "Sugar", "Milk"]);
 
-  // Simulate fetching low-stock inventory items
   useEffect(() => {
     const fetchedInventory = [
       { id: 1, name: "Milk", stock: 1 },
       { id: 2, name: "Eggs", stock: 0 },
       { id: 3, name: "Bread", stock: 5 },
     ];
-    setInventory(fetchedInventory.filter((item) => item.stock <= 1)); // Filter low-stock items
+    setInventory(fetchedInventory.filter((item) => item.stock <= 1));
   }, []);
 
-  // Add an item to the grocery list
   const addItem = () => {
     if (!newItem.name || !newItem.quantity) return;
-    setGroceryList([...groceryList, { ...newItem, id: Date.now() }]);
+    setGroceryList([
+      ...groceryList,
+      { ...newItem, quantity: Number(newItem.quantity), id: Date.now() },
+    ]);
     setNewItem({ name: "", quantity: "" });
   };
 
-  // Open the modal for editing
   const openEditModal = (id) => {
     const item = groceryList.find((item) => item.id === id);
     setItemToEdit(item);
     setIsModalOpen(true);
   };
 
-  // Save the edited item
   const saveEditedItem = () => {
     setGroceryList(
       groceryList.map((item) =>
-        item.id === itemToEdit.id ? { ...itemToEdit } : item
+        item.id === itemToEdit.id
+          ? { ...itemToEdit, quantity: Number(itemToEdit.quantity) }
+          : item
       )
     );
-    setIsModalOpen(false); // Close modal after saving
-    setItemToEdit(null); // Reset item to edit
+    setIsModalOpen(false);
+    setItemToEdit(null);
   };
 
-  // Delete an item from the grocery list
   const deleteItem = (id) => {
-    setGroceryList(groceryList.filter((item) => item.id !== id));
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this item?"
+    );
+    if (confirmDelete) {
+      setGroceryList(groceryList.filter((item) => item.id !== id));
+    }
   };
 
-  // Purchase items for two weeks (Simulation)
   const buyItems = () => {
     if (groceryList.length === 0) {
       alert("No items to purchase.");
@@ -57,8 +62,8 @@ function GroceryList() {
     }
 
     alert("Purchased items for two weeks! ✅");
-    sendToBudgeting(groceryList); // Send purchased list to budgeting
-    setGroceryList([]); // Clear list after purchase
+    sendToBudgeting(groceryList);
+    setGroceryList([]);
   };
 
   const sendToBudgeting = async (list) => {
@@ -70,17 +75,13 @@ function GroceryList() {
 
     try {
       console.log("Sending to Budgeting System:", budgetingData);
-
-      // Simulate API request
       await new Promise((resolve) => setTimeout(resolve, 1000));
-
       alert("Grocery list sent to budgeting system! 📊");
     } catch (error) {
       console.error("Error sending to budgeting:", error);
     }
   };
 
-  // Generate PDF Function
   const generatePDF = () => {
     const doc = new jsPDF();
     doc.text("Grocery List", 20, 10);
@@ -100,26 +101,58 @@ function GroceryList() {
     <main className="bg-white p-4 rounded-lg">
       <h2 className="text-xl font-bold mb-4">Grocery List Management</h2>
 
-      <div className="bg-red-100 text-red-700 p-2 rounded-lg mb-4">
-        <strong>Low Stock Alert:</strong> The following items are running low:
-        <ul className="list-disc pl-5">
-          {inventory.map((item) => (
-            <li key={item.id}>
-              {item.name} (Stock: {item.stock})
-            </li>
-          ))}
-        </ul>
+      <div className="bg-red-50 border-l-4 border-red-600 text-red-800 p-4 rounded-lg shadow-md mb-6 transition-all duration-300">
+        <div className="flex items-start">
+          <svg
+            className="w-6 h-6 text-red-600 mr-2"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 8v4m0 4h.01M4.93 19.07a10 10 0 1114.14 0M12 2a10 10 0 00-10 10h0a10 10 0 0020 0h0A10 10 0 0012 2z"
+            />
+          </svg>
+
+          <div>
+            <strong className="text-lg font-semibold">Low Stock Alert:</strong>
+            <p className="text-sm text-red-700 mt-1">
+              The following items are running low:
+            </p>
+            <ul className="list-disc pl-5 mt-2 space-y-1 text-sm">
+              {inventory.map((item) => (
+                <li key={item.id} className="font-medium text-red-800">
+                  {item.name}
+                  <span className="text-xs text-red-600 font-semibold ml-2">
+                    (Stock: {item.stock})
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
       </div>
 
-      {/* Add New Item Form */}
       <div className="mb-6 flex items-center space-x-4 bg-white p-4 rounded-lg shadow-md">
-        <input
-          type="text"
-          placeholder="Item Name"
-          value={newItem.name}
+        <select
           onChange={(e) => setNewItem({ ...newItem, name: e.target.value })}
+          value={newItem.name}
           className="border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-300 rounded-lg p-3 w-1/3 outline-none transition duration-200"
-        />
+        >
+          <option value="" disabled>
+            Select an Item
+          </option>
+          {items.map((item, index) => (
+            <option key={index} value={item}>
+              {item}
+            </option>
+          ))}
+        </select>
+
         <input
           type="number"
           placeholder="Quantity"
@@ -127,6 +160,7 @@ function GroceryList() {
           onChange={(e) => setNewItem({ ...newItem, quantity: e.target.value })}
           className="border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-300 rounded-lg p-3 w-1/4 outline-none transition duration-200"
         />
+
         <button
           onClick={addItem}
           className="bg-green-600 hover:bg-green-500 text-white font-bold px-5 py-3 rounded-lg shadow-md transition duration-300 transform hover:scale-105"
@@ -135,6 +169,7 @@ function GroceryList() {
         </button>
       </div>
 
+      {/* Grocery List Table */}
       <table className="min-w-full border border-gray-300 shadow-lg rounded-xl overflow-hidden">
         <thead className="bg-gradient-to-r from-blue-900 to-blue-950 text-white">
           <tr>
@@ -180,56 +215,71 @@ function GroceryList() {
         </tbody>
       </table>
 
-      {isModalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-gray-500 bg-opacity-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg">
-            <h3 className="text-lg font-bold mb-4">Edit Item</h3>
-            <input
-              type="text"
-              placeholder="Item Name"
-              value={itemToEdit.name}
-              onChange={(e) =>
-                setItemToEdit({ ...itemToEdit, name: e.target.value })
-              }
-              className="border p-2 mb-4 w-full"
-            />
-            <input
-              type="number"
-              placeholder="Quantity"
-              value={itemToEdit.quantity}
-              onChange={(e) =>
-                setItemToEdit({ ...itemToEdit, quantity: e.target.value })
-              }
-              className="border p-2 mb-4 w-full"
-            />
-            <div className="flex space-x-2">
-              <button
-                onClick={saveEditedItem}
-                className="bg-green-500 text-white p-2 rounded-md"
-              >
-                Save
-              </button>
+      {/* Edit Modal */}
+      {isModalOpen && itemToEdit && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
+          <div className="bg-white p-6 rounded-xl shadow-xl w-96">
+            <h3 className="text-xl font-semibold mb-4">Edit Item</h3>
+
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Item Name
+              </label>
+              <input
+                type="text"
+                value={itemToEdit.name}
+                onChange={(e) =>
+                  setItemToEdit({ ...itemToEdit, name: e.target.value })
+                }
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-100"
+              />
+            </div>
+
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Quantity
+              </label>
+              <input
+                type="number"
+                value={itemToEdit.quantity}
+                onChange={(e) =>
+                  setItemToEdit({ ...itemToEdit, quantity: e.target.value })
+                }
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              />
+            </div>
+
+            <div className="flex justify-end space-x-3">
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="bg-gray-500 text-white p-2 rounded-md"
+                className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold px-4 py-2 rounded-lg transition"
               >
                 Cancel
+              </button>
+              <button
+                onClick={saveEditedItem}
+                className="bg-blue-600 hover:bg-blue-500 text-white font-semibold px-4 py-2 rounded-lg transition"
+              >
+                Save
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Actions */}
-      <div className="mt-4 flex space-x-2">
-        <button onClick={buyItems} className="bg-blue-500 text-white p-2">
-          Buy for Two Weeks
-        </button>
+      <div className="mt-6 flex space-x-4">
         <button
           onClick={generatePDF}
-          className="bg-gray-500 text-white p-2 flex items-center"
+          className="bg-pink-600 hover:bg-pink-500 text-white font-bold px-5 py-3 rounded-lg shadow-md transition duration-300 transform hover:scale-105 flex items-center space-x-2"
         >
-          <FaFilePdf className="mr-2" /> Generate PDF
+          <FaFilePdf />
+          <span>Export PDF</span>
+        </button>
+        <button
+          onClick={buyItems}
+          className="bg-blue-600 hover:bg-blue-500 text-white font-bold px-6 py-3 rounded-lg shadow-md transition duration-300 transform hover:scale-105"
+        >
+          Buy for Two Weeks
         </button>
       </div>
     </main>
