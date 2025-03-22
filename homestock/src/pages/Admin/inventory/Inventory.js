@@ -28,7 +28,8 @@ const Inventory = () => {
       try {
         const response = await axios.get("http://localhost:5000/api/inventory");
         setItems(response.data);
-        setLowStockItems(response.data.filter(item => item.quantity < 5)); // Filter low stock items
+        setLowStockItems(response.data.filter(item => Number(item.quantity) < 5));
+ // Filter low stock items
       } catch (error) {
         console.error("Error fetching items:", error);
       }
@@ -81,6 +82,9 @@ const Inventory = () => {
         // Add new item
         await axios.post("http://localhost:5000/api/inventory", newItem);
         setWarning("Item added successfully!");
+        setTimeout(() => {
+          setWarning(null);
+        },3000)
       }
 
       setShowForm(false);
@@ -91,6 +95,9 @@ const Inventory = () => {
     } catch (error) {
       console.error(error);
       setWarning("An error occurred while adding or updating the item.");
+      setTimeout(() => {
+        setWarning(null);
+      },3000)
     }
   };
 
