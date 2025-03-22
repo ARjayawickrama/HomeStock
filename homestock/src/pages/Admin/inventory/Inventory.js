@@ -343,7 +343,10 @@ const Inventory = () => {
                 <td className="px-4 py-2">{item.name}</td>
                 <td className="px-4 py-2">{item.category}</td>
                 <td className="px-4 py-2">{item.quantity}</td>
+<<<<<<< Updated upstream
                 <td className="px-4 py-2">{item.manufactureDate.split("T")[0]}</td>
+=======
+>>>>>>> Stashed changes
                 <td className="px-4 py-2">{item.expiryDate.split("T")[0]}</td>
                 <td className="px-4 py-2">{item.temperature}</td>
                 <td className="px-4 py-2">{item.status}</td>
