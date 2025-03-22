@@ -11,20 +11,32 @@ const BudgetDetails = ({ setActiveTab }) => {
     const fetchBudgets = async () => {
       try {
         const response = await axios.get("http://localhost:5000/api/budgets");
-        setBudgets(response.data);
+        console.log("Fetched budgets:", response.data); // Debugging log
+  
+        if (response.data && Array.isArray(response.data)) {
+          setBudgets(response.data.map(budget => ({
+            ...budget,
+            id: budget.id || budget._id,  // Ensure the correct ID field is used
+          })));
+        } else {
+          console.error("Invalid response format:", response.data);
+        }
       } catch (error) {
-        console.error('Error fetching budgets:', error);
+        console.error("Error fetching budgets:", error);
       }
     };
+  
     fetchBudgets();
   }, []);
+  
+  
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingBudget, setEditingBudget] = useState(null);
 
   const handleAddBudget = async (newBudget) => {
     try {
-      const response = await axios.post("http://localhost:5000/api/budgets", newBudget);
+      const response = await axios.post('http://localhost:5000/api/budgets', newBudget);
       setBudgets([...budgets, response.data]);
       setIsModalOpen(false);
     } catch (error) {
@@ -34,7 +46,8 @@ const BudgetDetails = ({ setActiveTab }) => {
 
   const handleEditBudget = async (updatedBudget) => {
     try {
-      const response = await axios.put("http://localhost:5000/api/budgets${updatedBudget.id}", updatedBudget);
+      const response = await axios.put(`http://localhost:5000/api/budgets/${updatedBudget.id}`, updatedBudget);
+
       setBudgets(budgets.map((b) => (b.id === updatedBudget.id ? response.data : b)));
       setEditingBudget(null);
       setIsModalOpen(false);
@@ -48,24 +61,34 @@ const BudgetDetails = ({ setActiveTab }) => {
   const [popupPosition, setPopupPosition] = useState({ top: 0, left: 0 });
 
   const handleDeleteBudget = async (id) => {
+    if (!id) {
+      console.error("Error: Budget ID is undefined.");
+      return;
+    }
+  
     try {
-      await axios.delete(`/api/budgets/${id}`);
+      await axios.delete(`http://localhost:5000/api/budgets/${id}`);
       setBudgets(budgets.filter((b) => b.id !== id));
     } catch (error) {
-      console.error('Error deleting budget:', error);
+      console.error("Error deleting budget:", error);
     }
   };
+  
 
   const handleMoreOptionsClick = (event, budget) => {
+    
+  
     const button = event.currentTarget;
-    const rect = button.getBoundingClientRect(); // Get button position
+    const rect = button.getBoundingClientRect();
     setPopupPosition({
-      top: rect.bottom + window.scrollY + 5, // Position below the button with a small offset
-      left: rect.left + window.scrollX, // Align with the button
+      top: rect.bottom + window.scrollY ,
+      left: rect.left + window.scrollX - 25,
     });
     setSelectedBudget(budget);
     setShowPopup(true);
   };
+  
+  
 
   return (
     <div className="space-y-6">
@@ -116,11 +139,11 @@ const BudgetDetails = ({ setActiveTab }) => {
       </div>
 
       <div className="grid grid-cols-1 gap-4">
-        {budgets.map((budget) => (
-          <div 
-            key={budget.id} 
-            className="p-6 transition-shadow bg-white shadow-sm rounded-xl hover:shadow-md"
-          >
+      {budgets.map((budget, index) => (
+        <div 
+          key={budget.id || index} 
+          className="p-6 transition-shadow bg-white shadow-sm rounded-xl hover:shadow-md"
+        >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <div className={`w-12 h-12 rounded-full bg-${budget.color}-100 flex items-center justify-center`}>
