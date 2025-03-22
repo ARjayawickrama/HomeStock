@@ -10,7 +10,7 @@ async function createUser(req, res) {
       user: user,
       message: "User created successfully",
     });
-  } catch (error) {
+  } catch (error) { 
     console.error(error);
     res.status(400).json({ message: error.message });
   }

@@ -4,7 +4,11 @@ const connectDB = require("./configuration/dbConfig");
 const signupRouter = require("./routes/signup");
 const loginRouter = require("./routes/login");
 const barcodeRoutes = require("./routes/iot/barcodeRoutes");
+
+const budgetingRoutes = require('./routes/budgeting/budgetingRoutes');
+
 const inventoryRoutes = require("./routes/inventory/inventoryRoutes"); 
+
 const bodyParser = require("body-parser");
 const cors = require("cors");
 
@@ -28,7 +32,12 @@ app.use(bodyParser.json());
 app.use("/api", signupRouter);
 app.use("/auth", loginRouter);
 app.use("/api", barcodeRoutes);
+
+// Budgeting routes
+app.use('/api', budgetingRoutes);
+
 app.use('/api/inventory', inventoryRoutes);
+
 
 app.listen(PORT, () => {
   console.log(`Server is running on: http://localhost:${PORT}`);

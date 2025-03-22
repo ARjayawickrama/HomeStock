@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { Plus, FileText, Filter, ArrowLeft, Search } from 'lucide-react';
+import AddExpenseModal from "./component/AddExpenseModal";
 
 const ExpensesList = ({ setActiveTab }) => {
-
+  const [showModal, setShowModal] = useState(false);
   const [expenses, setExpenses] = useState([
     { 
       id: 1, 
@@ -10,29 +11,30 @@ const ExpensesList = ({ setActiveTab }) => {
       category: 'Groceries',
       amount: 150,
       date: '2024-03-20',
-      paymentMethod: 'Credit Card',
-      status: 'Completed'
+      paymentMethod: 'Credit Card'
     },
-    { 
-      id: 2, 
-      description: 'Cleaning Supplies',
-      category: 'Household',
+    {
+      id: 2,
+      description: "Cleaning Supplies",
+      category: "Household",
       amount: 75,
-      date: '2024-03-19',
-      paymentMethod: 'Cash',
-      status: 'Completed'
+      date: "2024-03-19",
+      paymentMethod: "Cash"
     },
-    { 
-      id: 3, 
-      description: 'Personal Care Items',
-      category: 'Essentials',
+    {
+      id: 3,
+      description: "Personal Care Items",
+      category: "Essentials",
       amount: 45,
-      date: '2024-03-18',
-      paymentMethod: 'Debit Card',
-      status: 'Pending'
+      date: "2024-03-18",
+      paymentMethod: "Debit Card"
     },
+    
   ]);
-  
+  const addExpense = (newExpense) => {
+    setExpenses([...expenses, { id: expenses.length + 1, ...newExpense }]);
+    setShowModal(false);
+  };
 
 
   return (
@@ -57,7 +59,10 @@ const ExpensesList = ({ setActiveTab }) => {
             <FileText className="w-5 h-5 mr-2" />
             Export
           </button>
-          <button className="flex items-center px-4 py-2 text-white bg-indigo-600 rounded-lg hover:bg-indigo-700">
+          <button
+            onClick={() => setShowModal(true)}
+            className="flex items-center px-4 py-2 text-white bg-indigo-600 rounded-lg hover:bg-indigo-700"
+          >
             <Plus className="w-5 h-5 mr-2" />
             Add Expense
           </button>
@@ -98,9 +103,9 @@ const ExpensesList = ({ setActiveTab }) => {
               <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
                 Payment Method
               </th>
-              <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
+              {/* <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
                 Status
-              </th>
+              </th> */}
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -113,7 +118,7 @@ const ExpensesList = ({ setActiveTab }) => {
                   <div className="text-sm text-gray-500">{expense.category}</div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm font-medium text-gray-900">${expense.amount}</div>
+                  <div className="text-sm font-medium text-gray-900">Rs.{expense.amount}</div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm text-gray-500">{expense.date}</div>
@@ -121,17 +126,19 @@ const ExpensesList = ({ setActiveTab }) => {
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm text-gray-500">{expense.paymentMethod}</div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                {/* <td className="px-6 py-4 whitespace-nowrap">
                   <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full
                     ${expense.status === 'Completed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
                     {expense.status}
                   </span>
-                </td>
+                </td> */}
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+    
+    {showModal && <AddExpenseModal onClose={() => setShowModal(false)} onAdd={addExpense} />}
     </div>
   );
 };
