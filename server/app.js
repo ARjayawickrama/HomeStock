@@ -17,7 +17,7 @@ app.use(
   cors({
     origin: [
       "http://localhost:3000",
-      "http://http://http://192.168.110.152:3000",
+      "http://http://http://192.168.14.152:3000",
     ], // Allow React and React Native apps
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,

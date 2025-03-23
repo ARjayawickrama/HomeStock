@@ -9,7 +9,7 @@ const ProductDashboard = () => {
   const fetchData = async () => {
     try {
       setIsLoading(true);
-      const response = await axios.get("http://192.168.181.103/temperature");
+      const response = await axios.get("http://192.168.14.103/temperature");
       setData(response.data);
       setError(null);
     } catch (err) {

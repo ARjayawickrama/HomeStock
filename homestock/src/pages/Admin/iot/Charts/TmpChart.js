@@ -9,7 +9,7 @@ import {
   ResponsiveContainer,
   Legend,
 } from "recharts";
-import { WiThermometer, WiHumidity } from "react-icons/wi"; 
+import { WiThermometer, WiHumidity } from "react-icons/wi";
 import axios from "axios";
 
 function TmpTracker() {
@@ -19,7 +19,7 @@ function TmpTracker() {
 
   const fetchData = async () => {
     try {
-      const response = await axios.get("http://192.168.181.103/temperature");
+      const response = await axios.get("http://192.168.14.103/temperature");
       setTemperature(response.data.temperature);
       setHumidity(response.data.humidity);
     } catch (error) {
@@ -32,14 +32,12 @@ function TmpTracker() {
       fetchData();
     }, 5000);
 
-  
     fetchData();
 
     return () => clearInterval(intervalId);
   }, []);
 
   useEffect(() => {
-   
     setData((prevData) => [
       ...prevData,
       {

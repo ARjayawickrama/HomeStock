@@ -23,7 +23,8 @@ function Temperature({ temperaturePercentage }) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get("http://192.168.181.103/temperature");
+        console.log("Fetching....");
+        const response = await axios.get("http://192.168.14.103/temperature");
         setData(response.data);
         setError(null);
       } catch (err) {
@@ -33,7 +34,7 @@ function Temperature({ temperaturePercentage }) {
 
     const fetchGasValue = async () => {
       try {
-        const response = await axios.get("http://192.168.181.103/gas");
+        const response = await axios.get("http://192.168.14.103/gas");
         setGasValue(response.data.gas_value);
       } catch (error) {
         console.error("Error fetching gas value:", error);
