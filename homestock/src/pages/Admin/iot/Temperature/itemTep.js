@@ -13,6 +13,7 @@ const ProductDashboard = () => {
       setData(response.data);
       setError(null);
     } catch (err) {
+      setError("Failed to fetch data.");
     } finally {
       setIsLoading(false);
     }
@@ -40,7 +41,7 @@ const ProductDashboard = () => {
   };
 
   return (
-    <div className="p-6 bg-gradient-to-br from-gray-50  relative  top-11 to-blue-50 rounded-2xl shadow-2xl shadow-blue-100/50">
+    <div className="p-6 bg-gradient-to-br from-gray-50 relative top-11 to-blue-50 rounded-2xl shadow-2xl shadow-blue-100/50">
       {error && (
         <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-xl flex items-center">
           <span className="animate-pulse">⚠️</span>
@@ -67,25 +68,69 @@ const ProductDashboard = () => {
                 </td>
               </tr>
             ) : (
-              <tr>
-                <td className="py-3 px-4">
-                  {data.product || "Unknown Product"}
-                </td>
-                <td className="py-3 px-4">
-                  {data.category || "Uncategorized"}
-                </td>
-                <td className="py-3 px-4">
-                  {data.temperature || 0}°C
-                  {renderGauge(data.temperature || 0, 100, [
-                    "#3b82f6",
-                    "#10b981",
-                  ])}
-                </td>
-                <td className="py-3 px-4">
-                  {data.humidity || 0}%
-                  {renderGauge(data.humidity || 0, 100, ["#fbbf24", "#f97316"])}
-                </td>
-              </tr>
+              <>
+                {/* First Product Row */}
+                <tr>
+                  <td className="py-3 px-4">
+                    {data.product || "Molding fish"}
+                  </td>
+                  <td className="py-3 px-4">{data.category || "Seafood"}</td>
+                  <td className="py-3 px-4">
+                    {data.temperature || 0}°C
+                    {renderGauge(data.temperature || 0, 100, [
+                      "#3b82f6",
+                      "#10b981",
+                    ])}
+                  </td>
+                  <td className="py-3 px-4">
+                    {data.humidity || 0}%
+                    {renderGauge(data.humidity || 0, 100, [
+                      "#fbbf24",
+                      "#f97316",
+                    ])}
+                  </td>
+                </tr>
+
+                {/* Second Product Row */}
+                <tr>
+                  <td className="py-3 px-4">{data.product || "Milk"}</td>
+                  <td className="py-3 px-4">{data.category || "Dairy"}</td>
+                  <td className="py-3 px-4">
+                    {data.temperature || 0}°C
+                    {renderGauge(data.temperature || 0, 100, [
+                      "#3b82f6",
+                      "#10b981",
+                    ])}
+                  </td>
+                  <td className="py-3 px-4">
+                    {data.humidity || 0}%
+                    {renderGauge(data.humidity || 0, 100, [
+                      "#fbbf24",
+                      "#f97316",
+                    ])}
+                  </td>
+                </tr>
+
+                {/* Second Product Row */}
+                <tr>
+                  <td className="py-3 px-4">{data.product || "Eggs"}</td>
+                  <td className="py-3 px-4">{data.category || "Poultry"}</td>
+                  <td className="py-3 px-4">
+                    {data.temperature || 0}°C
+                    {renderGauge(data.temperature || 0, 100, [
+                      "#3b82f6",
+                      "#10b981",
+                    ])}
+                  </td>
+                  <td className="py-3 px-4">
+                    {data.humidity || 0}%
+                    {renderGauge(data.humidity || 0, 100, [
+                      "#fbbf24",
+                      "#f97316",
+                    ])}
+                  </td>
+                </tr>
+              </>
             )}
           </tbody>
         </table>
