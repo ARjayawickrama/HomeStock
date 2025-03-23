@@ -6,9 +6,8 @@ const BarcodeTable = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [deletingBarcode, setDeletingBarcode] = useState(null); 
+  const [deletingBarcode, setDeletingBarcode] = useState(null);
 
- 
   useEffect(() => {
     const fetchBarcodes = async () => {
       try {
@@ -24,12 +23,10 @@ const BarcodeTable = () => {
     fetchBarcodes();
   }, []);
 
-  
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
   };
 
- 
   const checkIfExpired = (expiryDate) => {
     const [day, month, year] = expiryDate.split(/[-/]/).map(Number);
     const expiry = new Date(year, month - 1, day);
@@ -38,7 +35,7 @@ const BarcodeTable = () => {
   };
 
   const formatExpiryDate = (barcode) => {
-    const cleanedBarcode = barcode.replace(/[^0-9]/g, ""); 
+    const cleanedBarcode = barcode.replace(/[^0-9]/g, "");
 
     if (cleanedBarcode.length < 10) return "Invalid Barcode";
 
@@ -71,33 +68,30 @@ const BarcodeTable = () => {
           .includes(searchQuery.toLowerCase()))
   );
 
-
   const getBarcodeColor = (barcode) => {
     if (barcode.code.startsWith("A")) {
-      return "bg-blue-500 text-white"; 
+      return "bg-blue-500 text-white";
     } else if (barcode.code.startsWith("B")) {
-      return "bg-yellow-500 text-white"; 
+      return "bg-yellow-500 text-white";
     }
     return "bg-gray-200 text-gray-800";
   };
 
-
   const deleteBarcode = async (barcodeId) => {
-  
     const confirmed = window.confirm(
       "Are you sure you want to delete this barcode?"
     );
     if (!confirmed) return;
 
     try {
-      setDeletingBarcode(barcodeId); 
+      setDeletingBarcode(barcodeId);
       await axios.delete(`http://localhost:5000/api/barcodes/${barcodeId}`);
-      setBarcodes(barcodes.filter((barcode) => barcode._id !== barcodeId)); 
+      setBarcodes(barcodes.filter((barcode) => barcode._id !== barcodeId));
     } catch (err) {
       setError("❌ Error deleting barcode");
       console.error("❌ Error deleting barcode:", err);
     } finally {
-      setDeletingBarcode(null); 
+      setDeletingBarcode(null);
     }
   };
 
@@ -123,15 +117,13 @@ const BarcodeTable = () => {
         </div>
       ) : (
         <div className="overflow-x-auto bg-white rounded-xl shadow-lg">
-        <table className="min-w-full table-auto border-collapse">
-          <thead className="bg-gray-800 text-white">
-            
+          <table className="min-w-full table-auto border-collapse">
+            <thead className="bg-gray-800 text-white">
               <tr>
                 <th className="p-4 text-left">Barcode</th>
                 <th className="p-4 text-left">Expiry Date</th>
                 <th className="p-4 text-left">Scanned At</th>
                 <th className="p-4 text-left">Action</th>{" "}
-           
               </tr>
             </thead>
             <tbody>

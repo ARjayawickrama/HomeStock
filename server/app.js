@@ -4,11 +4,6 @@ const connectDB = require("./configuration/dbConfig");
 const signupRouter = require("./routes/signup");
 const loginRouter = require("./routes/login");
 const barcodeRoutes = require("./routes/iot/barcodeRoutes");
-
-const budgetingRoutes = require('./routes/budgeting/budgetingRoutes');
-
-const inventoryRoutes = require("./routes/inventory/inventoryRoutes"); 
-
 const bodyParser = require("body-parser");
 const cors = require("cors");
 
@@ -20,7 +15,7 @@ connectDB();
 
 app.use(
   cors({
-    origin: ["http://localhost:3000", "http://192.168.37.1:19000"], // Allow React and React Native apps
+    origin: ["http://http://http://192.168.14.152:3000"], // Allow React and React Native apps
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   })
@@ -32,12 +27,6 @@ app.use(bodyParser.json());
 app.use("/api", signupRouter);
 app.use("/auth", loginRouter);
 app.use("/api", barcodeRoutes);
-
-// Budgeting routes
-app.use('/api', budgetingRoutes);
-
-app.use('/api/inventory', inventoryRoutes);
-
 
 app.listen(PORT, () => {
   console.log(`Server is running on: http://localhost:${PORT}`);
