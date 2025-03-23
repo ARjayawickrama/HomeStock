@@ -1,13 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FaPlus, FaSearch, FaEdit, FaTrash, FaTimes } from "react-icons/fa";
+import axios from "axios";
 
 const Inventory = () => {
   const [items, setItems] = useState([]);
   const [search, setSearch] = useState("");
   const [showForm, setShowForm] = useState(false);
-  const [errors, setErrors] = useState({});
-  const [warning, setWarning] = useState(""); // For storing warning message
   const [newItem, setNewItem] = useState({
+    itemNumber: "",
     name: "",
     category: "",
     quantity: "",
@@ -16,282 +16,290 @@ const Inventory = () => {
     temperature: "",
     status: "Available",
   });
-  const [sortOrder, setSortOrder] = useState("asc"); // Added state to manage sorting order
-  const [showLowStockModal, setShowLowStockModal] = useState(false); // State to control modal visibility
+  const [editItem, setEditItem] = useState(null);
+  const [warning, setWarning] = useState("");
+  const [sortOrder, setSortOrder] = useState("asc"); // For sorting
+  const [showLowStockModal, setShowLowStockModal] = useState(false); // For low stock modal
+  const [lowStockItems, setLowStockItems] = useState([]); // For low stock items
 
-  const temperatureRanges = {
-    Milk: "Refrigerated (0-4°C)",
-    Eggs: "Cool (10-15°C)",
-    Bread: "Room Temperature (15-25°C)",
-    Cheese: "Refrigerated (0-4°C)",
-  };
+  // Fetch inventory data on mount
+  useEffect(() => {
+    const fetchItems = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/api/inventory");
+        setItems(response.data);
+        setLowStockItems(response.data.filter(item => Number(item.quantity) < 5));
+ // Filter low stock items
+      } catch (error) {
+        console.error("Error fetching items:", error);
+      }
+    };
+    fetchItems();
+  }, []);
 
+  // Toggle the form visibility and reset the form if necessary
   const toggleForm = () => {
     setShowForm(!showForm);
+    if (showForm) {
+      setNewItem({
+        itemNumber: "",
+        name: "",
+        category: "",
+        quantity: "",
+        manufactureDate: "",
+        expiryDate: "",
+        temperature: "",
+        status: "Available",
+      });
+    }
   };
 
+  // Toggle the sort order between ascending and descending
+  const toggleSortOrder = () => {
+    setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+  };
+
+  // Handle form input changes
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setNewItem((prevItem) => ({
+      ...prevItem,
+      [name]: value,
+    }));
+  };
+
+  // Handle adding or updating an item
+  const handleAddItem = async () => {
+    try {
+      if (editItem && editItem._id) {
+        // Update existing item
+        await axios.put(
+          `http://localhost:5000/api/inventory/${editItem._id}`,
+          newItem
+        );
+        setWarning("Item updated successfully!");
+      } else {
+        // Add new item
+        await axios.post("http://localhost:5000/api/inventory", newItem);
+        setWarning("Item added successfully!");
+        setTimeout(() => {
+          setWarning(null);
+        },3000)
+      }
+
+      setShowForm(false);
+      resetForm();
+      // Refetch inventory data
+      const response = await axios.get("http://localhost:5000/api/inventory");
+      setItems(response.data);
+    } catch (error) {
+      console.error(error);
+      setWarning("An error occurred while adding or updating the item.");
+      setTimeout(() => {
+        setWarning(null);
+      },3000)
+    }
+  };
+
+  // Handle editing an item
+  const handleEditItem = (item) => {
+    setEditItem(item);
+    setNewItem(item); // Pre-fill form with selected item
+    setShowForm(true); // Show form for editing
+  };
+
+  // Handle deleting an item
+  const handleDeleteItem = async (id) => {
+    try {
+      if (!id) {
+        console.error("Item ID is missing");
+        return;
+      }
+      await axios.delete(`http://localhost:5000/api/inventory/${id}`);
+      // Refetch inventory data after delete
+      const response = await axios.get("http://localhost:5000/api/inventory");
+      setItems(response.data);
+    } catch (error) {
+      console.error("Error deleting item:", error);
+    }
+  };
+
+  // Filter items based on the search input
+  const filteredItems = items.filter((item) =>
+    item.name.toLowerCase().includes(search.toLowerCase())
+  );
+
+  // Sort items by expiry date
+  const sortedItems = [...filteredItems].sort((a, b) => {
+    const dateA = new Date(a.expiryDate);
+    const dateB = new Date(b.expiryDate);
+    return sortOrder === "asc" ? dateA - dateB : dateB - dateA;
+  });
+
+  // Reset the form to its initial state
+  const resetForm = () => {
+    setNewItem({
+      itemNumber: "",
+      name: "",
+      category: "",
+      quantity: "",
+      manufactureDate: "",
+      expiryDate: "",
+      temperature: "",
+      status: "Available",
+    });
+    setEditItem(null);
+  };
+
+  // Toggle low stock modal visibility
   const toggleLowStockModal = () => {
     setShowLowStockModal(!showLowStockModal);
   };
 
-  const validateField = (name, value) => {
-    let error = "";
-    if (!value) {
-      error = `${name} is required.`;
-    } else if (name === "quantity" && value <= 0) {
-      error = "Quantity must be greater than 0.";
-    } else if (name === "expiryDate" && newItem.manufactureDate && newItem.manufactureDate > value) {
-      error = "Expiry Date must be later than Manufacture Date.";
-    }
-    setErrors((prevErrors) => ({ ...prevErrors, [name]: error }));
+  const getCurrentDate = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = (today.getMonth() + 1).toString().padStart(2, '0');
+    const day = today.getDate().toString().padStart(2, '0');
+    return `${year}-${month}-${day}`;
   };
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setNewItem({ ...newItem, [name]: value });
-    validateField(name, value);
-  };
-
-  const handleAddItem = () => {
-    let validationErrors = {};
-    let temperatureAlert = "";
-
-    // Validate Item Name
-    if (!newItem.name) {
-      validationErrors.name = "Item name is required";
-    }
-
-    // Validate Category
-    if (!newItem.category) {
-      validationErrors.category = "Category is required";
-    }
-
-    // Validate Quantity
-    if (!newItem.quantity) {
-      validationErrors.quantity = "Quantity is required";
-    } else if (isNaN(newItem.quantity) || newItem.quantity <= 0) {
-      validationErrors.quantity = "Quantity must be a positive number";
-    }
-
-    // Validate Manufacture Date
-    if (!newItem.manufactureDate) {
-      validationErrors.manufactureDate = "Manufacture date is required";
-    }
-
-    // Validate Expiry Date
-    if (!newItem.expiryDate) {
-      validationErrors.expiryDate = "Expiry date is required";
-    } else if (new Date(newItem.expiryDate) <= new Date(newItem.manufactureDate)) {
-      validationErrors.expiryDate = "Expiry date must be after manufacture date";
-    }
-
-    // Validate Temperature
-    if (!newItem.temperature) {
-      validationErrors.temperature = "Temperature selection is required";
-    } else {
-      // Check if the temperature is correct for the item
-      const expectedTemperature = temperatureRanges[newItem.name];
-      if (newItem.temperature !== expectedTemperature) {
-        temperatureAlert = `Warning: ${newItem.name} should be stored at ${expectedTemperature}.`;
-      }
-    }
-
-    // If validation fails, set errors and return
-    if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors);
-      return;
-    }
-
-    // If temperature is not correct, set the warning
-    if (temperatureAlert) {
-      setWarning(temperatureAlert); // Set warning to be displayed
-    } else {
-      setWarning(""); // Clear warning if temperature is correct
-    }
-
-    // If all validations pass, proceed with adding the item
-    const newItemData = {
-      ...newItem,
-      id: items.length + 1,
-      quantity: parseInt(newItem.quantity),
-      status: newItem.quantity < 10 ? "Low Stock" : "Available",
-    };
-
-    setItems([...items, newItemData]);
-    setNewItem({ name: "", category: "", quantity: "", manufactureDate: "", expiryDate: "", temperature: "", status: "Available" });
-    setShowForm(false);
-    setErrors({});
-  };
-
-  // Sort items based on expiry date
-  const sortItems = () => {
-    const sortedItems = [...items].sort((a, b) => {
-      const expiryA = new Date(a.expiryDate);
-      const expiryB = new Date(b.expiryDate);
-
-      if (sortOrder === "asc") {
-        return expiryA - expiryB; // Ascending order
-      } else {
-        return expiryB - expiryA; // Descending order
-      }
-    });
-
-    return sortedItems;
-  };
-
-  const toggleSortOrder = () => {
-    setSortOrder(sortOrder === "asc" ? "desc" : "asc"); // Toggle between ascending and descending
-  };
-
-  // Filter for low stock items
-  const lowStockItems = items.filter((item) => item.status === "Low Stock");
 
   return (
-    <main className="bg-white p-6 rounded-lg shadow-lg w-full max-w-5xl mx-auto">
-      <h1 className="text-2xl font-bold mb-4">HomeStock</h1>
+    <main className="bg-white p-6 rounded-lg shadow-lg w-full max-w-7xl mx-auto">
+      <h1 className="text-2xl font-bold mb-4">Inventory Management</h1>
 
-      {/* Search, Add Button */}
       <div className="flex justify-between mb-4">
-        <div className="relative w-2/3">
+        <div className="relative ">
           <input
             type="text"
             placeholder="Search items..."
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="w-[260px] px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-        <div className="flex gap-4">
+        <div className="flex gap-4 text-sm font-semibold">
           <button
             className="flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
             onClick={toggleForm}
           >
-            {showForm ? <FaTimes /> : <FaPlus />} {showForm ? "Close Form" : "Add Item"}
+            {showForm ? <FaTimes /> : <FaPlus />}
+            {showForm ? "Close Form" : "Add Item"}
           </button>
-          {/* Low Stock Button */}
           <button
-            className="flex items-center gap-2 bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600"
+            className="bg-gray-300 px-4 py-2 rounded-lg hover:bg-gray-400"
+            onClick={toggleSortOrder}
+          >
+            Sort by Expiry Date ({sortOrder === "asc" ? "Ascending" : "Descending"})
+          </button>
+          <button
+            className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600"
             onClick={toggleLowStockModal}
           >
             Low Stock Items
           </button>
+          <button
+            className="bg-gray-300 px-4 py-2 rounded-lg hover:bg-gray-400"
+            onClick={toggleSortOrder}
+          >
+            Export PDF
+          </button>
         </div>
       </div>
 
-      {/* Display Warning Message */}
       {warning && (
         <div className="bg-red-500 text-white text-center p-2 mb-4 animate-pulse">
           {warning}
         </div>
       )}
 
-      {/* Add Item Form */}
       {showForm && (
         <div className="bg-gray-100 p-4 rounded-lg mb-4">
-          <h2 className="text-lg font-semibold mb-2">Add New Item</h2>
+          <h2 className="text-lg font-semibold mb-2">
+            {editItem ? "Edit Item" : "Add New Item"}
+          </h2>
           <div className="grid grid-cols-2 gap-4">
-            {/* Select Item Name */}
-            <select name="name" className="p-2 border rounded" value={newItem.name} onChange={handleInputChange}>
+            <input
+              type="text"
+              name="itemNumber"
+              className="p-2 border rounded"
+              value={newItem.itemNumber}
+              onChange={handleInputChange}
+              placeholder="Item Number"
+            />
+            <select
+              name="name"
+              className="p-2 border rounded"
+              value={newItem.name}
+              onChange={handleInputChange}
+            >
               <option value="">Select Item</option>
               <option value="Milk">Milk</option>
               <option value="Eggs">Eggs</option>
               <option value="Bread">Bread</option>
               <option value="Cheese">Cheese</option>
             </select>
-            {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
-
-            {/* Select Category */}
-            <select name="category" className="p-2 border rounded" value={newItem.category} onChange={handleInputChange}>
+            <select
+              name="category"
+              className="p-2 border rounded"
+              value={newItem.category}
+              onChange={handleInputChange}
+            >
               <option value="">Select Category</option>
               <option value="Dairy">Dairy</option>
               <option value="Bakery">Bakery</option>
               <option value="Frozen">Frozen</option>
               <option value="Beverages">Beverages</option>
             </select>
-            {errors.category && <p className="text-red-500 text-sm">{errors.category}</p>}
-
-            {/* Select Quantity */}
-            <select name="quantity" className="p-2 border rounded" value={newItem.quantity} onChange={handleInputChange}>
+            <select
+              name="quantity"
+              className="p-2 border rounded"
+              value={newItem.quantity}
+              onChange={handleInputChange}
+            >
               <option value="">Select Quantity</option>
               <option value="1">1</option>
               <option value="2">2</option>
               <option value="5">5</option>
               <option value="10">10</option>
             </select>
-            {errors.quantity && <p className="text-red-500 text-sm">{errors.quantity}</p>}
-
-            {/* Manufacture & Expiry Dates */}
-            <input type="date" name="manufactureDate" className="p-2 border rounded" value={newItem.manufactureDate} onChange={handleInputChange} />
-            <input type="date" name="expiryDate" className="p-2 border rounded" value={newItem.expiryDate} onChange={handleInputChange} />
-            {errors.expiryDate && <p className="text-red-500 text-sm">{errors.expiryDate}</p>}
-
-            {/* Temperature Selection */}
-            <select name="temperature" className="p-2 border rounded" value={newItem.temperature} onChange={handleInputChange}>
+            <input
+              type="date"
+              name="manufactureDate"
+              className="p-2 border rounded"
+              value={newItem.manufactureDate}
+              onChange={handleInputChange}
+              max={getCurrentDate()}
+            />
+            <input
+              type="date"
+              name="expiryDate"
+              className="p-2 border rounded"
+              value={newItem.expiryDate}
+              onChange={handleInputChange}
+              min={getCurrentDate()}
+            />
+            <select
+              name="temperature"
+              className="p-2 border rounded"
+              value={newItem.temperature}
+              onChange={handleInputChange}
+            >
               <option value="">Select Storage Temperature</option>
               <option value="Frozen (-18°C)">Frozen (-18°C)</option>
               <option value="Refrigerated (0-4°C)">Refrigerated (0-4°C)</option>
-              <option value="Cool (10-15°C)">Cool (10-15°C)</option>
-              <option value="Room Temperature (15-25°C)">Room Temperature (15-25°C)</option>
-              <option value="Warm (25-40°C)">Warm (25-40°C)</option>
+              <option value="Ambient">Ambient</option>
             </select>
+            <button
+              type="button"
+              className="w-full py-2 bg-blue-600 text-white rounded-lg"
+              onClick={handleAddItem}
+            >
+              {editItem ? "Update Item" : "Add Item"}
+            </button>
           </div>
-
-          <button className="mt-3 bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600" onClick={handleAddItem}>
-            Add Item
-          </button>
         </div>
       )}
-
-      {/* Sort Button */}
-      <div className="mb-4 flex justify-end">
-        <button
-          className="bg-gray-300 px-4 py-2 rounded-lg hover:bg-gray-400"
-          onClick={toggleSortOrder}
-        >
-          Sort by Expiry Date ({sortOrder === "asc" ? "Ascending" : "Descending"})
-        </button>
-      </div>
-
-      {/* Inventory Table */}
-      <div className="overflow-x-auto">
-        <table className="w-full border-collapse">
-          <thead>
-            <tr className="bg-gray-100 text-left">
-              <th className="p-2">Item Name</th>
-              <th className="p-2">Category</th>
-              <th className="p-2">Quantity</th>
-              <th className="p-2">Manufacture Date</th>
-              <th className="p-2">Expiry Date</th>
-              <th className="p-2">Temperature</th>
-              <th className="p-2">Status</th>
-              <th className="p-2">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sortItems()
-              .filter((item) => item.name.toLowerCase().includes(search.toLowerCase()))
-              .map((item) => (
-                <tr key={item.id} className="border-b">
-                  <td className="p-2">{item.name}</td>
-                  <td className="p-2">{item.category}</td>
-                  <td className="p-2">{item.quantity}</td>
-                  <td className="p-2">{item.manufactureDate}</td>
-                  <td className="p-2">{item.expiryDate}</td>
-                  <td className="p-2">{item.temperature}</td>
-                  <td className="p-2">{item.status}</td>
-                  <td className="p-2">
-                    <button className="text-blue-500">
-                      <FaEdit />
-                    </button>
-                    <button className="text-red-500 ml-2">
-                      <FaTrash />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-          </tbody>
-        </table>
-      </div>
 
       {/* Low Stock Modal */}
       {showLowStockModal && (
@@ -301,7 +309,7 @@ const Inventory = () => {
             <ul>
               {lowStockItems.length > 0 ? (
                 lowStockItems.map((item) => (
-                  <li key={item.id}>
+                  <li key={item._id}>
                     <p>{item.name} - {item.quantity} left</p>
                   </li>
                 ))
@@ -318,6 +326,59 @@ const Inventory = () => {
           </div>
         </div>
       )}
+
+      {/* Display sorted items in table */}
+      <table className="w-full table-auto mt-6">
+        <thead>
+          <tr className="bg-gray-200">
+            <th className="px-4 py-2 text-left">Item Number</th>
+            <th className="px-4 py-2 text-left">Name</th>
+            <th className="px-4 py-2 text-left">Category</th>
+            <th className="px-4 py-2 text-left">Quantity</th>
+            <th className="px-4 py-2 text-left">Manufacture Date</th>
+            <th className="px-4 py-2 text-left">Expiry Date</th>
+            <th className="px-4 py-2 text-left">Temperature</th>
+            <th className="px-4 py-2 text-left">Status</th>
+            <th className="px-4 py-2 text-left">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {sortedItems.length > 0 ? (
+            sortedItems.map((item) => (
+              <tr key={item._id}>
+                <td className="px-4 py-2">{item.itemNumber}</td>
+                <td className="px-4 py-2">{item.name}</td>
+                <td className="px-4 py-2">{item.category}</td>
+                <td className="px-4 py-2">{item.quantity}</td>
+                <td className="px-4 py-2">{item.manufactureDate.split("T")[0]}</td>
+                <td className="px-4 py-2">{item.expiryDate.split("T")[0]}</td>
+                <td className="px-4 py-2">{item.temperature}</td>
+                <td className="px-4 py-2">{item.status}</td>
+                <td className="px-4 py-2 flex gap-2">
+                  <button
+                    onClick={() => handleEditItem(item)}
+                    className="text-yellow-600"
+                  >
+                    <FaEdit />
+                  </button>
+                  <button
+                    onClick={() => handleDeleteItem(item._id)}
+                    className="text-red-600"
+                  >
+                    <FaTrash />
+                  </button>
+                </td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan="8" className="text-center p-4">
+                No items found
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
     </main>
   );
 };
