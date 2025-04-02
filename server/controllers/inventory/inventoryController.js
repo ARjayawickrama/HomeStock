@@ -15,11 +15,40 @@ exports.getInventory = async (req, res) => {
 // Add new inventory item
 exports.addItem = async (req, res) => {
   try {
-    const newItem = new Inventory(req.body);
+    // Validate required fields
+    const requiredFields = [
+      "itemNumber",
+      "name",
+      "category",
+      "quantity",
+      "manufactureDate",
+      "expiryDate",
+      "temperature",
+    ];
+    for (const field of requiredFields) {
+      if (!req.body[field]) {
+        return res.status(400).json({ message: `${field} is required` });
+      }
+    }
+
+    // Convert dates to Date objects
+    const itemData = {
+      ...req.body,
+      manufactureDate: new Date(req.body.manufactureDate),
+      expiryDate: new Date(req.body.expiryDate),
+      quantity: Number(req.body.quantity),
+    };
+
+    const newItem = new Inventory(itemData);
     await newItem.save();
     res.status(201).json(newItem);
   } catch (error) {
-    res.status(500).json({ message: "Error adding item", error });
+    console.error("Detailed error:", error);
+    res.status(500).json({
+      message: "Error adding item",
+      error: error.message,
+      stack: process.env.NODE_ENV === "development" ? error.stack : undefined,
+    });
   }
 };
 

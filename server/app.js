@@ -36,7 +36,7 @@ app.use("/api", barcodeRoutes);
 // Budgeting routes
 app.use("/api", budgetingRoutes);
 
-app.use("/api/inventory", inventoryRoutes);
+app.use('/api/inventory', inventoryRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server is running on: http://localhost:${PORT}`);
