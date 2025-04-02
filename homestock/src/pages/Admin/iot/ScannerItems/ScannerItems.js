@@ -123,7 +123,7 @@ const BarcodeTable = () => {
                 <th className="p-4 text-left">Barcode</th>
                 <th className="p-4 text-left">Expiry Date</th>
                 <th className="p-4 text-left">Scanned At</th>
-                <th className="p-4 text-left">Action</th>{" "}
+                <th className="p-4 text-left">Action</th>
               </tr>
             </thead>
             <tbody>
@@ -148,7 +148,7 @@ const BarcodeTable = () => {
                             ? "opacity-50 cursor-not-allowed"
                             : ""
                         }`}
-                        disabled={deletingBarcode === barcode._id} // Disable the button while deleting
+                        disabled={deletingBarcode === barcode._id}
                       >
                         {deletingBarcode === barcode._id
                           ? "Deleting..."
