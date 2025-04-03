@@ -1,168 +1,260 @@
 import React, { useState, useEffect } from "react";
-import TmpChart from "../Charts/TmpChart";
-import { FaFire, FaFan, FaTemperatureHigh } from "react-icons/fa";
+import { FaTemperatureHigh, FaFan, FaFireExtinguisher } from "react-icons/fa";
+import { WiHumidity } from "react-icons/wi";
 import axios from "axios";
+import TmpChart from "../Charts/TmpChart";
 import backgroundImage from "../../../../assets/g2.png";
 
 function Temperature({ temperaturePercentage }) {
-  const getStatusColor = (percentage) => {
-    if (percentage > 80) return "bg-red-600";
-    if (percentage > 50) return "bg-amber-500";
-    return "bg-emerald-600";
-  };
-
-  const [fireAlarm, setFireAlarm] = useState(false);
-  const [temperatureControl, setTemperatureControl] = useState(false);
-  const [fan, setFan] = useState(false);
-  const [data, setData] = useState({ temperature: null, humidity: null });
-  const [gasValue, setGasValue] = useState(null);
+  // State management
+  const [controls, setControls] = useState({
+    temperature: false,
+    fan: false,
+    fireAlarm: false,
+  });
+  const [sensorData, setSensorData] = useState({
+    temperature: "--",
+    humidity: "--",
+    gas: null,
+  });
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const handleToggle = (setter) => setter((prev) => !prev);
+  // Color thresholds
+  const getStatusColor = (percentage) => {
+    if (percentage > 80) return "bg-red-500";
+    if (percentage > 50) return "bg-amber-400";
+    return "bg-emerald-500";
+  };
 
+  const getGasStatus = (value) => {
+    if (!value) return { text: "Loading...", color: "text-gray-400" };
+    if (value >= 2000) return { text: "Danger", color: "text-red-500" };
+    if (value >= 1000) return { text: "Moderate", color: "text-amber-400" };
+    if (value >= 300) return { text: "Low", color: "text-blue-400" };
+    return { text: "Clean", color: "text-green-500" };
+  };
+
+  // Data fetching
   useEffect(() => {
     const fetchData = async () => {
       try {
-        console.log("Fetching....");
-        const response = await axios.get("http://192.168.14.103/temperature");
-        setData(response.data);
+        setLoading(true);
+        const [tempRes, gasRes] = await Promise.all([
+          axios.get("http://192.168.14.103/temperature"),
+          axios.get("http://192.168.14.103/gas"),
+        ]);
+
+        setSensorData({
+          temperature: tempRes.data.temperature || "--",
+          humidity: tempRes.data.humidity || "--",
+          gas: gasRes.data.gas_value,
+        });
         setError(null);
       } catch (err) {
-        setError("Failed to fetch data from the ESP32 server.");
-      }
-    };
-
-    const fetchGasValue = async () => {
-      try {
-        const response = await axios.get("http://192.168.14.103/gas");
-        setGasValue(response.data.gas_value);
-      } catch (error) {
-        console.error("Error fetching gas value:", error);
+        setError("Failed to fetch sensor data");
+        console.error("API Error:", err);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchData();
-    fetchGasValue();
-    const dataInterval = setInterval(fetchData, 5000);
-    const gasInterval = setInterval(fetchGasValue, 2000);
-
-    return () => {
-      clearInterval(dataInterval);
-      clearInterval(gasInterval);
-    };
+    const interval = setInterval(fetchData, 5000);
+    return () => clearInterval(interval);
   }, []);
 
+  // Toggle handler
+  const toggleControl = (control) => {
+    setControls((prev) => ({
+      ...prev,
+      [control]: !prev[control],
+    }));
+  };
+
+  const gasStatus = getGasStatus(sensorData.gas);
+
   return (
-    <section className="px-6 py-8 rounded-2xl shadow-sm space-y-6 relative bottom-20">
-      <div className="p-6 rounded-2xl">
-        <div className="flex items-center justify-between">
-          <div className="relative w-36 h-1 bottom-20">
+    <div className="space-y-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-6 text-white shadow-xl relative overflow-hidden">
+          <div className="absolute inset-0 opacity-20">
             <img
               src={backgroundImage}
-              alt="Background"
-              className=" rounded-lg h-40 mt-16"
+              alt="background"
+              className="w-full h-full object-cover"
             />
-
-            <div className="relative left-32 bottom-32">
-              <p className="text-white font-bold bg-slate-900/60 px-4 rounded-md">
-                {gasValue !== null ? (
-                  <div>
-                    <p className="text-xl">
-                      Gas Value: <span className="font-bold">{gasValue}</span>
-                    </p>
-                    <p className="mt-2">
-                      Status:{" "}
-                      <span
-                        className={`font-semibold ${
-                          gasValue >= 2000 ? "text-red-600" : ""
-                        }`}
-                      >
-                        {gasValue < 300 && "Clean Air"}
-                        {gasValue >= 300 &&
-                          gasValue < 1000 &&
-                          "Low Concentration"}
-                        {gasValue >= 1000 &&
-                          gasValue < 2000 &&
-                          "Moderate Concentration"}
-                        {gasValue >= 2000 &&
-                          "High Concentration - Possible Hazard!"}
-                      </span>
-                    </p>
-                  </div>
-                ) : (
-                  "Loading..."
-                )}
-              </p>
+          </div>
+          <div className="relative z-10">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-semibold flex items-center">
+                <FaFireExtinguisher className="mr-3" /> Gas Monitoring
+              </h3>
+              <span
+                className={`px-3 py-1 rounded-full text-xs font-medium ${gasStatus.color} bg-white/10`}
+              >
+                {gasStatus.text}
+              </span>
+            </div>
+            <div className="flex items-end justify-between">
+              <div>
+                <p className="text-4xl font-bold">
+                  {sensorData.gas !== null ? sensorData.gas : "--"}
+                </p>
+                <p className="text-sm opacity-80">ppm concentration</p>
+              </div>
+              <div className="text-right">
+                <div className="h-2 w-full bg-gray-700 rounded-full overflow-hidden">
+                  <div
+                    className={`h-full ${
+                      sensorData.gas >= 2000
+                        ? "bg-red-500"
+                        : sensorData.gas >= 1000
+                        ? "bg-amber-400"
+                        : "bg-blue-400"
+                    }`}
+                    style={{
+                      width: sensorData.gas
+                        ? `${Math.min(100, (sensorData.gas / 2500) * 100)}%`
+                        : "0%",
+                    }}
+                  />
+                </div>
+                <p className="text-xs mt-1 opacity-80">Threshold: 2000ppm</p>
+              </div>
             </div>
           </div>
+        </div>
 
-          <div class="h-80 border-l border-black mx-4 absolute left-80"></div>
-
+        <div className="lg:col-span-2 bg-white rounded-2xl p-6 shadow-xl border border-gray-100">
           <TmpChart />
         </div>
       </div>
-      <hr className="h-px my-8 bg-black border-0 dark:bg-gray-700" />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {/* Current Temperature */}
-        <div className="bg-gradient-to-br from-red-900 to-black  p-6 rounded-xl shadow-lg border">
-          <h3 className="ext-xl font-semibold text-white flex items-center gap-2 mb-4">
-            <FaTemperatureHigh className="text-3xl text-white drop-shadow-md" />{" "}
-            Current Temp
-          </h3>
-          <div className="text-center py-6">
-            <span className="text-5xl font-bold text-white">
-              {data.temperature}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="bg-gradient-to-br from-red-600 to-red-800 rounded-2xl p-6 text-white shadow-xl">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-xl font-semibold flex items-center">
+              <FaTemperatureHigh className="mr-3" /> Temperature
+            </h3>
+            <span className="px-3 py-1 rounded-full text-xs font-medium bg-white/20">
+              {sensorData.temperature > 30
+                ? "High"
+                : sensorData.temperature > 20
+                ? "Normal"
+                : "Low"}
             </span>
-            <span className="text-2xl text-white">°C</span>
-            <div className="mt-4 w-3/4 mx-auto h-2 bg-slate-200 rounded-full overflow-hidden">
+          </div>
+          <div className="text-center">
+            <p className="text-5xl font-bold mb-2">
+              {sensorData.temperature}
+              <span className="text-2xl">°C</span>
+            </p>
+            <div className="w-full bg-white/20 rounded-full h-2.5 overflow-hidden">
               <div
-                className={`h-full ${getStatusColor(
-                  temperaturePercentage
-                )} transition-all duration-500`}
+                className={`h-full ${getStatusColor(temperaturePercentage)}`}
                 style={{ width: `${temperaturePercentage}%` }}
               />
             </div>
+            <p className="text-sm mt-2 opacity-80">Max: 40°C</p>
           </div>
         </div>
 
-        {/* Max Temperature */}
-        <div className="bg-gradient-to-br from-blue-900 to-black  p-6 rounded-xl shadow-lg border border-blue-400">
-          <h3 className="text-xl font-semibold text-white flex items-center gap-2 mb-4">
-            <FaTemperatureHigh className="text-3xl text-white drop-shadow-md" />{" "}
-            Humidity
-          </h3>
-          <div className="text-center py-6">
-            <span className="text-6xl font-extrabold text-white drop-shadow-lg">
-              {data.humidity}
+        <div className="bg-gradient-to-br from-blue-600 to-blue-800 rounded-2xl p-6 text-white shadow-xl">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-xl font-semibold flex items-center">
+              <WiHumidity className="text-2xl mr-3" /> Humidity
+            </h3>
+            <span className="px-3 py-1 rounded-full text-xs font-medium bg-white/20">
+              {sensorData.humidity > 70
+                ? "High"
+                : sensorData.humidity > 40
+                ? "Normal"
+                : "Low"}
             </span>
-            <span className="text-2xl text-white font-medium">%</span>
           </div>
-        </div>
-
-        {/* Control Switches */}
-        <div className="bg-gradient-to-br from-slate-800 to-black p-6 rounded-xl shadow-lg border border-blue-300 space-y-6">
-          <label className="inline-flex items-center cursor-pointer">
-            <input
-              type="checkbox"
-              className="sr-only peer"
-              checked={temperatureControl}
-              onChange={() => handleToggle(setTemperatureControl)}
-            />
-            <div className="relative w-12 h-7 bg-gray-300 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-400 dark:peer-focus:ring-blue-700 dark:bg-gray-700 peer-checked:bg-blue-500 transition-all duration-300">
+          <div className="text-center">
+            <p className="text-5xl font-bold mb-2">
+              {sensorData.humidity}
+              <span className="text-2xl">%</span>
+            </p>
+            <div className="w-full bg-white/20 rounded-full h-2.5 overflow-hidden">
               <div
-                className={`absolute top-0.5 ${
-                  temperatureControl && "left-[21px]"
-                } start-[3px] w-6 h-6 bg-white border border-gray-300 rounded-full transition-all duration-300 peer-checked:translate-x-5 peer-checked:border-blue-500 shadow-md`}
-              ></div>
+                className="h-full bg-blue-300"
+                style={{
+                  width:
+                    sensorData.humidity !== "--"
+                      ? `${((sensorData.humidity - 30) / 50) * 100}%`
+                      : "0%",
+                }}
+              />
             </div>
-            <span className="ms-3 text-base font-semibold text-gray-800 dark:text-gray-300">
-              Power ON & OFF
-            </span>
-          </label>
+            <p className="text-sm mt-2 opacity-80">Range: 30-80%</p>
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-br from-gray-700 to-gray-800 rounded-2xl p-6 text-white shadow-xl">
+          <h3 className="text-xl font-semibold mb-6">Device Controls</h3>
+
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <FaTemperatureHigh className="mr-3 text-red-300" />
+                <span>Cooling System</span>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  className="sr-only peer"
+                  checked={controls.temperature}
+                  onChange={() => toggleControl("temperature")}
+                />
+                <div className="w-11 h-6 bg-gray-400 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
+              </label>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <FaFan className="mr-3 text-blue-300" />
+                <span>Ventilation Fan</span>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  className="sr-only peer"
+                  checked={controls.fan}
+                  onChange={() => toggleControl("fan")}
+                />
+                <div className="w-11 h-6 bg-gray-400 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
+              </label>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <FaFireExtinguisher className="mr-3 text-red-400" />
+                <span>Fire Alarm</span>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  className="sr-only peer"
+                  checked={controls.fireAlarm}
+                  onChange={() => toggleControl("fireAlarm")}
+                />
+                <div className="w-11 h-6 bg-gray-400 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-500"></div>
+              </label>
+            </div>
+          </div>
         </div>
       </div>
-    </section>
+
+      {error && (
+        <div className="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded">
+          <p className="font-medium">Error:</p>
+          <p>{error}</p>
+        </div>
+      )}
+    </div>
   );
 }
 

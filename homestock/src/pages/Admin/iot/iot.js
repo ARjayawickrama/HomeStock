@@ -16,7 +16,8 @@ function Iot() {
   const tabs = [
     {
       id: "temperature",
-      icon: <FaThermometerHalf className="text-2xl" />,
+      icon: <FaThermometerHalf />,
+      label: "Temperature",
       component: (
         <Temperature
           currentTemperature={22}
@@ -27,12 +28,14 @@ function Iot() {
     },
     {
       id: "ItemTep",
-      icon: <FaBox className="text-2xl" />,
+      icon: <FaBox />,
+      label: "Inventory",
       component: <ItemTep />,
     },
     {
       id: "scannerItem",
-      icon: <FaBarcode className="text-2xl" />,
+      icon: <FaBarcode />,
+      label: "Scanner",
       component: <ScannerItem />,
     },
   ];
@@ -40,19 +43,22 @@ function Iot() {
   return (
     <main className="bg-white bg-opacity-80 p-6 rounded-lg ">
       <div className="flex justify-center sm:justify-start space-x-6  relative bottom-6 ">
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`flex items-center justify-center rounded-xl transition-all duration-300 ease-in-out w-16 h-10 focus:outline-none transform ${
-              activeTab === tab.id
-                ? "bg-black text-white shadow-xl scale-110"
-                : "text-gray-800 hover:bg-indigo-600 hover:text-white hover:shadow-lg hover:scale-105"
-            }`}
-          >
-            {tab.icon}
-          </button>
-        ))}
+        <div className="flex space-x-2 mb-8 bg-white rounded-xl p-1 shadow-sm">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex-1 py-3 px-4 rounded-lg transition-all duration-200 flex items-center justify-center space-x-2 ${
+                activeTab === tab.id
+                  ? "bg-indigo-600 text-white shadow-md"
+                  : "text-gray-600 hover:bg-gray-100"
+              }`}
+            >
+              {tab.icon}
+              <span className="hidden sm:inline">{tab.label}</span>
+            </button>
+          ))}
+        </div>
 
         <div className=" absolute top-16 ">
           <War />
@@ -60,7 +66,6 @@ function Iot() {
         </div>
       </div>
 
-      {/* Dynamic Content Rendering */}
       <section className="mt-8">
         {tabs.find((tab) => tab.id === activeTab)?.component}
       </section>

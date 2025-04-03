@@ -9,6 +9,8 @@ const budgetingRoutes = require("./routes/budgeting/budgetingRoutes");
 
 const inventoryRoutes = require("./routes/inventory/inventoryRoutes");
 
+const groceryRoutes = require("./routes/GroceryRoute/grocery");
+
 const bodyParser = require("body-parser");
 const cors = require("cors");
 
@@ -36,8 +38,8 @@ app.use("/api", barcodeRoutes);
 // Budgeting routes
 app.use("/api", budgetingRoutes);
 
-app.use('/api/inventory', inventoryRoutes);
-
+app.use("/api/inventory", inventoryRoutes);
+app.use("/api/groceries", groceryRoutes);
 app.listen(PORT, () => {
   console.log(`Server is running on: http://localhost:${PORT}`);
 });

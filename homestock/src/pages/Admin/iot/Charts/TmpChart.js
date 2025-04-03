@@ -49,7 +49,7 @@ function TmpTracker() {
   }, [temperature, humidity]);
 
   return (
-    <div className="w-3/4  relative left-9 h-64 p-4 rounded-lg bg-white shadow-md">
+    <div className="  relative h-64 p-4 rounded-lg bg-white shadow-md">
       <h2 className="text-lg font-semibold mb-4 text-center">
         <p className="text-center text-red-800 flex justify-center items-center gap-2">
           <WiThermometer className="text-red-500 text-3xl" /> {temperature}°C •
