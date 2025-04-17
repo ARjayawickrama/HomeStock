@@ -93,7 +93,8 @@ const GroceryList = () => {
         setGroceries(groceries.filter((item) => item._id !== id));
         showNotification(`${name} removed from grocery list`);
       } catch (err) {
-        console.error(err);
+        console.error("Error deleting item:", err);
+        showNotification("Failed to delete item. Please try again.");
       }
     }
   };
