@@ -177,18 +177,45 @@ const GroceryList = () => {
       )}
 
       <div className="max-w-6xl mx-auto">
+        {/* Low Stock Alert */}
+        {inventory.length > 0 && (
+          <div className="bg-gradient-to-r from-red-50 to-red-100 border-l-4 border-red-500 text-red-800 p-5 rounded-lg shadow-sm mb-8">
+            <div className="flex items-start">
+              <div className="bg-red-100 p-2 rounded-full mr-4">
+                <IoMdNotificationsOutline className="text-red-600 text-xl" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold mb-2">Low Stock Alert</h3>
+                <p className="text-sm mb-3">
+                  The following items need replenishment:
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {inventory.map((item) => (
+                    <span
+                      key={item._id}
+                      className="bg-white px-3 py-1 rounded-full text-sm font-medium shadow-xs border border-red-100"
+                    >
+                      {item.name} (Qty: {item.quantity})
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
         {/* Header */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 px-6 py-4 bg-gray-50 rounded-lg shadow-lg">
           <div>
-            <h1 className="text-3xl font-bold text-gray-800">
+            <h1 className="text-4xl font-extrabold text-gray-800 mb-2">
               Grocery List Manager
             </h1>
-            <p className="text-gray-600">Manage your shopping efficiently</p>
+            <p className="text-lg text-gray-600">
+              Manage your shopping efficiently
+            </p>
           </div>
           <div className="flex items-center space-x-4 mt-4 md:mt-0">
             <div className="relative">
-              <RiCalendarTodoFill className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-              <div className="bg-white px-4 py-2 pl-10 rounded-lg border border-gray-200 text-sm font-medium">
+              <div className="bg-white px-4 py-2 pl-10 rounded-lg border border-gray-300 text-sm font-medium shadow-sm">
                 {new Date().toLocaleDateString("en-US", {
                   weekday: "long",
                   month: "long",
@@ -196,7 +223,7 @@ const GroceryList = () => {
                 })}
               </div>
             </div>
-            <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition">
+            <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg flex items-center space-x-2 transition transform hover:scale-105 duration-300 ease-in-out shadow-md">
               <IoMdNotificationsOutline />
               <span className="hidden sm:inline">Alerts</span>
             </button>
@@ -225,69 +252,42 @@ const GroceryList = () => {
           </div>
         </div>
 
-        {/* Low Stock Alert */}
-        {inventory.length > 0 && (
-          <div className="bg-gradient-to-r from-red-50 to-red-100 border-l-4 border-red-500 text-red-800 p-5 rounded-lg shadow-sm mb-8">
-            <div className="flex items-start">
-              <div className="bg-red-100 p-2 rounded-full mr-4">
-                <IoMdNotificationsOutline className="text-red-600 text-xl" />
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold mb-2">Low Stock Alert</h3>
-                <p className="text-sm mb-3">
-                  The following items need replenishment:
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {inventory.map((item) => (
-                    <span
-                      key={item._id}
-                      className="bg-white px-3 py-1 rounded-full text-sm font-medium shadow-xs border border-red-100"
-                    >
-                      {item.name} (Qty: {item.quantity})
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* Add Item Section */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-8">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">
+        <div className="bg-white p-8 rounded-2xl shadow-md border border-gray-200 mb-10">
+          <h2 className="text-2xl font-bold text-gray-800 mb-6">
             Add New Item
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Item Name
               </label>
               <input
                 type="text"
-                placeholder="Item name"
+                placeholder="Enter item name"
                 value={newItem.name}
                 onChange={(e) =>
                   setNewItem({ ...newItem, name: e.target.value })
                 }
-                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                className="w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-gray-50 transition"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Quantity
               </label>
               <input
                 type="number"
-                placeholder="Qty"
+                placeholder="Enter quantity"
                 value={newItem.quantity}
                 onChange={(e) =>
                   setNewItem({ ...newItem, quantity: e.target.value })
                 }
-                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                className="w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-gray-50 transition"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Category
               </label>
               <select
@@ -295,7 +295,7 @@ const GroceryList = () => {
                   setNewItem({ ...newItem, category: e.target.value })
                 }
                 value={newItem.category}
-                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                className="w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-gray-50 transition"
               >
                 <option value="">Select Category</option>
                 {categories.map((cat, index) => (
@@ -306,13 +306,16 @@ const GroceryList = () => {
               </select>
             </div>
           </div>
-          <button
-            onClick={addItem}
-            className="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-medium px-5 py-2.5 rounded-lg shadow-sm transition flex items-center justify-center space-x-2"
-          >
-            <FaPlus />
-            <span>Add Item</span>
-          </button>
+
+          <div className="flex justify-end mt-6">
+            <button
+              onClick={addItem}
+              className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-lg shadow-md transition-all"
+            >
+              <FaPlus className="text-lg" />
+              <span>Add Item</span>
+            </button>
+          </div>
         </div>
 
         {/* Filter and Search */}
