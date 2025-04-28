@@ -420,10 +420,38 @@ const Inventory = () => {
                       required
                     >
                       <option value="">Select Item</option>
-                      <option value="Milk">Milk</option>
-                      <option value="Eggs">Eggs</option>
-                      <option value="Bread">Bread</option>
-                      <option value="Cheese">Cheese</option>
+<option value="Milk">Milk</option>
+<option value="Eggs">Eggs</option>
+<option value="Bread">Bread</option>
+<option value="Cheese">Cheese</option>
+<option value="Butter">Butter</option>
+<option value="Yogurt">Yogurt</option>
+<option value="Chicken">Chicken</option>
+<option value="Beef">Beef</option>
+<option value="Fish">Fish</option>
+<option value="Rice">Rice</option>
+<option value="Pasta">Pasta</option>
+<option value="Apples">Apples</option>
+<option value="Bananas">Bananas</option>
+<option value="Oranges">Oranges</option>
+<option value="Tomatoes">Tomatoes</option>
+<option value="Potatoes">Potatoes</option>
+<option value="Carrots">Carrots</option>
+<option value="Onions">Onions</option>
+<option value="Garlic">Garlic</option>
+<option value="Lettuce">Lettuce</option>
+<option value="Cucumber">Cucumber</option>
+<option value="Peppers">Peppers</option>
+<option value="Mushrooms">Mushrooms</option>
+<option value="Olive Oil">Olive Oil</option>
+<option value="Salt">Salt</option>
+<option value="Pepper">Pepper</option>
+<option value="Sugar">Sugar</option>
+<option value="Flour">Flour</option>
+<option value="Cereal">Cereal</option>
+<option value="Juice">Juice</option>
+<option value="Water">Water</option>
+
                     </select>
                   </div>
 
@@ -439,10 +467,13 @@ const Inventory = () => {
                       required
                     >
                       <option value="">Select Category</option>
-                      <option value="Dairy">Dairy</option>
-                      <option value="Bakery">Bakery</option>
-                      <option value="Frozen">Frozen</option>
-                      <option value="Beverages">Beverages</option>
+                      <option value="Dairy">Dairy</option>          
+<option value="Meat & Fish">Meat & Fish</option>   
+<option value="Bakery">Bakery</option>         
+<option value="Fruits">Fruits</option>         
+<option value="Vegetables">Vegetables</option>  
+<option value="Pantry Essentials">Pantry Essentials</option>  
+<option value="Beverages">Beverages</option>  
                     </select>
                   </div>
 
