@@ -34,14 +34,26 @@ const GroceryList = () => {
     message: "",
   });
 
-  const categories = [...new Set(groceries.map((item) => item.category))];
+  const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    const options = { year: 'numeric', month: 'short', day: 'numeric' };
+    return new Date(dateString).toLocaleDateString('en-US', options);
+  };
+
+  const categories = [
+    ...new Set(groceries.map((item) => item.category || "Uncategorized")),
+  ];
 
   // Fetch groceries from backend
   useEffect(() => {
     const fetchGroceries = async () => {
       try {
         const res = await axios.get("http://localhost:5000/api/groceries");
-        setGroceries(res.data);
+        const itemsWithDates = res.data.map((item) => ({
+          ...item,
+          createdAt: item.createdAt || new Date().toISOString(),
+        }));
+        setGroceries(itemsWithDates);
       } catch (err) {
         console.error(err);
       }
@@ -73,9 +85,15 @@ const GroceryList = () => {
   const addItem = async () => {
     if (!newItem.name || !newItem.quantity) return;
     try {
+      const today = new Date().toISOString().split("T")[0]; // Get only YYYY-MM-DD
+      const itemWithDate = {
+        ...newItem,
+        completed: false,
+        dateAdded: today, // Store only the date
+      };
       const res = await axios.post(
         "http://localhost:5000/api/groceries",
-        newItem
+        itemWithDate
       );
       setGroceries([res.data, ...groceries]);
       setNewItem({ name: "", quantity: "", category: "" });
@@ -84,7 +102,6 @@ const GroceryList = () => {
       console.error(err);
     }
   };
-
   const updateItem = async () => {
     try {
       const res = await axios.put(
@@ -159,7 +176,6 @@ const GroceryList = () => {
     const date = new Date().toLocaleDateString();
     const time = new Date().toLocaleTimeString();
 
-    // Company / App Header
     doc.setFillColor(40, 53, 147);
     doc.rect(0, 0, pageWidth, 20, "F");
 
@@ -168,13 +184,11 @@ const GroceryList = () => {
     doc.setFont("helvetica", "bold");
     doc.text("GROCERY LIST REPORT", pageWidth / 2, 13, { align: "center" });
 
-    // Report Metadata
     doc.setFontSize(10);
     doc.setTextColor(100, 100, 100);
     doc.setFont("helvetica", "italic");
     doc.text(`Report generated on: ${date} at ${time}`, margin, 30);
 
-    // Report Description
     doc.setFontSize(12);
     doc.setTextColor(50, 50, 50);
     doc.setFont("helvetica", "normal");
@@ -184,19 +198,18 @@ const GroceryList = () => {
       40
     );
 
-    // Table Headers
-    const headers = [["#", "Status", "Item Name", "Quantity", "Category"]];
-
-    // Table Body
+    const headers = [
+      ["#", "Status", "Item Name", "Quantity", "Category", "Date Added"],
+    ];
     const data = filteredItems.map((item, index) => [
       index + 1,
       item.completed ? "✓ Purchased" : "○ Pending",
       item.name,
       item.quantity,
       item.category || "Uncategorized",
+      formatDate(item.createdAt),
     ]);
 
-    // Add Table
     autoTable(doc, {
       startY: 50,
       head: headers,
@@ -221,16 +234,16 @@ const GroceryList = () => {
         fillColor: [245, 245, 245],
       },
       columnStyles: {
-        0: { halign: "center", cellWidth: 10 }, // #
-        1: { halign: "center", cellWidth: 30 }, // Status
-        2: { cellWidth: 60 }, // Item Name
-        3: { halign: "center", cellWidth: 20 }, // Quantity
-        4: { cellWidth: 50 }, // Category
+        0: { halign: "center", cellWidth: 10 },
+        1: { halign: "center", cellWidth: 20 },
+        2: { cellWidth: 50 },
+        3: { halign: "center", cellWidth: 20 },
+        4: { cellWidth: 40 },
+        5: { cellWidth: 30 },
       },
       margin: { left: margin, right: margin },
     });
 
-    // Footer
     const pageHeight = doc.internal.pageSize.height;
     doc.setFontSize(9);
     doc.setTextColor(150, 150, 150);
@@ -241,7 +254,6 @@ const GroceryList = () => {
       { align: "center" }
     );
 
-    // Save PDF
     doc.save(`Grocery-Report-${new Date().toISOString().slice(0, 10)}.pdf`);
     showNotification("✅ Professional PDF report generated successfully!");
   };
@@ -282,12 +294,11 @@ const GroceryList = () => {
       ],
     },
   };
-  // For demo purposes - replace with actual inventory data if needed
+
   const inventory = groceries.filter((item) => item.quantity < 3).slice(0, 3);
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
-      {/* Notification Toast */}
       {notification.show && (
         <div className="fixed top-4 right-4 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fade-in-down">
           {notification.message}
@@ -295,7 +306,6 @@ const GroceryList = () => {
       )}
 
       <div className="max-w-6xl mx-auto">
-        {/* Low Stock Alert */}
         {inventory.length > 0 && (
           <div className="bg-gradient-to-r from-red-50 to-red-100 border-l-4 border-red-500 text-red-800 p-5 rounded-lg shadow-sm mb-8">
             <div className="flex items-start">
@@ -322,34 +332,6 @@ const GroceryList = () => {
           </div>
         )}
 
-        {/* Header */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 px-6 py-4 bg-gray-50 rounded-lg shadow-lg">
-          <div>
-            <h1 className="text-4xl font-extrabold text-gray-800 mb-2">
-              Grocery List Manager
-            </h1>
-            <p className="text-lg text-gray-600">
-              Manage your shopping efficiently
-            </p>
-          </div>
-          <div className="flex items-center space-x-4 mt-4 md:mt-0">
-            <div className="relative">
-              <div className="bg-white px-4 py-2 pl-10 rounded-lg border border-gray-300 text-sm font-medium shadow-sm">
-                {new Date().toLocaleDateString("en-US", {
-                  weekday: "long",
-                  month: "long",
-                  day: "numeric",
-                })}
-              </div>
-            </div>
-            <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg flex items-center space-x-2 transition transform hover:scale-105 duration-300 ease-in-out shadow-md">
-              <IoMdNotificationsOutline />
-              <span className="hidden sm:inline">Alerts</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Dashboard Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
             <h3 className="text-gray-500 font-medium mb-2">Total Items</h3>
@@ -371,7 +353,6 @@ const GroceryList = () => {
           </div>
         </div>
 
-        {/* Add Item Section */}
         <div className="bg-white p-8 rounded-2xl shadow-md border border-gray-200 mb-10">
           <h2 className="text-2xl font-bold text-gray-800 mb-6">
             Add New Item
@@ -437,7 +418,6 @@ const GroceryList = () => {
           </div>
         </div>
 
-        {/* Filter and Search */}
         <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div className="flex space-x-2 overflow-x-auto pb-2 md:pb-0 w-full md:w-auto">
             <button
@@ -503,46 +483,27 @@ const GroceryList = () => {
           </button>
         </div>
 
-        {/* Grocery List Table */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-800 overflow-hidden mb-8">
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-900">
               <thead className="bg-gray-800">
                 <tr>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider"
-                  >
+                  <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                     Status
                   </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider"
-                  >
+                  <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                     Item
                   </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider"
-                  >
+                  <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                     Quantity
                   </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider"
-                  >
+                  <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                     Category
                   </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider"
-                  >
+                  <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                     Date Added
                   </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-right text-xs font-medium text-white uppercase tracking-wider"
-                  >
+                  <th className="px-6 py-3 text-right text-xs font-medium text-white uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
@@ -596,7 +557,7 @@ const GroceryList = () => {
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {new Date(item.createdAt).toLocaleDateString() || "-"}
+                        {formatDate(item.createdAt)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <div className="flex justify-end space-x-2">
@@ -633,94 +594,80 @@ const GroceryList = () => {
           </div>
         </div>
 
-        {/* Analytics and Actions */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
           <div className="lg:col-span-2 bg-white p-6 rounded-xl shadow-sm border border-gray-100">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-800">
-                Items by Category
+                Category Analytics
               </h3>
               <div className="flex items-center space-x-2 text-sm text-gray-500">
                 <FaChartLine />
                 <span>Analytics</span>
               </div>
             </div>
-            <div className="lg:col-span-2 bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-800">
-                  Category Analytics
-                </h3>
-                <div className="flex items-center space-x-2 text-sm text-gray-500">
-                  <FaChartLine />
-                  <span>Analytics</span>
-                </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="h-64">
+                <h4 className="text-sm font-medium text-gray-600 mb-2">
+                  Items by Category
+                </h4>
+                {categories.length > 0 ? (
+                  <Bar
+                    data={chartData.itemsByCategory}
+                    options={{
+                      responsive: true,
+                      maintainAspectRatio: false,
+                      scales: {
+                        y: {
+                          beginAtZero: true,
+                          ticks: {
+                            precision: 0,
+                            stepSize: 1,
+                          },
+                        },
+                      },
+                      plugins: {
+                        legend: {
+                          display: false,
+                        },
+                      },
+                    }}
+                  />
+                ) : (
+                  <div className="h-full flex items-center justify-center text-gray-500">
+                    No category data available
+                  </div>
+                )}
               </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="h-64">
-                  <h4 className="text-sm font-medium text-gray-600 mb-2">
-                    Items by Category
-                  </h4>
-                  {categories.length > 0 ? (
-                    <Bar
-                      data={chartData.itemsByCategory}
-                      options={{
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                          y: {
-                            beginAtZero: true,
-                            ticks: {
-                              precision: 0,
-                              stepSize: 1,
-                            },
+              <div className="h-64">
+                <h4 className="text-sm font-medium text-gray-600 mb-2">
+                  Quantity by Category
+                </h4>
+                {categories.length > 0 ? (
+                  <Bar
+                    data={chartData.quantitiesByCategory}
+                    options={{
+                      responsive: true,
+                      maintainAspectRatio: false,
+                      scales: {
+                        y: {
+                          beginAtZero: true,
+                          ticks: {
+                            precision: 0,
                           },
                         },
-                        plugins: {
-                          legend: {
-                            display: false,
-                          },
+                      },
+                      plugins: {
+                        legend: {
+                          display: false,
                         },
-                      }}
-                    />
-                  ) : (
-                    <div className="h-full flex items-center justify-center text-gray-500">
-                      No category data available
-                    </div>
-                  )}
-                </div>
-
-                <div className="h-64">
-                  <h4 className="text-sm font-medium text-gray-600 mb-2">
-                    Quantity by Category
-                  </h4>
-                  {categories.length > 0 ? (
-                    <Bar
-                      data={chartData.quantitiesByCategory}
-                      options={{
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                          y: {
-                            beginAtZero: true,
-                            ticks: {
-                              precision: 0,
-                            },
-                          },
-                        },
-                        plugins: {
-                          legend: {
-                            display: false,
-                          },
-                        },
-                      }}
-                    />
-                  ) : (
-                    <div className="h-full flex items-center justify-center text-gray-500">
-                      No quantity data available
-                    </div>
-                  )}
-                </div>
+                      },
+                    }}
+                  />
+                ) : (
+                  <div className="h-full flex items-center justify-center text-gray-500">
+                    No quantity data available
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -763,7 +710,6 @@ const GroceryList = () => {
           </div>
         </div>
 
-        {/* Edit Modal */}
         {isModalOpen && itemToEdit && (
           <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 p-4">
             <div className="bg-white rounded-xl shadow-xl w-full max-w-md">
