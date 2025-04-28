@@ -2,6 +2,18 @@ import React, { useState, useEffect } from "react";
 import { FaPlus, FaSearch, FaEdit, FaTrash, FaTimes, FaSort, FaFileExport } from "react-icons/fa";
 import { RiCalendarTodoFill } from "react-icons/ri";
 import axios from "axios";
+import { Bar } from 'react-chartjs-2';
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
+
+// Register ChartJS components
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 const Inventory = () => {
   // All your existing state declarations remain exactly the same
@@ -74,6 +86,74 @@ const Inventory = () => {
     fetchItems();
     fetchBarcodes();
   }, []);
+
+  // Prepare data for the chart
+  const getChartData = () => {
+    // Group items by category and calculate total quantity for each category
+    const categoryData = items.reduce((acc, item) => {
+      if (!acc[item.category]) {
+        acc[item.category] = 0;
+      }
+      acc[item.category] += parseInt(item.quantity);
+      return acc;
+    }, {});
+
+    const categories = Object.keys(categoryData);
+    const quantities = Object.values(categoryData);
+
+    return {
+      labels: categories,
+      datasets: [
+        {
+          label: 'Quantity in Stock',
+          data: quantities,
+          backgroundColor: [
+            'rgba(54, 162, 235, 0.6)',
+            'rgba(255, 99, 132, 0.6)',
+            'rgba(75, 192, 192, 0.6)',
+            'rgba(255, 206, 86, 0.6)',
+            'rgba(153, 102, 255, 0.6)',
+          ],
+          borderColor: [
+            'rgba(54, 162, 235, 1)',
+            'rgba(255, 99, 132, 1)',
+            'rgba(75, 192, 192, 1)',
+            'rgba(255, 206, 86, 1)',
+            'rgba(153, 102, 255, 1)',
+          ],
+          borderWidth: 1,
+        },
+      ],
+    };
+  };
+
+  const chartOptions = {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: 'top',
+      },
+      title: {
+        display: true,
+        text: 'Inventory by Category',
+      },
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        title: {
+          display: true,
+          text: 'Quantity',
+        },
+      },
+      x: {
+        title: {
+          display: true,
+          text: 'Category',
+        },
+      },
+    },
+  };
 
   // All your existing handler functions remain exactly the same
   const toggleForm = () => {
@@ -234,6 +314,13 @@ const Inventory = () => {
                   })}
                 </span>
               </div>
+            </div>
+          </div>
+
+          {/* Added Chart Section */}
+          <div className="bg-white p-4 rounded-lg shadow mb-6">
+            <div className="h-80">
+              <Bar data={getChartData()} options={chartOptions} />
             </div>
           </div>
 
@@ -615,4 +702,4 @@ const Inventory = () => {
   );
 };
 
-export default Inventory;
+export default Inventory; 
