@@ -247,18 +247,40 @@ const GroceryList = () => {
   };
 
   const chartData = {
-    labels: categories,
-    datasets: [
-      {
-        label: "Items by Category",
-        data: categories.map(
-          (cat) => groceries.filter((item) => item.category === cat).length
-        ),
-        backgroundColor: "rgba(54, 162, 235, 0.6)",
-        borderColor: "rgba(54, 162, 235, 1)",
-        borderWidth: 1,
-      },
-    ],
+    itemsByCategory: {
+      labels: categories,
+      datasets: [
+        {
+          label: "Items by Category",
+          data: categories.map(
+            (cat) => groceries.filter((item) => item.category === cat).length
+          ),
+          backgroundColor: categories.map(
+            (_, i) => `hsl(${(i * 360) / categories.length}, 70%, 50%)`
+          ),
+          borderColor: categories.map(
+            (_, i) => `hsl(${(i * 360) / categories.length}, 70%, 30%)`
+          ),
+          borderWidth: 1,
+        },
+      ],
+    },
+    quantitiesByCategory: {
+      labels: categories,
+      datasets: [
+        {
+          label: "Total Quantity by Category",
+          data: categories.map((cat) =>
+            groceries
+              .filter((item) => item.category === cat)
+              .reduce((sum, item) => sum + parseInt(item.quantity || 0), 0)
+          ),
+          backgroundColor: "rgba(54, 162, 235, 0.6)",
+          borderColor: "rgba(54, 162, 235, 1)",
+          borderWidth: 1,
+        },
+      ],
+    },
   };
   // For demo purposes - replace with actual inventory data if needed
   const inventory = groceries.filter((item) => item.quantity < 3).slice(0, 3);
@@ -623,27 +645,83 @@ const GroceryList = () => {
                 <span>Analytics</span>
               </div>
             </div>
-            <div className="h-64">
-              <Bar
-                data={chartData}
-                options={{
-                  responsive: true,
-                  maintainAspectRatio: false,
-                  scales: {
-                    y: {
-                      beginAtZero: true,
-                      ticks: {
-                        precision: 0,
-                      },
-                    },
-                  },
-                  plugins: {
-                    legend: {
-                      position: "top",
-                    },
-                  },
-                }}
-              />
+            <div className="lg:col-span-2 bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-800">
+                  Category Analytics
+                </h3>
+                <div className="flex items-center space-x-2 text-sm text-gray-500">
+                  <FaChartLine />
+                  <span>Analytics</span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="h-64">
+                  <h4 className="text-sm font-medium text-gray-600 mb-2">
+                    Items by Category
+                  </h4>
+                  {categories.length > 0 ? (
+                    <Bar
+                      data={chartData.itemsByCategory}
+                      options={{
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                          y: {
+                            beginAtZero: true,
+                            ticks: {
+                              precision: 0,
+                              stepSize: 1,
+                            },
+                          },
+                        },
+                        plugins: {
+                          legend: {
+                            display: false,
+                          },
+                        },
+                      }}
+                    />
+                  ) : (
+                    <div className="h-full flex items-center justify-center text-gray-500">
+                      No category data available
+                    </div>
+                  )}
+                </div>
+
+                <div className="h-64">
+                  <h4 className="text-sm font-medium text-gray-600 mb-2">
+                    Quantity by Category
+                  </h4>
+                  {categories.length > 0 ? (
+                    <Bar
+                      data={chartData.quantitiesByCategory}
+                      options={{
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                          y: {
+                            beginAtZero: true,
+                            ticks: {
+                              precision: 0,
+                            },
+                          },
+                        },
+                        plugins: {
+                          legend: {
+                            display: false,
+                          },
+                        },
+                      }}
+                    />
+                  ) : (
+                    <div className="h-full flex items-center justify-center text-gray-500">
+                      No quantity data available
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
           <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col">
