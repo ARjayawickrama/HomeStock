@@ -35,9 +35,9 @@ const GroceryList = () => {
   });
 
   const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
-    const options = { year: 'numeric', month: 'short', day: 'numeric' };
-    return new Date(dateString).toLocaleDateString('en-US', options);
+    if (!dateString) return "N/A";
+    const options = { year: "numeric", month: "short", day: "numeric" };
+    return new Date(dateString).toLocaleDateString("en-US", options);
   };
 
   const categories = [
@@ -298,14 +298,14 @@ const GroceryList = () => {
   const inventory = groceries.filter((item) => item.quantity < 3).slice(0, 3);
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen  p-6">
       {notification.show && (
         <div className="fixed top-4 right-4 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fade-in-down">
           {notification.message}
         </div>
       )}
 
-      <div className="max-w-6xl mx-auto">
+      <div className=" mx-auto">
         {inventory.length > 0 && (
           <div className="bg-gradient-to-r from-red-50 to-red-100 border-l-4 border-red-500 text-red-800 p-5 rounded-lg shadow-sm mb-8">
             <div className="flex items-start">
@@ -331,35 +331,103 @@ const GroceryList = () => {
             </div>
           </div>
         )}
-
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <h3 className="text-gray-500 font-medium mb-2">Total Items</h3>
-            <p className="text-3xl font-bold text-blue-600">
-              {groceries.length}
-            </p>
+          {/* Total Items Card */}
+          <div className="bg-blue-700 p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-300 transform hover:-translate-y-1">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-white font-medium text-sm uppercase tracking-wider mb-2">
+                  Total Items
+                </h3>
+                <p className="text-3xl font-bold text-white">
+                  {groceries.length}
+                </p>
+              </div>
+              <div className="bg-indigo-50 p-3 rounded-full">
+                <svg
+                  className="w-6 h-6 text-indigo-700"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                  />
+                </svg>
+              </div>
+            </div>
+            <p className="mt-3 text-xs text-white">All grocery items</p>
           </div>
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <h3 className="text-gray-500 font-medium mb-2">Pending</h3>
-            <p className="text-3xl font-bold text-amber-500">
-              {groceries.filter((item) => !item.completed).length}
-            </p>
+
+          {/* Pending Card */}
+          <div className="bg-orange-600 p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-300 transform hover:-translate-y-1">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-white font-medium text-sm uppercase tracking-wider mb-2">
+                  Pending
+                </h3>
+                <p className="text-3xl font-bold text-white">
+                  {groceries.filter((item) => !item.completed).length}
+                </p>
+              </div>
+              <div className="bg-slate-50 p-3 rounded-full">
+                <svg
+                  className="w-6 h-6 text-slate-700"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+              </div>
+            </div>
+            <p className="mt-3 text-xs text-white">Items to purchase</p>
           </div>
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <h3 className="text-gray-500 font-medium mb-2">Categories</h3>
-            <p className="text-3xl font-bold text-green-600">
-              {categories.length}
-            </p>
+
+          {/* Categories Card */}
+          <div className="bg-emerald-600 p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-300 transform hover:-translate-y-1">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-white font-medium text-sm uppercase tracking-wider mb-2">
+                  Categories
+                </h3>
+                <p className="text-3xl font-bold text-white">
+                  {categories.length}
+                </p>
+              </div>
+              <div className="bg-teal-50 p-3 rounded-full">
+                <svg
+                  className="w-6 h-6 text-teal-700"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
+                  />
+                </svg>
+              </div>
+            </div>
+            <p className="mt-3 text-xs text-white">Unique categories</p>
           </div>
         </div>
 
-        <div className="bg-white p-8 rounded-2xl shadow-md border border-gray-200 mb-10">
-          <h2 className="text-2xl font-bold text-gray-800 mb-6">
-            Add New Item
-          </h2>
+        <div className="bg-slate-800 p-8 rounded-2xl shadow-md border border-gray-200 mb-10">
+          <h2 className="text-2xl font-bold text-white mb-6">Add New Item</h2>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <div className="md:col-span-2">
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-xl font-semibold text-white mb-2">
                 Item Name
               </label>
               <input
@@ -373,7 +441,7 @@ const GroceryList = () => {
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-xl font-semibold text-white mb-2">
                 Quantity
               </label>
               <input
@@ -387,7 +455,7 @@ const GroceryList = () => {
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-xl font-semibold text-white mb-2">
                 Category
               </label>
               <select
@@ -398,7 +466,18 @@ const GroceryList = () => {
                 className="w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-gray-50 transition"
               >
                 <option value="">Select Category</option>
-                {categories.map((cat, index) => (
+                {[
+                  "Vegetables",
+                  "Fruits",
+                  "Dairy Products",
+                  "Meat & Fish",
+                  "Beverages",
+                  "Snacks",
+                  "Household Items",
+                  "Personal Care",
+                  "Spices",
+                  "Other",
+                ].map((cat, index) => (
                   <option key={index} value={cat}>
                     {cat}
                   </option>
@@ -407,10 +486,10 @@ const GroceryList = () => {
             </div>
           </div>
 
-          <div className="flex justify-end mt-6">
+          <div className="flex justify-center mt-6">
             <button
               onClick={addItem}
-              className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-lg shadow-md transition-all"
+              className="inline-flex items-center gap-2 bg-red-700 text-white font-semibold px-6 py-3 rounded-lg shadow-md transition-all"
             >
               <FaPlus className="text-lg" />
               <span>Add Item</span>
@@ -418,7 +497,7 @@ const GroceryList = () => {
           </div>
         </div>
 
-        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div className="bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div className="flex space-x-2 overflow-x-auto pb-2 md:pb-0 w-full md:w-auto">
             <button
               onClick={() => setActiveTab("all")}
@@ -785,7 +864,18 @@ const GroceryList = () => {
                       className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
                     >
                       <option value="">Select Category</option>
-                      {categories.map((cat, index) => (
+                      {[
+                        "Vegetables",
+                        "Fruits",
+                        "Dairy Products",
+                        "Meat & Fish",
+                        "Beverages",
+                        "Snacks",
+                        "Household Items",
+                        "Personal Care",
+                        "Spices",
+                        "Other",
+                      ].map((cat, index) => (
                         <option key={index} value={cat}>
                           {cat}
                         </option>
