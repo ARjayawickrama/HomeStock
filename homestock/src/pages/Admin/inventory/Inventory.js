@@ -1,9 +1,25 @@
 import React, { useState, useEffect } from "react";
-import { FaPlus, FaSearch, FaEdit, FaTrash, FaTimes, FaSort, FaFileExport } from "react-icons/fa";
+import {
+  FaPlus,
+  FaSearch,
+  FaEdit,
+  FaTrash,
+  FaTimes,
+  FaSort,
+  FaFileExport,
+} from "react-icons/fa";
 import { RiCalendarTodoFill } from "react-icons/ri";
 import axios from "axios";
-import { Bar } from 'react-chartjs-2';
-import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
+import { Bar } from "react-chartjs-2";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+} from "chart.js";
 
 // Register ChartJS components
 ChartJS.register(
@@ -105,21 +121,21 @@ const Inventory = () => {
       labels: categories,
       datasets: [
         {
-          label: 'Quantity in Stock',
+          label: "Quantity in Stock",
           data: quantities,
           backgroundColor: [
-            'rgba(54, 162, 235, 0.6)',
-            'rgba(255, 99, 132, 0.6)',
-            'rgba(75, 192, 192, 0.6)',
-            'rgba(255, 206, 86, 0.6)',
-            'rgba(153, 102, 255, 0.6)',
+            "rgba(54, 162, 235, 0.6)",
+            "rgba(255, 99, 132, 0.6)",
+            "rgba(75, 192, 192, 0.6)",
+            "rgba(255, 206, 86, 0.6)",
+            "rgba(153, 102, 255, 0.6)",
           ],
           borderColor: [
-            'rgba(54, 162, 235, 1)',
-            'rgba(255, 99, 132, 1)',
-            'rgba(75, 192, 192, 1)',
-            'rgba(255, 206, 86, 1)',
-            'rgba(153, 102, 255, 1)',
+            "rgba(54, 162, 235, 1)",
+            "rgba(255, 99, 132, 1)",
+            "rgba(75, 192, 192, 1)",
+            "rgba(255, 206, 86, 1)",
+            "rgba(153, 102, 255, 1)",
           ],
           borderWidth: 1,
         },
@@ -131,11 +147,11 @@ const Inventory = () => {
     responsive: true,
     plugins: {
       legend: {
-        position: 'top',
+        position: "top",
       },
       title: {
         display: true,
-        text: 'Inventory by Category',
+        text: "Inventory by Category",
       },
     },
     scales: {
@@ -143,13 +159,13 @@ const Inventory = () => {
         beginAtZero: true,
         title: {
           display: true,
-          text: 'Quantity',
+          text: "Quantity",
         },
       },
       x: {
         title: {
           display: true,
-          text: 'Category',
+          text: "Category",
         },
       },
     },
@@ -299,10 +315,14 @@ const Inventory = () => {
         <div className="p-6">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
             <div>
-              <h1 className="text-3xl font-bold text-gray-800">Inventory Management</h1>
-              <p className="text-gray-600 mt-1">Manage your inventory items efficiently</p>
+              <h1 className="text-3xl font-bold text-gray-800">
+                Inventory Management
+              </h1>
+              <p className="text-gray-600 mt-1">
+                Manage your inventory items efficiently
+              </p>
             </div>
-            
+
             <div className="flex items-center space-x-4 mt-4 md:mt-0">
               <div className="relative flex items-center bg-blue-50 rounded-lg px-3 py-2">
                 <RiCalendarTodoFill className="text-blue-500 mr-2" />
@@ -318,203 +338,258 @@ const Inventory = () => {
           </div>
 
           {/* Add this section below the header and above the chart */}
-<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-  {/* Total Items Card */}
-  <div className="bg-white p-4 rounded-xl shadow border-l-4 border-blue-500">
-    <div className="flex justify-between items-center">
-      <div>
-        <p className="text-sm font-medium text-gray-500">Total Items</p>
-        <p className="text-2xl font-bold text-gray-800">{items.length}</p>
-      </div>
-      <div className="p-3 rounded-full bg-blue-100 text-blue-600">
-        <FaPlus />
-      </div>
-    </div>
-    <p className="text-xs text-gray-500 mt-2">+5% from last month</p>
-  </div>
-
-  {/* Low Stock Card */}
-  <div className="bg-white p-4 rounded-xl shadow border-l-4 border-red-500">
-    <div className="flex justify-between items-center">
-      <div>
-        <p className="text-sm font-medium text-gray-500">Low Stock</p>
-        <p className="text-2xl font-bold text-gray-800">{lowStockItems.length}</p>
-      </div>
-      <div className="p-3 rounded-full bg-red-100 text-red-600">
-        <FaTimes />
-      </div>
-    </div>
-    <p className="text-xs text-gray-500 mt-2">Items below 5 in quantity</p>
-  </div>
-
-  {/* Categories Card */}
-  <div className="bg-white p-4 rounded-xl shadow border-l-4 border-green-500">
-    <div className="flex justify-between items-center">
-      <div>
-        <p className="text-sm font-medium text-gray-500">Categories</p>
-        <p className="text-2xl font-bold text-gray-800">
-          {[...new Set(items.map(item => item.category))].length}
-        </p>
-      </div>
-      <div className="p-3 rounded-full bg-green-100 text-green-600">
-        <FaSort />
-      </div>
-    </div>
-    <p className="text-xs text-gray-500 mt-2">Unique categories</p>
-  </div>
-
-  {/* Expiring Soon Card */}
-  <div className="bg-white p-4 rounded-xl shadow border-l-4 border-yellow-500">
-    <div className="flex justify-between items-center">
-      <div>
-        <p className="text-sm font-medium text-gray-500">Expiring Soon</p>
-        <p className="text-2xl font-bold text-gray-800">
-          {items.filter(item => {
-            const expiryDate = new Date(item.expiryDate);
-            const today = new Date();
-            const diffTime = expiryDate - today;
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-            return diffDays <= 7;
-          }).length}
-        </p>
-      </div>
-      <div className="p-3 rounded-full bg-yellow-100 text-yellow-600">
-        <RiCalendarTodoFill />
-      </div>
-    </div>
-    <p className="text-xs text-gray-500 mt-2">Within 7 days</p>
-  </div>
-</div>
-
-{/* Add this section below your existing chart */}
-<div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-  {/* Expiry Alerts Section */}
-  <div className="bg-white p-4 rounded-lg shadow">
-    <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-      <RiCalendarTodoFill className="text-yellow-500" />
-      Expiry Alerts
-    </h3>
-    <div className="space-y-3">
-      {items
-        .filter(item => {
-          const expiryDate = new Date(item.expiryDate);
-          const today = new Date();
-          const diffTime = expiryDate - today;
-          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-          return diffDays <= 30;
-        })
-        .sort((a, b) => new Date(a.expiryDate) - new Date(b.expiryDate))
-        .slice(0, 5)
-        .map(item => {
-          const expiryDate = new Date(item.expiryDate);
-          const today = new Date();
-          const diffTime = expiryDate - today;
-          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-          
-          return (
-            <div key={item._id} className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg">
-              <div>
-                <p className="font-medium text-gray-800">{item.name}</p>
-                <p className="text-xs text-gray-500">{item.category}</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            {/* Total Items Card */}
+            <div className="bg-white p-4 rounded-xl shadow border-l-4 border-blue-500">
+              <div className="flex justify-between items-center">
+                <div>
+                  <p className="text-sm font-medium text-gray-500">
+                    Total Items
+                  </p>
+                  <p className="text-2xl font-bold text-gray-800">
+                    {items.length}
+                  </p>
+                </div>
+                <div className="p-3 rounded-full bg-blue-100 text-blue-600">
+                  <FaPlus />
+                </div>
               </div>
-              <div className="text-right">
-                <span className={`px-2 py-1 text-xs rounded-full ${
-                  diffDays <= 7 ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'
-                }`}>
-                  {diffDays <= 0 ? 'Expired' : `${diffDays} days left`}
-                </span>
-                <p className="text-xs text-gray-500 mt-1">
-                  {item.expiryDate.split('T')[0]}
-                </p>
+              <p className="text-xs text-gray-500 mt-2">+5% from last month</p>
+            </div>
+
+            {/* Low Stock Card */}
+            <div className="bg-white p-4 rounded-xl shadow border-l-4 border-red-500">
+              <div className="flex justify-between items-center">
+                <div>
+                  <p className="text-sm font-medium text-gray-500">Low Stock</p>
+                  <p className="text-2xl font-bold text-gray-800">
+                    {lowStockItems.length}
+                  </p>
+                </div>
+                <div className="p-3 rounded-full bg-red-100 text-red-600">
+                  <FaTimes />
+                </div>
+              </div>
+              <p className="text-xs text-gray-500 mt-2">
+                Items below 5 in quantity
+              </p>
+            </div>
+
+            {/* Categories Card */}
+            <div className="bg-white p-4 rounded-xl shadow border-l-4 border-green-500">
+              <div className="flex justify-between items-center">
+                <div>
+                  <p className="text-sm font-medium text-gray-500">
+                    Categories
+                  </p>
+                  <p className="text-2xl font-bold text-gray-800">
+                    {[...new Set(items.map((item) => item.category))].length}
+                  </p>
+                </div>
+                <div className="p-3 rounded-full bg-green-100 text-green-600">
+                  <FaSort />
+                </div>
+              </div>
+              <p className="text-xs text-gray-500 mt-2">Unique categories</p>
+            </div>
+
+            {/* Expiring Soon Card */}
+            <div className="bg-white p-4 rounded-xl shadow border-l-4 border-yellow-500">
+              <div className="flex justify-between items-center">
+                <div>
+                  <p className="text-sm font-medium text-gray-500">
+                    Expiring Soon
+                  </p>
+                  <p className="text-2xl font-bold text-gray-800">
+                    {
+                      items.filter((item) => {
+                        const expiryDate = new Date(item.expiryDate);
+                        const today = new Date();
+                        const diffTime = expiryDate - today;
+                        const diffDays = Math.ceil(
+                          diffTime / (1000 * 60 * 60 * 24)
+                        );
+                        return diffDays <= 7;
+                      }).length
+                    }
+                  </p>
+                </div>
+                <div className="p-3 rounded-full bg-yellow-100 text-yellow-600">
+                  <RiCalendarTodoFill />
+                </div>
+              </div>
+              <p className="text-xs text-gray-500 mt-2">Within 7 days</p>
+            </div>
+          </div>
+
+          {/* Add this section below your existing chart */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+            {/* Expiry Alerts Section */}
+            <div className="bg-white p-4 rounded-lg shadow">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                <RiCalendarTodoFill className="text-yellow-500" />
+                Expiry Alerts
+              </h3>
+              <div className="space-y-3">
+                {items
+                  .filter((item) => {
+                    const expiryDate = new Date(item.expiryDate);
+                    const today = new Date();
+                    const diffTime = expiryDate - today;
+                    const diffDays = Math.ceil(
+                      diffTime / (1000 * 60 * 60 * 24)
+                    );
+                    return diffDays <= 30;
+                  })
+                  .sort(
+                    (a, b) => new Date(a.expiryDate) - new Date(b.expiryDate)
+                  )
+                  .slice(0, 5)
+                  .map((item) => {
+                    const expiryDate = new Date(item.expiryDate);
+                    const today = new Date();
+                    const diffTime = expiryDate - today;
+                    const diffDays = Math.ceil(
+                      diffTime / (1000 * 60 * 60 * 24)
+                    );
+
+                    return (
+                      <div
+                        key={item._id}
+                        className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg"
+                      >
+                        <div>
+                          <p className="font-medium text-gray-800">
+                            {item.name}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {item.category}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <span
+                            className={`px-2 py-1 text-xs rounded-full ${
+                              diffDays <= 7
+                                ? "bg-red-100 text-red-800"
+                                : "bg-yellow-100 text-yellow-800"
+                            }`}
+                          >
+                            {diffDays <= 0
+                              ? "Expired"
+                              : `${diffDays} days left`}
+                          </span>
+                          <p className="text-xs text-gray-500 mt-1">
+                            {item.expiryDate.split("T")[0]}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                {items.filter((item) => {
+                  const expiryDate = new Date(item.expiryDate);
+                  const today = new Date();
+                  const diffTime = expiryDate - today;
+                  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                  return diffDays <= 30;
+                }).length === 0 && (
+                  <p className="text-center text-gray-500 py-4">
+                    No items expiring soon
+                  </p>
+                )}
               </div>
             </div>
-          );
-        })}
-      {items.filter(item => {
-        const expiryDate = new Date(item.expiryDate);
-        const today = new Date();
-        const diffTime = expiryDate - today;
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        return diffDays <= 30;
-      }).length === 0 && (
-        <p className="text-center text-gray-500 py-4">No items expiring soon</p>
-      )}
-    </div>
-  </div>
 
-  {/* Recent Activity Section */}
-  {/* Recent Activity Section */}
-<div className="bg-white p-4 rounded-lg shadow">
-  <h3 className="text-lg font-semibold text-gray-800 mb-4">Recent Activity</h3>
-  <div className="space-y-3">
-    {[...items]
-      .sort((a, b) => new Date(b.updatedAt || b.createdAt) - new Date(a.updatedAt || a.createdAt)) // fixed here
-      .slice(0, 5)
-      .map(item => (
-        <div key={item._id} className="flex items-start gap-3 p-3 border-b border-gray-100 last:border-0">
-          <div className="mt-1 p-1 rounded-full bg-blue-100 text-blue-600">
-            {item.updatedAt ? <FaEdit size={12} /> : <FaPlus size={12} />}
+            {/* Recent Activity Section */}
+            {/* Recent Activity Section */}
+            <div className="bg-white p-4 rounded-lg shadow">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                Recent Activity
+              </h3>
+              <div className="space-y-3">
+                {[...items]
+                  .sort(
+                    (a, b) =>
+                      new Date(b.updatedAt || b.createdAt) -
+                      new Date(a.updatedAt || a.createdAt)
+                  ) // fixed here
+                  .slice(0, 5)
+                  .map((item) => (
+                    <div
+                      key={item._id}
+                      className="flex items-start gap-3 p-3 border-b border-gray-100 last:border-0"
+                    >
+                      <div className="mt-1 p-1 rounded-full bg-blue-100 text-blue-600">
+                        {item.updatedAt ? (
+                          <FaEdit size={12} />
+                        ) : (
+                          <FaPlus size={12} />
+                        )}
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-800">
+                          {item.updatedAt ? "Updated" : "Added"} {item.name}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {new Date(
+                            item.updatedAt || item.createdAt
+                          ).toLocaleString()}
+                        </p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          Qty: {item.quantity} | Category: {item.category}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            </div>
+
+            {/* Quick Actions Section */}
+            <div className="bg-white p-4 rounded-lg shadow">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                Quick Actions
+              </h3>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  className="flex flex-col items-center justify-center p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
+                  onClick={toggleForm}
+                >
+                  <div className="p-3 rounded-full bg-blue-100 text-blue-600 mb-2">
+                    <FaPlus />
+                  </div>
+                  <span className="text-sm font-medium text-gray-800">
+                    Add Item
+                  </span>
+                </button>
+                <button
+                  className="flex flex-col items-center justify-center p-4 bg-green-50 rounded-lg hover:bg-green-100 transition-colors"
+                  onClick={toggleLowStockModal}
+                >
+                  <div className="p-3 rounded-full bg-green-100 text-green-600 mb-2">
+                    <FaTimes />
+                  </div>
+                  <span className="text-sm font-medium text-gray-800">
+                    Low Stock
+                  </span>
+                </button>
+                <button className="flex flex-col items-center justify-center p-4 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors">
+                  <div className="p-3 rounded-full bg-purple-100 text-purple-600 mb-2">
+                    <FaFileExport />
+                  </div>
+                  <span className="text-sm font-medium text-gray-800">
+                    Export Data
+                  </span>
+                </button>
+                <button className="flex flex-col items-center justify-center p-4 bg-yellow-50 rounded-lg hover:bg-yellow-100 transition-colors">
+                  <div className="p-3 rounded-full bg-yellow-100 text-yellow-600 mb-2">
+                    <RiCalendarTodoFill />
+                  </div>
+                  <span className="text-sm font-medium text-gray-800">
+                    Expiry Report
+                  </span>
+                </button>
+              </div>
+            </div>
           </div>
-          <div>
-            <p className="text-sm font-medium text-gray-800">
-              {item.updatedAt ? 'Updated' : 'Added'} {item.name}
-            </p>
-            <p className="text-xs text-gray-500">
-              {new Date(item.updatedAt || item.createdAt).toLocaleString()}
-            </p>
-            <p className="text-xs text-gray-500 mt-1">
-              Qty: {item.quantity} | Category: {item.category}
-            </p>
-          </div>
-        </div>
-      ))}
-  </div>
-</div>
-
-
-  {/* Quick Actions Section */}
-  <div className="bg-white p-4 rounded-lg shadow">
-    <h3 className="text-lg font-semibold text-gray-800 mb-4">Quick Actions</h3>
-    <div className="grid grid-cols-2 gap-3">
-      <button 
-        className="flex flex-col items-center justify-center p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
-        onClick={toggleForm}
-      >
-        <div className="p-3 rounded-full bg-blue-100 text-blue-600 mb-2">
-          <FaPlus />
-        </div>
-        <span className="text-sm font-medium text-gray-800">Add Item</span>
-      </button>
-      <button 
-        className="flex flex-col items-center justify-center p-4 bg-green-50 rounded-lg hover:bg-green-100 transition-colors"
-        onClick={toggleLowStockModal}
-      >
-        <div className="p-3 rounded-full bg-green-100 text-green-600 mb-2">
-          <FaTimes />
-        </div>
-        <span className="text-sm font-medium text-gray-800">Low Stock</span>
-      </button>
-      <button 
-        className="flex flex-col items-center justify-center p-4 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors"
-      >
-        <div className="p-3 rounded-full bg-purple-100 text-purple-600 mb-2">
-          <FaFileExport />
-        </div>
-        <span className="text-sm font-medium text-gray-800">Export Data</span>
-      </button>
-      <button 
-        className="flex flex-col items-center justify-center p-4 bg-yellow-50 rounded-lg hover:bg-yellow-100 transition-colors"
-      >
-        <div className="p-3 rounded-full bg-yellow-100 text-yellow-600 mb-2">
-          <RiCalendarTodoFill />
-        </div>
-        <span className="text-sm font-medium text-gray-800">Expiry Report</span>
-      </button>
-    </div>
-  </div>
-</div>
-
-          
 
           {/* Added Chart Section */}
           <div className="bg-white p-4 rounded-lg shadow mb-6">
@@ -536,16 +611,16 @@ const Inventory = () => {
                 onChange={(e) => setSearch(e.target.value)}
               />
             </div>
-            
-             
           </div>
 
           {warning && (
-            <div className={`mb-6 p-3 rounded-lg text-center ${
-              warning.includes("success") 
-                ? "bg-green-100 text-green-800 border border-green-200" 
-                : "bg-red-100 text-red-800 border border-red-200"
-            }`}>
+            <div
+              className={`mb-6 p-3 rounded-lg text-center ${
+                warning.includes("success")
+                  ? "bg-green-100 text-green-800 border border-green-200"
+                  : "bg-red-100 text-red-800 border border-red-200"
+              }`}
+            >
               {warning}
             </div>
           )}
@@ -569,7 +644,7 @@ const Inventory = () => {
                       required
                     >
                       <option value="">Select Item Number</option>
-                      {barcodeOptions.slice(0, 1).map((option) => (
+                      {barcodeOptions.slice(0, 10).map((option) => (
                         <option key={option.value} value={option.value}>
                           {option.label}
                         </option>
@@ -589,38 +664,37 @@ const Inventory = () => {
                       required
                     >
                       <option value="">Select Item</option>
-<option value="Milk">Milk</option>
-<option value="Eggs">Eggs</option>
-<option value="Bread">Bread</option>
-<option value="Cheese">Cheese</option>
-<option value="Butter">Butter</option>
-<option value="Yogurt">Yogurt</option>
-<option value="Chicken">Chicken</option>
-<option value="Beef">Beef</option>
-<option value="Fish">Fish</option>
-<option value="Rice">Rice</option>
-<option value="Pasta">Pasta</option>
-<option value="Apples">Apples</option>
-<option value="Bananas">Bananas</option>
-<option value="Oranges">Oranges</option>
-<option value="Tomatoes">Tomatoes</option>
-<option value="Potatoes">Potatoes</option>
-<option value="Carrots">Carrots</option>
-<option value="Onions">Onions</option>
-<option value="Garlic">Garlic</option>
-<option value="Lettuce">Lettuce</option>
-<option value="Cucumber">Cucumber</option>
-<option value="Peppers">Peppers</option>
-<option value="Mushrooms">Mushrooms</option>
-<option value="Olive Oil">Olive Oil</option>
-<option value="Salt">Salt</option>
-<option value="Pepper">Pepper</option>
-<option value="Sugar">Sugar</option>
-<option value="Flour">Flour</option>
-<option value="Cereal">Cereal</option>
-<option value="Juice">Juice</option>
-<option value="Water">Water</option>
-
+                      <option value="Milk">Milk</option>
+                      <option value="Eggs">Eggs</option>
+                      <option value="Bread">Bread</option>
+                      <option value="Cheese">Cheese</option>
+                      <option value="Butter">Butter</option>
+                      <option value="Yogurt">Yogurt</option>
+                      <option value="Chicken">Chicken</option>
+                      <option value="Beef">Beef</option>
+                      <option value="Fish">Fish</option>
+                      <option value="Rice">Rice</option>
+                      <option value="Pasta">Pasta</option>
+                      <option value="Apples">Apples</option>
+                      <option value="Bananas">Bananas</option>
+                      <option value="Oranges">Oranges</option>
+                      <option value="Tomatoes">Tomatoes</option>
+                      <option value="Potatoes">Potatoes</option>
+                      <option value="Carrots">Carrots</option>
+                      <option value="Onions">Onions</option>
+                      <option value="Garlic">Garlic</option>
+                      <option value="Lettuce">Lettuce</option>
+                      <option value="Cucumber">Cucumber</option>
+                      <option value="Peppers">Peppers</option>
+                      <option value="Mushrooms">Mushrooms</option>
+                      <option value="Olive Oil">Olive Oil</option>
+                      <option value="Salt">Salt</option>
+                      <option value="Pepper">Pepper</option>
+                      <option value="Sugar">Sugar</option>
+                      <option value="Flour">Flour</option>
+                      <option value="Cereal">Cereal</option>
+                      <option value="Juice">Juice</option>
+                      <option value="Water">Water</option>
                     </select>
                   </div>
 
@@ -636,13 +710,15 @@ const Inventory = () => {
                       required
                     >
                       <option value="">Select Category</option>
-                      <option value="Dairy">Dairy</option>          
-<option value="Meat & Fish">Meat & Fish</option>   
-<option value="Bakery">Bakery</option>         
-<option value="Fruits">Fruits</option>         
-<option value="Vegetables">Vegetables</option>  
-<option value="Pantry Essentials">Pantry Essentials</option>  
-<option value="Beverages">Beverages</option>  
+                      <option value="Dairy">Dairy</option>
+                      <option value="Meat & Fish">Meat & Fish</option>
+                      <option value="Bakery">Bakery</option>
+                      <option value="Fruits">Fruits</option>
+                      <option value="Vegetables">Vegetables</option>
+                      <option value="Pantry Essentials">
+                        Pantry Essentials
+                      </option>
+                      <option value="Beverages">Beverages</option>
                     </select>
                   </div>
 
@@ -694,7 +770,7 @@ const Inventory = () => {
                         required
                       >
                         <option value="">Select from scanned dates</option>
-                        {expiryDateOptions.slice(0, 1).map((option) => (
+                        {expiryDateOptions.slice(0, 10).map((option) => (
                           <option key={option.value} value={option.value}>
                             {option.label}
                           </option>
@@ -749,7 +825,9 @@ const Inventory = () => {
             <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
               <div className="bg-white rounded-xl shadow-xl w-full max-w-md">
                 <div className="flex justify-between items-center border-b border-gray-200 p-4">
-                  <h3 className="text-xl font-semibold text-gray-800">Low Stock Items</h3>
+                  <h3 className="text-xl font-semibold text-gray-800">
+                    Low Stock Items
+                  </h3>
                   <button
                     onClick={toggleLowStockModal}
                     className="text-gray-500 hover:text-gray-700 p-1 rounded-full hover:bg-gray-100"
@@ -764,8 +842,12 @@ const Inventory = () => {
                         <li key={item._id} className="py-3">
                           <div className="flex justify-between">
                             <div>
-                              <p className="font-medium text-gray-800">{item.name}</p>
-                              <p className="text-sm text-gray-600">{item.category}</p>
+                              <p className="font-medium text-gray-800">
+                                {item.name}
+                              </p>
+                              <p className="text-sm text-gray-600">
+                                {item.category}
+                              </p>
                             </div>
                             <div className="text-right">
                               <span className="inline-block px-2 py-1 rounded-full bg-red-100 text-red-800 text-xs font-medium">
@@ -801,31 +883,58 @@ const Inventory = () => {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
                     Item #
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
                     Name
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
                     Category
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
                     Qty
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
                     Mfg Date
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
                     Expiry Date
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
                     Temp
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
                     Status
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
                     Actions
                   </th>
                 </tr>
@@ -833,7 +942,10 @@ const Inventory = () => {
               <tbody className="bg-white divide-y divide-gray-200">
                 {sortedItems.length > 0 ? (
                   sortedItems.map((item) => (
-                    <tr key={item._id} className="hover:bg-gray-50 transition-colors duration-150">
+                    <tr
+                      key={item._id}
+                      className="hover:bg-gray-50 transition-colors duration-150"
+                    >
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                         {item.itemNumber}
                       </td>
@@ -843,9 +955,11 @@ const Inventory = () => {
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {item.category}
                       </td>
-                      <td className={`px-6 py-4 whitespace-nowrap text-sm font-medium ${
-                        item.quantity < 5 ? "text-red-600" : "text-gray-900"
-                      }`}>
+                      <td
+                        className={`px-6 py-4 whitespace-nowrap text-sm font-medium ${
+                          item.quantity < 5 ? "text-red-600" : "text-gray-900"
+                        }`}
+                      >
                         {item.quantity}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -858,11 +972,13 @@ const Inventory = () => {
                         {item.temperature}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`px-2 py-1 text-xs rounded-full ${
-                          item.status === "Available"
-                            ? "bg-green-100 text-green-800"
-                            : "bg-yellow-100 text-yellow-800"
-                        }`}>
+                        <span
+                          className={`px-2 py-1 text-xs rounded-full ${
+                            item.status === "Available"
+                              ? "bg-green-100 text-green-800"
+                              : "bg-yellow-100 text-yellow-800"
+                          }`}
+                        >
                           {item.status}
                         </span>
                       </td>
@@ -888,7 +1004,10 @@ const Inventory = () => {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="9" className="px-6 py-4 text-center text-sm text-gray-500">
+                    <td
+                      colSpan="9"
+                      className="px-6 py-4 text-center text-sm text-gray-500"
+                    >
                       No items found. Try adjusting your search.
                     </td>
                   </tr>
@@ -902,4 +1021,4 @@ const Inventory = () => {
   );
 };
 
-export default Inventory; 
+export default Inventory;
