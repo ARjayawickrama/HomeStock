@@ -6,6 +6,10 @@ import {
   FiClock,
   FiAlertTriangle,
   FiCheckCircle,
+  FiEdit,
+  FiPlus,
+  FiX,
+  FiSave,
 } from "react-icons/fi";
 import { FaBarcode } from "react-icons/fa";
 
@@ -19,21 +23,28 @@ const BarcodeTable = () => {
     key: "createdAt",
     direction: "desc",
   });
+  const [editingId, setEditingId] = useState(null);
+  const [editFormData, setEditFormData] = useState({ code: "" });
+  const [newBarcode, setNewBarcode] = useState("");
+  const [showAddForm, setShowAddForm] = useState(false);
 
   useEffect(() => {
-    const fetchBarcodes = async () => {
-      try {
-        const response = await axios.get("http://localhost:5000/api/barcodes");
-        setBarcodes(response.data.barcodes);
-      } catch (err) {
-        setError("Failed to fetch barcode data");
-        console.error("Error fetching barcodes:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchBarcodes();
   }, []);
+
+  const fetchBarcodes = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get("http://localhost:5000/api/barcodes");
+      setBarcodes(response.data.barcodes);
+      setError(null);
+    } catch (err) {
+      setError("Failed to fetch barcode data");
+      console.error("Error fetching barcodes:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
@@ -50,9 +61,8 @@ const BarcodeTable = () => {
     const cleanedBarcode = barcode.replace(/[^0-9]/g, "");
 
     if (cleanedBarcode.length < 10)
-      return <span className="text-white italic">Invalid format</span>;
+      return <span className="text-gray-500 italic">Invalid format</span>;
 
-    const itemNumber = cleanedBarcode.slice(0, 2);
     const month = cleanedBarcode.slice(2, 4);
     const day = cleanedBarcode.slice(4, 6);
     const year = cleanedBarcode.slice(6, 10);
@@ -120,6 +130,61 @@ const BarcodeTable = () => {
     }
   };
 
+  const startEditing = (barcode) => {
+    setEditingId(barcode._id);
+    setEditFormData({ code: barcode.code });
+  };
+
+  const cancelEditing = () => {
+    setEditingId(null);
+  };
+
+  const handleEditChange = (e) => {
+    setEditFormData({
+      ...editFormData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const saveEditedBarcode = async (barcodeId) => {
+    try {
+      const response = await axios.put(
+        `http://localhost:5000/api/barcodes/${barcodeId}`,
+        editFormData
+      );
+      setBarcodes(
+        barcodes.map((barcode) =>
+          barcode._id === barcodeId ? response.data.barcode : barcode
+        )
+      );
+      setEditingId(null);
+    } catch (err) {
+      setError("Error updating barcode");
+      console.error("Error updating barcode:", err);
+    }
+  };
+
+  const handleAddBarcodeChange = (e) => {
+    setNewBarcode(e.target.value);
+  };
+
+  const addBarcode = async () => {
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/api/barcodes/scan",
+        {
+          barcode: newBarcode,
+        }
+      );
+      setBarcodes([response.data.barcode, ...barcodes]);
+      setNewBarcode("");
+      setShowAddForm(false);
+    } catch (err) {
+      setError(err.response?.data?.message || "Error adding barcode");
+      console.error("Error adding barcode:", err);
+    }
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="bg-white rounded-xl shadow-md overflow-hidden">
@@ -135,19 +200,65 @@ const BarcodeTable = () => {
             </p>
           </div>
 
-          <div className="relative w-full md:w-64">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <FiSearch className="text-gray-400" />
+          <div className="flex flex-col md:flex-row gap-3 w-full md:w-auto">
+            <div className="relative w-full md:w-64">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <FiSearch className="text-gray-400" />
+              </div>
+              <input
+                type="text"
+                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Search barcodes..."
+                value={searchQuery}
+                onChange={handleSearchChange}
+              />
             </div>
-            <input
-              type="text"
-              className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Search barcodes..."
-              value={searchQuery}
-              onChange={handleSearchChange}
-            />
+            <button
+              onClick={() => setShowAddForm(!showAddForm)}
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
+              <FiPlus className="mr-2" />
+              Add Barcode
+            </button>
           </div>
         </div>
+
+        {/* Add Barcode Form */}
+        {showAddForm && (
+          <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
+            <div className="flex flex-col md:flex-row gap-3">
+              <div className="flex-grow">
+                <input
+                  type="text"
+                  name="newBarcode"
+                  className="block w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Enter new barcode"
+                  value={newBarcode}
+                  onChange={handleAddBarcodeChange}
+                />
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={addBarcode}
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                >
+                  <FiSave className="mr-2" />
+                  Save
+                </button>
+                <button
+                  onClick={() => {
+                    setShowAddForm(false);
+                    setNewBarcode("");
+                  }}
+                  className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                >
+                  <FiX className="mr-2" />
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Error Message */}
         {error && (
@@ -171,7 +282,7 @@ const BarcodeTable = () => {
                 <tr>
                   <th
                     scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                    className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider cursor-pointer hover:bg-gray-700"
                     onClick={() => requestSort("code")}
                   >
                     <div className="flex items-center">
@@ -191,7 +302,7 @@ const BarcodeTable = () => {
                   </th>
                   <th
                     scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                    className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider cursor-pointer hover:bg-gray-700"
                     onClick={() => requestSort("createdAt")}
                   >
                     <div className="flex items-center">
@@ -220,16 +331,26 @@ const BarcodeTable = () => {
                       className="hover:bg-gray-50 transition-colors"
                     >
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <div className="flex-shrink-0 h-10 w-10 flex items-center justify-center bg-blue-100 rounded-lg">
-                            <FaBarcode className="text-blue-600" />
-                          </div>
-                          <div className="ml-4">
-                            <div className="text-sm font-medium text-gray-900">
-                              {barcode.code}
+                        {editingId === barcode._id ? (
+                          <input
+                            type="text"
+                            name="code"
+                            value={editFormData.code}
+                            onChange={handleEditChange}
+                            className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                          />
+                        ) : (
+                          <div className="flex items-center">
+                            <div className="flex-shrink-0 h-10 w-10 flex items-center justify-center bg-blue-100 rounded-lg">
+                              <FaBarcode className="text-blue-600" />
+                            </div>
+                            <div className="ml-4">
+                              <div className="text-sm font-medium text-gray-900">
+                                {barcode.code}
+                              </div>
                             </div>
                           </div>
-                        </div>
+                        )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         {formatExpiryDate(barcode.code)}
@@ -241,21 +362,49 @@ const BarcodeTable = () => {
                             : "N/A"}
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <button
-                          onClick={() => deleteBarcode(barcode._id)}
-                          className={`inline-flex items-center px-3 py-1 border border-transparent text-sm leading-5 font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 ${
-                            deletingBarcode === barcode._id
-                              ? "opacity-50 cursor-not-allowed"
-                              : ""
-                          }`}
-                          disabled={deletingBarcode === barcode._id}
-                        >
-                          <FiTrash2 className="mr-1" />
-                          {deletingBarcode === barcode._id
-                            ? "Deleting..."
-                            : "Delete"}
-                        </button>
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+                        {editingId === barcode._id ? (
+                          <>
+                            <button
+                              onClick={() => saveEditedBarcode(barcode._id)}
+                              className="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-5 font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                            >
+                              <FiSave className="mr-1" />
+                              Save
+                            </button>
+                            <button
+                              onClick={cancelEditing}
+                              className="inline-flex items-center px-3 py-1 border border-gray-300 text-sm leading-5 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                            >
+                              <FiX className="mr-1" />
+                              Cancel
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <button
+                              onClick={() => startEditing(barcode)}
+                              className="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-5 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                            >
+                              <FiEdit className="mr-1" />
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => deleteBarcode(barcode._id)}
+                              className={`inline-flex items-center px-3 py-1 border border-transparent text-sm leading-5 font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 ${
+                                deletingBarcode === barcode._id
+                                  ? "opacity-50 cursor-not-allowed"
+                                  : ""
+                              }`}
+                              disabled={deletingBarcode === barcode._id}
+                            >
+                              <FiTrash2 className="mr-1" />
+                              {deletingBarcode === barcode._id
+                                ? "Deleting..."
+                                : "Delete"}
+                            </button>
+                          </>
+                        )}
                       </td>
                     </tr>
                   ))

@@ -285,7 +285,7 @@ const Inventory = () => {
                 required
               >
                 <option value="">Select Item Number</option>
-                {barcodeOptions.slice(0, 1).map(
+                {barcodeOptions.slice(0, 5).map(
                   (
                     option // Only shows first 5 options
                   ) => (
@@ -379,7 +379,7 @@ const Inventory = () => {
                   required
                 >
                   <option value="">Select from scanned dates</option>
-                  {expiryDateOptions.slice(0, 1).map(
+                  {expiryDateOptions.slice(0, 2).map(
                     (
                       option // Only show first 3 options
                     ) => (
