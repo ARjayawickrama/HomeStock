@@ -47,21 +47,20 @@ function Temperature({ temperaturePercentage }) {
         ]);
 
         setSensorData({
-          temperature: tempRes.data.temperature || 0,
-          humidity: tempRes.data.humidity || 0,
-          gas: gasRes.data?.gas_value || 0,
+          temperature: tempRes.data?.temperature || 0,
+          humidity: tempRes.data?.humidity || 0,
+          gas: gasRes.data?.gas_value || gasRes.data?.gas || 0,
         });
         setError(null);
       } catch (err) {
         setError("Failed to fetch sensor data");
         console.error("API Error:", err);
         // Set default values when API fails
-        setSensorData((prev) => ({
-          ...prev,
-          temperature: prev.temperature || 0,
-          humidity: prev.humidity || 0,
-          gas: prev.gas || 0,
-        }));
+        setSensorData({
+          temperature: 0,
+          humidity: 0,
+          gas: 0,
+        });
       } finally {
         setLoading(false);
       }
@@ -90,7 +89,7 @@ function Temperature({ temperaturePercentage }) {
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6  ">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-6 text-white shadow-xl relative overflow-hidden">
           <GasDisplay gasValue={sensorData.gas} loading={loading} />
         </div>
