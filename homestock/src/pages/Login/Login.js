@@ -3,8 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { HiHome } from "react-icons/hi2";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
-
-import backgroundImage from "../../../src/assets/2.jpg";
+import { motion, AnimatePresence } from "framer-motion";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -12,6 +11,7 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -49,90 +49,172 @@ const Login = () => {
   };
 
   return (
-    <div className="relative flex items-center justify-center min-h-screen">
-      
-      {/* Blurred Background */}
-      <div
-        className="absolute inset-0 bg-cover bg-center blur-sm"
-        style={{ backgroundImage: `url(${backgroundImage})` }}
-      ></div>
+    <div className="relative flex items-center justify-center min-h-screen overflow-hidden ">
+      {/* Background pattern */}
+      <div className="absolute inset-0 bg-gradient-to-r from-gray-800  opacity-90">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-gray-700 via-transparent to-transparent opacity-20"></div>
+      </div>
 
-      {/* Overlay for Glass Effect */}
-      <div className="absolute inset-0 bg-black/30 "></div>
+      {/* Login Box with Animation */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+        className="relative z-10 bg-gray-800 p-8 rounded-xl shadow-2xl w-96 max-w-[90%] border border-gray-700"
+      >
+        {/* Logo with Animation */}
+        <motion.div
+          initial={{ scale: 0.9 }}
+          animate={{ scale: 1 }}
+          transition={{ type: "spring", stiffness: 200, damping: 10 }}
+          className="flex justify-center"
+        >
+          <HiHome className="text-5xl text-blue-400" />
+        </motion.div>
 
-      {/* Login Box */}
-      <div className="relative z-10 bg-white/90 p-8 rounded-lg shadow-lg w-96">
-        <div className="flex justify-center">
-          <HiHome className="text-5xl text-gray-900" />
-        </div>
-        <h2 className="text-2xl font-bold text-center text-gray-900 mt-2">
-          Sign in to Home Stock
+        <h2 className="text-2xl font-bold text-center text-white mt-2 mb-1">
+          Welcome Back
         </h2>
-        {error && (
-          <p className="text-red-500 text-sm text-center mt-2">{error}</p>
-        )}
+        <p className="text-sm text-gray-400 text-center mb-6">
+          Sign in to your Home Stock account
+        </p>
+
+        <AnimatePresence>
+          {error && (
+            <motion.p
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              className="text-red-400 text-sm text-center mb-4 p-2 bg-red-900/20 rounded-lg"
+            >
+              {error}
+            </motion.p>
+          )}
+        </AnimatePresence>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="mt-4">
-          <div className="mb-4">
-            <label htmlFor="email" className="block text-gray-700 font-medium">
+        <form onSubmit={handleSubmit} className="space-y ">
+          <div>
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-gray-300 mb-1"
+            >
               Email address
             </label>
-            <input
-              type="email"
-              id="email"
-              placeholder="john.doe@company.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
-            />
+            <motion.div whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}>
+              <input
+                type="email"
+                id="email"
+                placeholder="john.doe@company.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="w-full px-4 py-2.5 text-sm bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-white placeholder-gray-400"
+              />
+            </motion.div>
           </div>
 
           {/* Password Field with Toggle */}
-          <div className="mb-4 relative">
-            <label htmlFor="password" className="block text-gray-700 font-medium">
+          <div>
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-gray-300 mb-1"
+            >
               Password
             </label>
-            <div className="relative">
+            <motion.div
+              whileHover={{ scale: 1.01 }}
+              whileTap={{ scale: 0.99 }}
+              className="relative"
+            >
               <input
                 id="password"
                 type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 pr-10"
+                className="w-full px-4 py-2.5 text-sm bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-10 transition-all duration-200 text-white placeholder-gray-400"
+                placeholder="••••••••"
               />
               {/* Toggle Show Password */}
               <button
                 type="button"
                 onClick={handleShowClick}
-                className="absolute right-3 top-3 text-gray-600 hover:text-gray-900"
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white transition-colors duration-200"
               >
-                {showPassword ? <AiOutlineEyeInvisible size={20} /> : <AiOutlineEye size={20} />}
+                {showPassword ? (
+                  <AiOutlineEyeInvisible size={18} />
+                ) : (
+                  <AiOutlineEye size={18} />
+                )}
               </button>
-            </div>
+            </motion.div>
           </div>
 
-          {/* Submit Button */}
-          <button
+          {/* Forgot Password Link */}
+          <div className="flex justify-end">
+            <a
+              href="/forgot-password"
+              className="text-xs text-gray-400 hover:text-blue-400 transition-colors duration-200"
+            >
+              Forgot password?
+            </a>
+          </div>
+
+          {/* Submit Button with Animation */}
+          <motion.button
             type="submit"
             disabled={loading}
-            className={`w-full text-white py-2 rounded-lg transition duration-200 ${
-              loading ? "bg-gray-500 cursor-not-allowed" : "bg-gray-900 hover:bg-gray-800"
-            }`}
+            className={`w-full text-white py-3 rounded-lg font-medium text-sm tracking-wide relative overflow-hidden ${
+              loading ? "bg-gray-600" : "bg-blue-600 hover:bg-blue-700"
+            } transition-colors duration-200`}
+            whileHover={!loading ? { scale: 1.02 } : {}}
+            whileTap={!loading ? { scale: 0.98 } : {}}
+            onHoverStart={() => !loading && setIsHovered(true)}
+            onHoverEnd={() => setIsHovered(false)}
           >
-            {loading ? "Logging in..." : "Login"}
-          </button>
+            <span className="relative z-10">
+              {loading ? (
+                <span className="flex items-center justify-center">
+                  <motion.span
+                    animate={{ rotate: 360 }}
+                    transition={{
+                      duration: 1,
+                      repeat: Infinity,
+                      ease: "linear",
+                    }}
+                    className="inline-block h-4 w-4 border-2 border-white border-t-transparent rounded-full mr-2"
+                  ></motion.span>
+                  Logging in...
+                </span>
+              ) : (
+                "Sign In"
+              )}
+            </span>
+            {!loading && (
+              <motion.span
+                className="absolute inset-0 bg-gradient-to-r from-blue-700 to-blue-600 opacity-0"
+                animate={{ opacity: isHovered ? 1 : 0 }}
+                transition={{ duration: 0.3 }}
+              ></motion.span>
+            )}
+          </motion.button>
         </form>
 
         {/* Sign Up Link */}
-        <p className="text-sm text-gray-600 text-center mt-4">
-          New to Home Stock?{" "}
-          <a href="/SignUp" className="text-blue-500 hover:underline">
-            Create an account
-          </a>
-        </p>
-      </div>
+        <div className="mt-6 text-center">
+          <p className="text-xs text-gray-400">
+            Don't have an account?{" "}
+            <motion.a
+              href="/SignUp"
+              className="text-blue-400 font-medium hover:underline"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              Sign up
+            </motion.a>
+          </p>
+        </div>
+      </motion.div>
     </div>
   );
 };

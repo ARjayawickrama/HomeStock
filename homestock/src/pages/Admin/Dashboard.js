@@ -5,7 +5,7 @@ import Inventory from "./inventory/Inventory";
 import Grocery_ist from "./grocery_ist/grocery_ist";
 import Budgeting from "./budgeting/budgeting";
 import Iot from "./iot/iot";
-import Home from "./home";
+import AdminHome from "./adminhome";
 import Allusers from "../Login/Allusers";
 import backgroundImage from "../../../src/assets/map2.png";
 import Logo from "../../../src/assets/2.jpg";
@@ -29,7 +29,6 @@ const Dashboard = () => {
 
   return (
     <div className="h-screen flex">
-    
       <aside className="w-64 h-screen fixed left-0 top-0 bg-gradient-to-r  from-black to-slate-800 shadow-2xl p-6">
         <div className="flex flex-col items-center text-center mb-6">
           <div className="w-24 h-24 rounded-full overflow-hidden mb-4">
@@ -40,9 +39,7 @@ const Dashboard = () => {
                 backgroundSize: "cover",
                 backgroundPosition: "center",
               }}
-            >
-             
-            </div>
+            ></div>
           </div>
           <h2 className="text-xl font-semibold text-white">Home Stock</h2>
           <p className="text-sm text-white">System Unit</p>
@@ -73,7 +70,6 @@ const Dashboard = () => {
       </aside>
 
       <div className="flex-1 ml-64 flex flex-col h-screen">
-        
         <nav className="bg-gradient-to-r from-slate-800 to-black text-white p-4 flex justify-between items-center shadow-md">
           <div className="flex items-center gap-4">
             <span className="text-lg font-semibold relative right-4">
@@ -98,9 +94,8 @@ const Dashboard = () => {
           </div>
         </nav>
 
-   
         <main className=" bg-white p-4 rounded-lg  ">
-          {activeTab === "home" && <Home />}
+          {activeTab === "home" && <AdminHome />}
           {activeTab === "inventory" && <Inventory />}
           {activeTab === "grocery" && <Grocery_ist />}
           {activeTab === "budgeting" && <Budgeting />}
