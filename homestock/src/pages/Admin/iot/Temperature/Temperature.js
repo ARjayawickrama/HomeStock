@@ -3,7 +3,7 @@ import { FaTemperatureHigh, FaFan, FaFireExtinguisher } from "react-icons/fa";
 import { WiHumidity } from "react-icons/wi";
 import axios from "axios";
 import TmpChart from "../Charts/TmpChart";
-import backgroundImage from "../../../../assets/g2.png";
+import GasDisplay from "../../../Admin/iot/Temperature/GasDisplay";
 
 function Temperature({ temperaturePercentage }) {
   // State management
@@ -13,9 +13,9 @@ function Temperature({ temperaturePercentage }) {
     fireAlarm: false,
   });
   const [sensorData, setSensorData] = useState({
-    temperature: "--",
-    humidity: "--",
-    gas: null,
+    temperature: 0,
+    humidity: 0,
+    gas: 0,
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -28,7 +28,8 @@ function Temperature({ temperaturePercentage }) {
   };
 
   const getGasStatus = (value) => {
-    if (!value) return { text: "Loading...", color: "text-gray-400" };
+    if (value === null || value === undefined)
+      return { text: "Loading...", color: "text-gray-400" };
     if (value >= 2000) return { text: "Danger", color: "text-red-500" };
     if (value >= 1000) return { text: "Moderate", color: "text-amber-400" };
     if (value >= 300) return { text: "Low", color: "text-blue-400" };
@@ -41,19 +42,26 @@ function Temperature({ temperaturePercentage }) {
       try {
         setLoading(true);
         const [tempRes, gasRes] = await Promise.all([
-          axios.get("http://192.168.14.103/temperature"),
-          axios.get("http://192.168.14.103/gas"),
+          axios.get("http://192.168.228.103/temperature"),
+          axios.get("http://192.168.228.103/gas"),
         ]);
 
         setSensorData({
-          temperature: tempRes.data.temperature || "--",
-          humidity: tempRes.data.humidity || "--",
-          gas: gasRes.data.gas_value,
+          temperature: tempRes.data.temperature || 0,
+          humidity: tempRes.data.humidity || 0,
+          gas: gasRes.data?.gas_value || 0,
         });
         setError(null);
       } catch (err) {
         setError("Failed to fetch sensor data");
         console.error("API Error:", err);
+        // Set default values when API fails
+        setSensorData((prev) => ({
+          ...prev,
+          temperature: prev.temperature || 0,
+          humidity: prev.humidity || 0,
+          gas: prev.gas || 0,
+        }));
       } finally {
         setLoading(false);
       }
@@ -75,55 +83,16 @@ function Temperature({ temperaturePercentage }) {
   const gasStatus = getGasStatus(sensorData.gas);
 
   return (
-    <div className="space-y-8">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div className="space-y-8 relative bottom-12">
+      {loading && (
+        <div className="text-center py-4">
+          <p>Loading sensor data...</p>
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6  ">
         <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-6 text-white shadow-xl relative overflow-hidden">
-          <div className="absolute inset-0 opacity-20">
-            <img
-              src={backgroundImage}
-              alt="background"
-              className="w-full h-full object-cover"
-            />
-          </div>
-          <div className="relative z-10">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-semibold flex items-center">
-                <FaFireExtinguisher className="mr-3" /> Gas Monitoring
-              </h3>
-              <span
-                className={`px-3 py-1 rounded-full text-xs font-medium ${gasStatus.color} bg-white/10`}
-              >
-                {gasStatus.text}
-              </span>
-            </div>
-            <div className="flex items-end justify-between">
-              <div>
-                <p className="text-4xl font-bold">
-                  {sensorData.gas !== null ? sensorData.gas : "--"}
-                </p>
-                <p className="text-sm opacity-80">ppm concentration</p>
-              </div>
-              <div className="text-right">
-                <div className="h-2 w-full bg-gray-700 rounded-full overflow-hidden">
-                  <div
-                    className={`h-full ${
-                      sensorData.gas >= 2000
-                        ? "bg-red-500"
-                        : sensorData.gas >= 1000
-                        ? "bg-amber-400"
-                        : "bg-blue-400"
-                    }`}
-                    style={{
-                      width: sensorData.gas
-                        ? `${Math.min(100, (sensorData.gas / 2500) * 100)}%`
-                        : "0%",
-                    }}
-                  />
-                </div>
-                <p className="text-xs mt-1 opacity-80">Threshold: 2000ppm</p>
-              </div>
-            </div>
-          </div>
+          <GasDisplay gasValue={sensorData.gas} loading={loading} />
         </div>
 
         <div className="lg:col-span-2 bg-white rounded-2xl p-6 shadow-xl border border-gray-100">
@@ -147,7 +116,7 @@ function Temperature({ temperaturePercentage }) {
           </div>
           <div className="text-center">
             <p className="text-5xl font-bold mb-2">
-              {sensorData.temperature}
+              {sensorData.temperature.toFixed(1)}
               <span className="text-2xl">°C</span>
             </p>
             <div className="w-full bg-white/20 rounded-full h-2.5 overflow-hidden">
@@ -175,17 +144,14 @@ function Temperature({ temperaturePercentage }) {
           </div>
           <div className="text-center">
             <p className="text-5xl font-bold mb-2">
-              {sensorData.humidity}
+              {sensorData.humidity.toFixed(1)}
               <span className="text-2xl">%</span>
             </p>
             <div className="w-full bg-white/20 rounded-full h-2.5 overflow-hidden">
               <div
                 className="h-full bg-blue-300"
                 style={{
-                  width:
-                    sensorData.humidity !== "--"
-                      ? `${((sensorData.humidity - 30) / 50) * 100}%`
-                      : "0%",
+                  width: `${((sensorData.humidity - 30) / 50) * 100}%`,
                 }}
               />
             </div>

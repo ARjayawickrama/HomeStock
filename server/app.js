@@ -22,7 +22,7 @@ connectDB();
 
 app.use(
   cors({
-    origin: ["http://localhost:3000", "http://192.168.37.1:19000"], // Allow React and React Native apps
+    origin: ["http://localhost:3000", "http://192.168.8.118:19000"], // Allow React and React Native apps
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   })
