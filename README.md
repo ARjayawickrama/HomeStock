@@ -1,4 +1,6 @@
-🏠 HomeStockHomeStock is a smart household management web application that empowers users to efficiently manage their home inventory, groceries, and essential items — all in one place.
+🏠 HomeStock
+
+🏠 HomeStock is a smart household management web application that empowers users to efficiently manage their home inventory, groceries, and essential items — all in one place.
 
 ✨ Key Features
 
