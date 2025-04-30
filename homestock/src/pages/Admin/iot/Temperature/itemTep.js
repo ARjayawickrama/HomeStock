@@ -98,10 +98,10 @@ const ProductDashboard = () => {
       <div className="max-w-6xl mx-auto">
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-gray-800">
+            <h1 className="text-2xl font-bold text-white">
               Product Monitoring Dashboard
             </h1>
-            <p className="text-gray-600">Real-time environmental conditions</p>
+            <p className="text-white">Real-time environmental conditions</p>
           </div>
           {lastUpdated && (
             <div className="text-sm text-gray-500">

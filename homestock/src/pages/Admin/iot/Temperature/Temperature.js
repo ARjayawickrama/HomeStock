@@ -4,6 +4,7 @@ import { WiHumidity } from "react-icons/wi";
 import axios from "axios";
 import TmpChart from "../Charts/TmpChart";
 import backgroundImage from "../../../../assets/g2.png";
+import GasDisplay from "./GasDisplay";
 
 function Temperature({ temperaturePercentage }) {
   // State management
@@ -78,52 +79,7 @@ function Temperature({ temperaturePercentage }) {
     <div className="space-y-8">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-6 text-white shadow-xl relative overflow-hidden">
-          <div className="absolute inset-0 opacity-20">
-            <img
-              src={backgroundImage}
-              alt="background"
-              className="w-full h-full object-cover"
-            />
-          </div>
-          <div className="relative z-10">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-semibold flex items-center">
-                <FaFireExtinguisher className="mr-3" /> Gas Monitoring
-              </h3>
-              <span
-                className={`px-3 py-1 rounded-full text-xs font-medium ${gasStatus.color} bg-white/10`}
-              >
-                {gasStatus.text}
-              </span>
-            </div>
-            <div className="flex items-end justify-between">
-              <div>
-                <p className="text-4xl font-bold">
-                  {sensorData.gas !== null ? sensorData.gas : "--"}
-                </p>
-                <p className="text-sm opacity-80">ppm concentration</p>
-              </div>
-              <div className="text-right">
-                <div className="h-2 w-full bg-gray-700 rounded-full overflow-hidden">
-                  <div
-                    className={`h-full ${
-                      sensorData.gas >= 2000
-                        ? "bg-red-500"
-                        : sensorData.gas >= 1000
-                        ? "bg-amber-400"
-                        : "bg-blue-400"
-                    }`}
-                    style={{
-                      width: sensorData.gas
-                        ? `${Math.min(100, (sensorData.gas / 2500) * 100)}%`
-                        : "0%",
-                    }}
-                  />
-                </div>
-                <p className="text-xs mt-1 opacity-80">Threshold: 2000ppm</p>
-              </div>
-            </div>
-          </div>
+          <GasDisplay />
         </div>
 
         <div className="lg:col-span-2 bg-white rounded-2xl p-6 shadow-xl border border-gray-100">
