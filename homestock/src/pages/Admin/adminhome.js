@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 import { MessageCircle, ArrowRight, ChevronRight } from "lucide-react";
 import {
   LineChart,
@@ -12,15 +13,6 @@ import {
   Area,
 } from "recharts";
 import { motion } from "framer-motion";
-
-const userData = [
-  { name: "Jan", users: 400 },
-  { name: "Feb", users: 600 },
-  { name: "Mar", users: 800 },
-  { name: "Apr", users: 1200 },
-  { name: "May", users: 1500 },
-  { name: "Jun", users: 1800 },
-];
 
 const sectionData = [
   {
@@ -73,6 +65,50 @@ const itemVariants = {
 };
 
 function HomeScreen() {
+  const [userData, setUserData] = useState([]);
+  const [totalUsers, setTotalUsers] = useState(0);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/api/user");
+        const users = response.data.users || response.data;
+
+        if (Array.isArray(users)) {
+          setTotalUsers(users.length);
+          // Generate user growth data (you might want to get this from your backend)
+          const now = new Date();
+          const monthlyData = Array.from({ length: 6 }, (_, i) => {
+            const date = new Date(now);
+            date.setMonth(now.getMonth() - (5 - i));
+            const monthName = date.toLocaleString("default", {
+              month: "short",
+            });
+
+            // This is a simplified example - in a real app you'd want to:
+            // 1. Get actual signup dates from your users
+            // 2. Calculate how many users signed up each month
+            const userCount = Math.floor((users.length * (i + 1)) / 6);
+
+            return {
+              name: monthName,
+              users: userCount,
+            };
+          });
+
+          setUserData(monthlyData);
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
       <div className="max-w-7xl mx-auto">
@@ -91,7 +127,6 @@ function HomeScreen() {
               whileHover={{ y: -5 }}
               className={`bg-gradient-to-br ${section.color} rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-all duration-300 relative overflow-hidden group`}
             >
-              {/* Animated background element */}
               <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
 
               <div className="flex justify-between items-start relative z-10">
@@ -140,7 +175,7 @@ function HomeScreen() {
                   User Growth
                 </h2>
                 <p className="text-sm text-gray-500">
-                  Last 6 months performance
+                  {loading ? "Loading data..." : `Total users: ${totalUsers}`}
                 </p>
               </div>
               <motion.select
@@ -153,62 +188,78 @@ function HomeScreen() {
               </motion.select>
             </div>
             <div className="h-64">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={userData}>
-                  <defs>
-                    <linearGradient id="colorUsers" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.8} />
-                      <stop
-                        offset="95%"
-                        stopColor="#3B82F6"
-                        stopOpacity={0.1}
-                      />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid
-                    strokeDasharray="3 3"
-                    vertical={false}
-                    stroke="#f0f0f0"
-                  />
-                  <XAxis
-                    dataKey="name"
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fill: "#6B7280", fontSize: 12 }}
-                  />
-                  <YAxis
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fill: "#6B7280", fontSize: 12 }}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "white",
-                      borderRadius: "0.5rem",
-                      boxShadow: "0 4px 20px rgba(0, 0, 0, 0.1)",
-                      border: "1px solid #e5e7eb",
-                      padding: "0.5rem 1rem",
-                    }}
-                    itemStyle={{ color: "#1F2937", fontSize: 12 }}
-                    labelStyle={{ fontWeight: 600, color: "#111827" }}
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="users"
-                    stroke="#3B82F6"
-                    strokeWidth={3}
-                    fillOpacity={1}
-                    fill="url(#colorUsers)"
-                    activeDot={{
-                      r: 6,
-                      stroke: "#2563EB",
-                      strokeWidth: 2,
-                      fill: "#ffffff",
-                      filter: "drop-shadow(0 0 2px rgba(59, 130, 246, 0.5))",
-                    }}
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
+              {loading ? (
+                <div className="flex items-center justify-center h-full">
+                  <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={userData}>
+                    <defs>
+                      <linearGradient
+                        id="colorUsers"
+                        x1="0"
+                        y1="0"
+                        x2="0"
+                        y2="1"
+                      >
+                        <stop
+                          offset="5%"
+                          stopColor="#3B82F6"
+                          stopOpacity={0.8}
+                        />
+                        <stop
+                          offset="95%"
+                          stopColor="#3B82F6"
+                          stopOpacity={0.1}
+                        />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      vertical={false}
+                      stroke="#f0f0f0"
+                    />
+                    <XAxis
+                      dataKey="name"
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fill: "#6B7280", fontSize: 12 }}
+                    />
+                    <YAxis
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fill: "#6B7280", fontSize: 12 }}
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: "white",
+                        borderRadius: "0.5rem",
+                        boxShadow: "0 4px 20px rgba(0, 0, 0, 0.1)",
+                        border: "1px solid #e5e7eb",
+                        padding: "0.5rem 1rem",
+                      }}
+                      itemStyle={{ color: "#1F2937", fontSize: 12 }}
+                      labelStyle={{ fontWeight: 600, color: "#111827" }}
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="users"
+                      stroke="#3B82F6"
+                      strokeWidth={3}
+                      fillOpacity={1}
+                      fill="url(#colorUsers)"
+                      activeDot={{
+                        r: 6,
+                        stroke: "#2563EB",
+                        strokeWidth: 2,
+                        fill: "#ffffff",
+                        filter: "drop-shadow(0 0 2px rgba(59, 130, 246, 0.5))",
+                      }}
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              )}
             </div>
           </motion.div>
 
@@ -222,9 +273,13 @@ function HomeScreen() {
             <div className="flex justify-between items-center mb-6">
               <div>
                 <h2 className="text-xl font-semibold text-gray-800">
-                  System Performance
+                  User Statistics
                 </h2>
-                <p className="text-sm text-gray-500">Key metrics overview</p>
+                <p className="text-sm text-gray-500">
+                  {loading
+                    ? "Loading..."
+                    : `Current active users: ${totalUsers}`}
+                </p>
               </div>
               <motion.select
                 whileHover={{ scale: 1.02 }}
@@ -253,35 +308,20 @@ function HomeScreen() {
                   }}
                   className="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4"
                 >
-                  <svg
-                    className="w-10 h-10 text-blue-600"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-                    />
-                  </svg>
+                  <div className="text-3xl font-bold text-blue-600">
+                    {loading ? "..." : totalUsers}
+                  </div>
                 </motion.div>
                 <h3 className="text-lg font-medium text-gray-700 mb-1">
-                  Performance Metrics
+                  Total Registered Users
                 </h3>
-                <p className="text-gray-500 text-sm max-w-xs mx-auto mb-4">
-                  Detailed performance metrics will be displayed here when
-                  available.
-                </p>
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 shadow-md"
-                >
-                  Generate Report
-                </motion.button>
+                {!loading && (
+                  <p className="text-gray-500 text-sm max-w-xs mx-auto mb-4">
+                    {totalUsers > 0
+                      ? `Your platform has ${totalUsers} registered users.`
+                      : "No users registered yet."}
+                  </p>
+                )}
               </motion.div>
             </div>
           </motion.div>
