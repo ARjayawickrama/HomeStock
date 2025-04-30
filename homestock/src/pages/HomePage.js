@@ -9,6 +9,9 @@ import {
   FaShoppingCart,
   FaThermometerHalf,
   FaMoneyBillWave,
+  FaWifi,
+  FaBluetooth,
+  FaMicrochip,
 } from "react-icons/fa";
 import { motion } from "framer-motion";
 import { FiArrowRight } from "react-icons/fi";
@@ -50,8 +53,73 @@ const HomeStockHomePage = () => {
     },
   };
 
+  // IoT device data
+  const iotDevices = [
+    {
+      name: "Smart Fridge Sensor",
+      icon: <FaThermometerHalf />,
+      status: "Connected",
+      color: "bg-blue-500",
+      pulse: true,
+    },
+    {
+      name: "Pantry Scanner",
+      icon: <FaBarcode />,
+      status: "Syncing",
+      color: "bg-green-500",
+      pulse: true,
+    },
+    {
+      name: "WiFi Scale",
+      icon: <FaWifi />,
+      status: "Active",
+      color: "bg-purple-500",
+      pulse: false,
+    },
+    {
+      name: "Notification",
+      icon: <FaBell />, // or FaRegBell or FaBellSlash
+      status: "Standby",
+      color: "bg-blue-400",
+      pulse: false,
+    },
+  ];
+
   return (
-    <div className="dark-theme min-h-screen text-gray-100 bg-gradient-to-br from-gray-900 to-gray-800">
+    <div className="dark-theme min-h-screen text-gray-100 bg-gradient-to-br from-gray-900 to-gray-800 overflow-x-hidden">
+      {/* Floating IoT particles */}
+      {[...Array(15)].map((_, i) => (
+        <motion.div
+          key={i}
+          initial={{
+            x: Math.random() * 100 - 50,
+            y: Math.random() * 100 - 50,
+            opacity: 0,
+          }}
+          animate={{
+            x: Math.random() * 200 - 100,
+            y: Math.random() * 200 - 100,
+            opacity: [0, 0.3, 0],
+            scale: [1, 1.5, 1],
+          }}
+          transition={{
+            duration: Math.random() * 10 + 10,
+            repeat: Infinity,
+            repeatType: "reverse",
+            ease: "easeInOut",
+          }}
+          className={`absolute rounded-full ${
+            ["bg-blue-500", "bg-teal-500", "bg-purple-500"][i % 3]
+          }`}
+          style={{
+            width: Math.random() * 10 + 5,
+            height: Math.random() * 10 + 5,
+            left: `${Math.random() * 100}%`,
+            top: `${Math.random() * 100}%`,
+          }}
+        />
+      ))}
+
       {/* Header */}
       <motion.header
         initial={{ y: -100 }}
@@ -72,8 +140,9 @@ const HomeStockHomePage = () => {
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
             <button
               onClick={() => setShowLogin(true)}
-              className="bg-gradient-to-r from-blue-600 to-teal-600 hover:from-blue-700 hover:to-teal-700 text-white font-bold py-2 px-6 rounded-full transition-all duration-300 shadow-lg hover:shadow-xl"
+              className="bg-gradient-to-r from-blue-600 to-teal-600 hover:from-blue-700 hover:to-teal-700 text-white font-bold py-2 px-6 rounded-full transition-all duration-300 shadow-lg hover:shadow-xl flex items-center gap-2"
             >
+              <FaMicrochip className="text-sm" />
               Login
             </button>
           </motion.div>
@@ -126,6 +195,67 @@ const HomeStockHomePage = () => {
           </motion.div>
         </div>
 
+        {/* IoT Device Visualization */}
+        <div className="mt-20 relative">
+          <div className="container mx-auto px-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              transition={{ duration: 1 }}
+              viewport={{ once: true }}
+              className="bg-gray-800/50 backdrop-blur-sm rounded-3xl p-8 border border-gray-700"
+            >
+              <h3 className="text-2xl font-bold mb-6 text-center bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-teal-400">
+                IoT Device Network
+              </h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                {iotDevices.map((device, index) => (
+                  <motion.div
+                    key={index}
+                    whileHover={{ y: -5 }}
+                    className={`p-6 rounded-2xl ${
+                      device.color
+                    } bg-opacity-20 border ${
+                      device.pulse ? "border-opacity-50" : "border-opacity-20"
+                    } border-white relative overflow-hidden`}
+                  >
+                    {device.pulse && (
+                      <motion.div
+                        animate={{
+                          scale: [1, 1.5],
+                          opacity: [0.7, 0],
+                        }}
+                        transition={{
+                          duration: 2,
+                          repeat: Infinity,
+                          ease: "easeOut",
+                        }}
+                        className="absolute inset-0 rounded-2xl border-2 border-white"
+                      />
+                    )}
+                    <div className="text-4xl mb-3">{device.icon}</div>
+                    <h4 className="font-bold mb-1">{device.name}</h4>
+                    <div className="flex items-center">
+                      <span
+                        className={`w-2 h-2 rounded-full mr-2 ${
+                          device.status === "Connected"
+                            ? "bg-green-500"
+                            : device.status === "Syncing"
+                            ? "bg-yellow-500"
+                            : "bg-blue-400"
+                        }`}
+                      />
+                      <span className="text-sm text-gray-300">
+                        {device.status}
+                      </span>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+          </div>
+        </div>
+
         {/* Animated background elements */}
         <motion.div
           animate={{
@@ -152,6 +282,32 @@ const HomeStockHomePage = () => {
             ease: "linear",
           }}
           className="absolute bottom-1/4 right-1/4 w-40 h-40 rounded-full bg-teal-900/20 blur-xl pointer-events-none"
+        />
+
+        {/* Data flow animation */}
+        <motion.div
+          animate={{
+            x: [0, 100, 200, 300, 400, 500, 0],
+            y: [0, 50, 0, -50, 0, 50, 0],
+          }}
+          transition={{
+            duration: 20,
+            repeat: Infinity,
+            ease: "linear",
+          }}
+          className="absolute top-1/3 left-0 w-4 h-4 rounded-full bg-purple-500/50 pointer-events-none"
+        />
+        <motion.div
+          animate={{
+            x: [0, -100, -200, -300, -400, -500, 0],
+            y: [0, -50, 0, 50, 0, -50, 0],
+          }}
+          transition={{
+            duration: 25,
+            repeat: Infinity,
+            ease: "linear",
+          }}
+          className="absolute bottom-1/3 right-0 w-4 h-4 rounded-full bg-teal-500/50 pointer-events-none"
         />
 
         {showLogin && <Login />}
@@ -219,7 +375,6 @@ const HomeStockHomePage = () => {
                 key={idx}
                 variants={itemVariants}
                 whileHover="hover"
-               
                 onMouseEnter={() => setHoveredFeature(idx)}
                 onMouseLeave={() => setHoveredFeature(null)}
                 className={`bg-gray-800/50 backdrop-blur-sm p-8 rounded-2xl border border-gray-700 hover:border-transparent transition-all duration-300 relative overflow-hidden ${
@@ -251,9 +406,154 @@ const HomeStockHomePage = () => {
         </div>
       </section>
 
+      {/* IoT Integration Section */}
+      <section className="py-20 px-4 bg-gradient-to-br from-gray-900 to-gray-800 relative overflow-hidden">
+        <div className="absolute inset-0 opacity-10 pointer-events-none">
+          <div className="absolute top-0 left-0 w-full h-full bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiPjxkZWZzPjxwYXR0ZXJuIGlkPSJwYXR0ZXJuIiB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHBhdHRlcm5Vbml0cz0idXNlclNwYWNlT25Vc2UiIHBhdHRlcm5UcmFuc2Zvcm09InJvdGF0ZSg0NSkiPjxyZWN0IHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjA1KSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNwYXR0ZXJuKSIvPjwvc3ZnPg==')]"></div>
+        </div>
+        <div className="container mx-auto relative z-10">
+          <div className="flex flex-col lg:flex-row items-center gap-12">
+            <motion.div
+              initial={{ opacity: 0, x: -50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ once: true }}
+              className="lg:w-1/2"
+            >
+              <h2 className="text-4xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-teal-400">
+                Seamless IoT Integration
+              </h2>
+              <p className="text-xl text-gray-300 mb-8">
+                Connect your smart home devices to HomeStock for automated
+                inventory tracking and real-time monitoring.
+              </p>
+              <ul className="space-y-4">
+                <li className="flex items-start gap-4">
+                  <div className="bg-blue-500/20 p-2 rounded-lg">
+                    <FaWifi className="text-blue-400 text-xl" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold">WiFi & Bluetooth Support</h3>
+                    <p className="text-gray-400">
+                      Works with most smart home protocols and standards
+                    </p>
+                  </div>
+                </li>
+                <li className="flex items-start gap-4">
+                  <div className="bg-green-500/20 p-2 rounded-lg">
+                    <FaMicrochip className="text-green-400 text-xl" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold">Smart Sensor Compatibility</h3>
+                    <p className="text-gray-400">
+                      Temperature, humidity, weight, and motion sensors
+                    </p>
+                  </div>
+                </li>
+                <li className="flex items-start gap-4">
+                  <div className="bg-purple-500/20 p-2 rounded-lg">
+                    <FaBarcode className="text-purple-400 text-xl" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold">Automated Scanning</h3>
+                    <p className="text-gray-400">
+                      RFID and barcode scanning for effortless item tracking
+                    </p>
+                  </div>
+                </li>
+              </ul>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, x: 50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ once: true }}
+              className="lg:w-1/2 relative"
+            >
+              <div className="bg-gray-800/50 backdrop-blur-sm rounded-3xl p-8 border border-gray-700">
+                <div className="flex justify-between items-center mb-6">
+                  <h3 className="text-xl font-bold">Connected Devices</h3>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-green-500 animate-pulse"></div>
+                    <span className="text-sm text-gray-400">Online</span>
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  {iotDevices.map((device, index) => (
+                    <motion.div
+                      key={index}
+                      whileHover={{ scale: 1.02 }}
+                      className={`p-4 rounded-xl border ${
+                        device.pulse ? "border-blue-500/50" : "border-gray-700"
+                      } bg-gray-900/50 flex items-center gap-4`}
+                    >
+                      <div
+                        className={`p-3 rounded-lg ${device.color} bg-opacity-20`}
+                      >
+                        {device.icon}
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-bold">{device.name}</h4>
+                        <p className="text-sm text-gray-400">{device.status}</p>
+                      </div>
+                      {device.pulse && (
+                        <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
+                      )}
+                    </motion.div>
+                  ))}
+                </div>
+                <motion.div
+                  animate={{
+                    opacity: [0.5, 1, 0.5],
+                  }}
+                  transition={{
+                    duration: 2,
+                    repeat: Infinity,
+                  }}
+                  className="mt-6 text-center"
+                >
+                  <button className="text-blue-400 text-sm flex items-center justify-center gap-2 mx-auto">
+                    <FaBluetooth /> Pair New Device
+                  </button>
+                </motion.div>
+              </div>
+              <motion.div
+                animate={{
+                  x: [0, 10, 0],
+                  y: [0, -10, 0],
+                }}
+                transition={{
+                  duration: 5,
+                  repeat: Infinity,
+                  repeatType: "reverse",
+                }}
+                className="absolute -top-10 -left-10 w-20 h-20 rounded-full bg-blue-900/20 blur-xl pointer-events-none"
+              />
+              <motion.div
+                animate={{
+                  x: [0, -10, 0],
+                  y: [0, 10, 0],
+                }}
+                transition={{
+                  duration: 7,
+                  repeat: Infinity,
+                  repeatType: "reverse",
+                }}
+                className="absolute -bottom-10 -right-10 w-24 h-24 rounded-full bg-teal-900/20 blur-xl pointer-events-none"
+              />
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
       {/* CTA Section */}
-      <section className="py-20 px-4 bg-gradient-to-br from-gray-900 to-gray-800">
-        <div className="container mx-auto text-center">
+      <section className="py-20 px-4 bg-gradient-to-br from-gray-900 to-gray-800 relative overflow-hidden">
+        <div className="absolute inset-0">
+          <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
+            <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiPjxkZWZzPjxwYXR0ZXJuIGlkPSJwYXR0ZXJuIiB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHBhdHRlcm5Vbml0cz0idXNlclNwYWNlT25Vc2UiIHBhdHRlcm5UcmFuc2Zvcm09InJvdGF0ZSg0NSkiPjxyZWN0IHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjA1KSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNwYXR0ZXJuKSIvPjwvc3ZnPg==')]"></div>
+          </div>
+        </div>
+        <div className="container mx-auto text-center relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -272,8 +572,9 @@ const HomeStockHomePage = () => {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setShowLogin(true)}
-              className="bg-gradient-to-r from-blue-600 to-teal-600 hover:from-blue-700 hover:to-teal-700 text-white font-bold py-4 px-8 rounded-full transition-all duration-300 shadow-lg hover:shadow-xl"
+              className="bg-gradient-to-r from-blue-600 to-teal-600 hover:from-blue-700 hover:to-teal-700 text-white font-bold py-4 px-8 rounded-full transition-all duration-300 shadow-lg hover:shadow-xl flex items-center justify-center gap-2 mx-auto"
             >
+              <FaMicrochip className="text-sm" />
               Start Your Free Trial Now
             </motion.button>
           </motion.div>
