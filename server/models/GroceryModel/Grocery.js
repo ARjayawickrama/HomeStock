@@ -17,6 +17,10 @@ const GrocerySchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  archived: {
+    type: Boolean,
+    default: false,
+  },
   dateAdded: {
     type: Date,
     default: Date.now,

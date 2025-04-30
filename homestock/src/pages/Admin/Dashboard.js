@@ -29,7 +29,6 @@ const Dashboard = () => {
 
   return (
     <div className="h-screen flex">
-    
       <aside className="w-64 h-screen fixed left-0 top-0 bg-gradient-to-r  from-black to-slate-800 shadow-2xl p-6">
         <div className="flex flex-col items-center text-center mb-6">
           <div className="w-24 h-24 rounded-full overflow-hidden mb-4">
@@ -40,9 +39,7 @@ const Dashboard = () => {
                 backgroundSize: "cover",
                 backgroundPosition: "center",
               }}
-            >
-             
-            </div>
+            ></div>
           </div>
           <h2 className="text-xl font-semibold text-white">Home Stock</h2>
           <p className="text-sm text-white">System Unit</p>
@@ -73,7 +70,6 @@ const Dashboard = () => {
       </aside>
 
       <div className="flex-1 ml-64 flex flex-col h-screen">
-        
         <nav className="bg-gradient-to-r from-slate-800 to-black text-white p-4 flex justify-between items-center shadow-md">
           <div className="flex items-center gap-4">
             <span className="text-lg font-semibold relative right-4">
@@ -83,12 +79,7 @@ const Dashboard = () => {
           <div className="flex items-center gap-4">
             <Globe className="w-5 h-5 cursor-pointer hover:text-indigo-300 transition-colors" />
             <Mail className="w-5 h-5 cursor-pointer hover:text-indigo-300 transition-colors" />
-            <div className="relative">
-              <Bell className="w-5 h-5 cursor-pointer hover:text-indigo-300 transition-colors" />
-              <span className="absolute -top-1 -right-1 bg-red-600 text-xs px-1.5 py-0.5 rounded-full">
-                3
-              </span>
-            </div>
+
             <button
               onClick={handleLogout}
               className="flex items-center bg-red-600 px-3 py-2 rounded-md text-sm font-medium hover:bg-red-700 transition-colors"
@@ -98,7 +89,6 @@ const Dashboard = () => {
           </div>
         </nav>
 
-   
         <main className=" bg-white p-4 rounded-lg  ">
           {activeTab === "home" && <Home />}
           {activeTab === "inventory" && <Inventory />}
