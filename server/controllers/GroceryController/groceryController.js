@@ -1,4 +1,4 @@
-const Grocery = require('../../models/GroceryModel/Grocery');
+const Grocery = require("../../models/GroceryModel/Grocery");
 
 // Get all groceries
 exports.getAllGroceries = async (req, res) => {
@@ -13,12 +13,12 @@ exports.getAllGroceries = async (req, res) => {
 // Add new grocery item
 exports.addGrocery = async (req, res) => {
   const { name, quantity, category } = req.body;
-  
+
   try {
     const newGrocery = new Grocery({
       name,
       quantity,
-      category
+      category,
     });
 
     const grocery = await newGrocery.save();
@@ -31,10 +31,10 @@ exports.addGrocery = async (req, res) => {
 // Update grocery item
 exports.updateGrocery = async (req, res) => {
   const { name, quantity, category, completed } = req.body;
-  
+
   try {
     let grocery = await Grocery.findById(req.params.id);
-    if (!grocery) return res.status(404).json({ message: 'Item not found' });
+    if (!grocery) return res.status(404).json({ message: "Item not found" });
 
     grocery.name = name || grocery.name;
     grocery.quantity = quantity || grocery.quantity;
@@ -49,14 +49,19 @@ exports.updateGrocery = async (req, res) => {
 };
 
 // Delete grocery item
+// Delete grocery item
 exports.deleteGrocery = async (req, res) => {
   try {
     const grocery = await Grocery.findById(req.params.id);
-    if (!grocery) return res.status(404).json({ message: 'Item not found' });
+    if (!grocery) return res.status(404).json({ message: "Item not found" });
 
-    await grocery.remove();
-    res.json({ message: 'Item removed' });
+    await Grocery.deleteOne({ _id: req.params.id }); // Changed from remove() to deleteOne()
+    res.json({ message: "Item removed" });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    console.error(err); // Add logging for debugging
+    res.status(500).json({
+      message: "Error deleting item",
+      error: err.message,
+    });
   }
 };
