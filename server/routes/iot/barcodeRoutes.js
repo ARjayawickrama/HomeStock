@@ -69,5 +69,40 @@ router.delete("/barcodes/:id", async (req, res) => {
     res.status(500).json({ message: "Error deleting barcode", error: err });
   }
 });
+router.put("/barcodes/:id", async (req, res) => {
+  try {
+    const { code } = req.body;
 
+    if (!code || code.trim() === "") {
+      return res.status(400).json({ message: "Barcode cannot be empty" });
+    }
+
+    // Check if new barcode already exists (excluding current one)
+    const existingBarcode = await Barcode.findOne({
+      code,
+      _id: { $ne: req.params.id },
+    });
+    if (existingBarcode) {
+      return res.status(409).json({ message: "Barcode already exists" });
+    }
+
+    const updatedBarcode = await Barcode.findByIdAndUpdate(
+      req.params.id,
+      { code },
+      { new: true }
+    );
+
+    if (!updatedBarcode) {
+      return res.status(404).json({ message: "Barcode not found" });
+    }
+
+    res.status(200).json({
+      message: "Barcode updated successfully",
+      barcode: updatedBarcode,
+    });
+  } catch (err) {
+    console.error("Error updating barcode:", err);
+    res.status(500).json({ message: "Error updating barcode", error: err });
+  }
+});
 module.exports = router;

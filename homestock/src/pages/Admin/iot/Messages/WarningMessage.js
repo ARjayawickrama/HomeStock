@@ -131,12 +131,7 @@ const WarningMessage = () => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
             className="bg-white/90 border border-gray-200 text-gray-600 p-4 rounded-xl shadow-lg flex items-center space-x-3"
-          >
-            <div className="animate-pulse h-6 w-6 rounded-full bg-gray-300"></div>
-            <span className="text-sm font-medium">
-              Checking system status...
-            </span>
-          </motion.div>
+          ></motion.div>
         ) : (
           <motion.div
             key={alert.active ? "alert" : "clear"}
