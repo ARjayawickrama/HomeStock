@@ -41,8 +41,8 @@ function Temperature({ temperaturePercentage }) {
       try {
         setLoading(true);
         const [tempRes, gasRes] = await Promise.all([
-          axios.get("http://192.168.14.103/temperature"),
-          axios.get("http://192.168.14.103/gas"),
+          axios.get("http://192.168.228.103/temperature"),
+          axios.get("http://192.168.228.103/gas"),
         ]);
 
         setSensorData({

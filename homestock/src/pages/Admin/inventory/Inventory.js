@@ -315,12 +315,35 @@ const Inventory = () => {
         <div className="p-6">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
             <div>
+
               <h1 className="text-3xl font-bold text-gray-800">
                 Inventory Management
               </h1>
               <p className="text-gray-600 mt-1">
                 Manage your inventory items efficiently
               </p>
+   <label className="block text-sm font-medium mb-1">
+                Item Number*
+              </label>
+              <select
+                name="itemNumber"
+                className="w-full p-2 border rounded"
+                value={newItem.itemNumber}
+                onChange={handleInputChange}
+                required
+              >
+                <option value="">Select Item Number</option>
+                {barcodeOptions.slice(0, 5).map(
+                  (
+                    option // Only shows first 5 options
+                  ) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  )
+                )}
+              </select>
+
             </div>
 
             <div className="flex items-center space-x-4 mt-4 md:mt-0">
@@ -393,6 +416,7 @@ const Inventory = () => {
               <p className="text-xs text-gray-500 mt-2">Unique categories</p>
             </div>
 
+
             {/* Expiring Soon Card */}
             <div className="bg-white p-4 rounded-xl shadow border-l-4 border-yellow-500">
               <div className="flex justify-between items-center">
@@ -417,6 +441,40 @@ const Inventory = () => {
                 <div className="p-3 rounded-full bg-yellow-100 text-yellow-600">
                   <RiCalendarTodoFill />
                 </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                Expiry Date*
+              </label>
+              <div className="flex gap-2">
+                <select
+                  name="expiryDate"
+                  className="flex-1 p-2 border rounded"
+                  value={newItem.expiryDate}
+                  onChange={handleInputChange}
+                  required
+                >
+                  <option value="">Select from scanned dates</option>
+                  {expiryDateOptions.slice(0, 2).map(
+                    (
+                      option // Only show first 3 options
+                    ) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    )
+                  )}
+                </select>
+                <span className="self-center">or</span>
+                <input
+                  type="date"
+                  name="expiryDateManual"
+                  className="flex-1 p-2 border rounded"
+                  value={newItem.expiryDate}
+                  onChange={handleInputChange}
+                  min={getCurrentDate()}
+                />
+
               </div>
               <p className="text-xs text-gray-500 mt-2">Within 7 days</p>
             </div>
