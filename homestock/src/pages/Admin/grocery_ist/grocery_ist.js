@@ -10,13 +10,16 @@ import {
   FaChartLine,
 } from "react-icons/fa";
 import { IoMdNotificationsOutline } from "react-icons/io";
-import { RiCalendarTodoFill } from "react-icons/ri";
 import { Bar } from "react-chartjs-2";
 import { Chart, registerables } from "chart.js";
+import { jsPDF } from "jspdf";
+import autoTable from "jspdf-autotable";
+
 Chart.register(...registerables);
 
 const GroceryList = () => {
   const [groceries, setGroceries] = useState([]);
+  const [filteredItems, setFilteredItems] = useState([]);
   const [newItem, setNewItem] = useState({
     name: "",
     quantity: "",
@@ -31,20 +34,48 @@ const GroceryList = () => {
     message: "",
   });
 
-  const categories = [...new Set(groceries.map((item) => item.category))];
+  const formatDate = (dateString) => {
+    if (!dateString) return "N/A";
+    const options = { year: "numeric", month: "short", day: "numeric" };
+    return new Date(dateString).toLocaleDateString("en-US", options);
+  };
+
+  const categories = [
+    ...new Set(groceries.map((item) => item.category || "Uncategorized")),
+  ];
 
   // Fetch groceries from backend
   useEffect(() => {
     const fetchGroceries = async () => {
       try {
         const res = await axios.get("http://localhost:5000/api/groceries");
-        setGroceries(res.data);
+        const itemsWithDates = res.data.map((item) => ({
+          ...item,
+          createdAt: item.createdAt || new Date().toISOString(),
+        }));
+        setGroceries(itemsWithDates);
       } catch (err) {
         console.error(err);
       }
     };
     fetchGroceries();
   }, []);
+
+  // Update filtered items when filters change
+  useEffect(() => {
+    const filtered = groceries.filter((item) => {
+      const matchesSearch = item.name
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase());
+      const matchesTab =
+        activeTab === "all" ||
+        (activeTab === "pending" && !item.completed) ||
+        (activeTab === "purchased" && item.completed) ||
+        activeTab === item.category;
+      return matchesSearch && matchesTab;
+    });
+    setFilteredItems(filtered);
+  }, [groceries, searchTerm, activeTab]);
 
   const showNotification = (message) => {
     setNotification({ show: true, message });
@@ -54,9 +85,15 @@ const GroceryList = () => {
   const addItem = async () => {
     if (!newItem.name || !newItem.quantity) return;
     try {
+      const today = new Date().toISOString().split("T")[0]; // Get only YYYY-MM-DD
+      const itemWithDate = {
+        ...newItem,
+        completed: false,
+        dateAdded: today, // Store only the date
+      };
       const res = await axios.post(
         "http://localhost:5000/api/groceries",
-        newItem
+        itemWithDate
       );
       setGroceries([res.data, ...groceries]);
       setNewItem({ name: "", quantity: "", category: "" });
@@ -65,7 +102,6 @@ const GroceryList = () => {
       console.error(err);
     }
   };
-
   const updateItem = async () => {
     try {
       const res = await axios.put(
@@ -93,7 +129,8 @@ const GroceryList = () => {
         setGroceries(groceries.filter((item) => item._id !== id));
         showNotification(`${name} removed from grocery list`);
       } catch (err) {
-        console.error(err);
+        console.error("Error deleting item:", err);
+        showNotification("Failed to delete item. Please try again.");
       }
     }
   };
@@ -124,107 +161,151 @@ const GroceryList = () => {
   };
 
   const buyItems = () => {
-    // Implement your buy items logic here
     showNotification("Items marked as purchased");
   };
 
   const generatePDF = () => {
-    // Implement your PDF generation logic here
-    showNotification("PDF generated successfully");
-  };
+    const doc = new jsPDF({
+      orientation: "portrait",
+      unit: "mm",
+      format: "a4",
+    });
 
-  const filteredItems = groceries.filter((item) => {
-    const matchesSearch = item.name
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase());
-    const matchesTab =
-      activeTab === "all" ||
-      (activeTab === "pending" && !item.completed) ||
-      (activeTab === "purchased" && item.completed) ||
-      activeTab === item.category;
-    return matchesSearch && matchesTab;
-  });
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const margin = 15;
+    const date = new Date().toLocaleDateString();
+    const time = new Date().toLocaleTimeString();
+
+    doc.setFillColor(40, 53, 147);
+    doc.rect(0, 0, pageWidth, 20, "F");
+
+    doc.setFontSize(18);
+    doc.setTextColor(255, 255, 255);
+    doc.setFont("helvetica", "bold");
+    doc.text("GROCERY LIST REPORT", pageWidth / 2, 13, { align: "center" });
+
+    doc.setFontSize(10);
+    doc.setTextColor(100, 100, 100);
+    doc.setFont("helvetica", "italic");
+    doc.text(`Report generated on: ${date} at ${time}`, margin, 30);
+
+    doc.setFontSize(12);
+    doc.setTextColor(50, 50, 50);
+    doc.setFont("helvetica", "normal");
+    doc.text(
+      "This report provides a detailed list of all grocery items, their status, quantities, and categories.",
+      margin,
+      40
+    );
+
+    const headers = [
+      ["#", "Status", "Item Name", "Quantity", "Category", "Date Added"],
+    ];
+    const data = filteredItems.map((item, index) => [
+      index + 1,
+      item.completed ? "✓ Purchased" : "○ Pending",
+      item.name,
+      item.quantity,
+      item.category || "Uncategorized",
+      formatDate(item.createdAt),
+    ]);
+
+    autoTable(doc, {
+      startY: 50,
+      head: headers,
+      body: data,
+      theme: "grid",
+      headStyles: {
+        fillColor: [40, 53, 147],
+        textColor: 255,
+        fontStyle: "bold",
+        halign: "center",
+      },
+      bodyStyles: {
+        fontSize: 10,
+        textColor: [60, 60, 60],
+      },
+      styles: {
+        cellPadding: 3,
+        overflow: "linebreak",
+        valign: "middle",
+      },
+      alternateRowStyles: {
+        fillColor: [245, 245, 245],
+      },
+      columnStyles: {
+        0: { halign: "center", cellWidth: 10 },
+        1: { halign: "center", cellWidth: 20 },
+        2: { cellWidth: 50 },
+        3: { halign: "center", cellWidth: 20 },
+        4: { cellWidth: 40 },
+        5: { cellWidth: 30 },
+      },
+      margin: { left: margin, right: margin },
+    });
+
+    const pageHeight = doc.internal.pageSize.height;
+    doc.setFontSize(9);
+    doc.setTextColor(150, 150, 150);
+    doc.text(
+      "Generated by Grocery Management System",
+      pageWidth / 2,
+      pageHeight - 10,
+      { align: "center" }
+    );
+
+    doc.save(`Grocery-Report-${new Date().toISOString().slice(0, 10)}.pdf`);
+    showNotification("✅ Professional PDF report generated successfully!");
+  };
 
   const chartData = {
-    labels: categories,
-    datasets: [
-      {
-        label: "Items by Category",
-        data: categories.map(
-          (cat) => groceries.filter((item) => item.category === cat).length
-        ),
-        backgroundColor: "rgba(54, 162, 235, 0.6)",
-        borderColor: "rgba(54, 162, 235, 1)",
-        borderWidth: 1,
-      },
-    ],
+    itemsByCategory: {
+      labels: categories,
+      datasets: [
+        {
+          label: "Items by Category",
+          data: categories.map(
+            (cat) => groceries.filter((item) => item.category === cat).length
+          ),
+          backgroundColor: categories.map(
+            (_, i) => `hsl(${(i * 360) / categories.length}, 70%, 50%)`
+          ),
+          borderColor: categories.map(
+            (_, i) => `hsl(${(i * 360) / categories.length}, 70%, 30%)`
+          ),
+          borderWidth: 1,
+        },
+      ],
+    },
+    quantitiesByCategory: {
+      labels: categories,
+      datasets: [
+        {
+          label: "Total Quantity by Category",
+          data: categories.map((cat) =>
+            groceries
+              .filter((item) => item.category === cat)
+              .reduce((sum, item) => sum + parseInt(item.quantity || 0), 0)
+          ),
+          backgroundColor: "rgba(54, 162, 235, 0.6)",
+          borderColor: "rgba(54, 162, 235, 1)",
+          borderWidth: 1,
+        },
+      ],
+    },
   };
 
-  // For demo purposes - replace with actual inventory data if needed
   const inventory = groceries.filter((item) => item.quantity < 3).slice(0, 3);
-  const items = [...new Set(groceries.map((item) => item.name))].map(
-    (name) => ({ name })
-  );
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      {/* Notification Toast */}
+    <div className="min-h-screen  p-6">
       {notification.show && (
         <div className="fixed top-4 right-4 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fade-in-down">
           {notification.message}
         </div>
       )}
 
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-800">
-              Grocery List Manager
-            </h1>
-            <p className="text-gray-600">Manage your shopping efficiently</p>
-          </div>
-          <div className="flex items-center space-x-4 mt-4 md:mt-0">
-            <div className="relative">
-              <RiCalendarTodoFill className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-              <div className="bg-white px-4 py-2 pl-10 rounded-lg border border-gray-200 text-sm font-medium">
-                {new Date().toLocaleDateString("en-US", {
-                  weekday: "long",
-                  month: "long",
-                  day: "numeric",
-                })}
-              </div>
-            </div>
-            <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition">
-              <IoMdNotificationsOutline />
-              <span className="hidden sm:inline">Alerts</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Dashboard Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <h3 className="text-gray-500 font-medium mb-2">Total Items</h3>
-            <p className="text-3xl font-bold text-blue-600">
-              {groceries.length}
-            </p>
-          </div>
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <h3 className="text-gray-500 font-medium mb-2">Pending</h3>
-            <p className="text-3xl font-bold text-amber-500">
-              {groceries.filter((item) => !item.completed).length}
-            </p>
-          </div>
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <h3 className="text-gray-500 font-medium mb-2">Categories</h3>
-            <p className="text-3xl font-bold text-green-600">
-              {categories.length}
-            </p>
-          </div>
-        </div>
-
-        {/* Low Stock Alert */}
+      <div className=" mx-auto">
         {inventory.length > 0 && (
           <div className="bg-gradient-to-r from-red-50 to-red-100 border-l-4 border-red-500 text-red-800 p-5 rounded-lg shadow-sm mb-8">
             <div className="flex items-start">
@@ -250,43 +331,131 @@ const GroceryList = () => {
             </div>
           </div>
         )}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          {/* Total Items Card */}
+          <div className="bg-blue-700 p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-300 transform hover:-translate-y-1">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-white font-medium text-sm uppercase tracking-wider mb-2">
+                  Total Items
+                </h3>
+                <p className="text-3xl font-bold text-white">
+                  {groceries.length}
+                </p>
+              </div>
+              <div className="bg-indigo-50 p-3 rounded-full">
+                <svg
+                  className="w-6 h-6 text-indigo-700"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                  />
+                </svg>
+              </div>
+            </div>
+            <p className="mt-3 text-xs text-white">All grocery items</p>
+          </div>
 
-        {/* Add Item Section */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-8">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">
-            Add New Item
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          {/* Pending Card */}
+          <div className="bg-orange-600 p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-300 transform hover:-translate-y-1">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-white font-medium text-sm uppercase tracking-wider mb-2">
+                  Pending
+                </h3>
+                <p className="text-3xl font-bold text-white">
+                  {groceries.filter((item) => !item.completed).length}
+                </p>
+              </div>
+              <div className="bg-slate-50 p-3 rounded-full">
+                <svg
+                  className="w-6 h-6 text-slate-700"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+              </div>
+            </div>
+            <p className="mt-3 text-xs text-white">Items to purchase</p>
+          </div>
+
+          {/* Categories Card */}
+          <div className="bg-emerald-600 p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-300 transform hover:-translate-y-1">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-white font-medium text-sm uppercase tracking-wider mb-2">
+                  Categories
+                </h3>
+                <p className="text-3xl font-bold text-white">
+                  {categories.length}
+                </p>
+              </div>
+              <div className="bg-teal-50 p-3 rounded-full">
+                <svg
+                  className="w-6 h-6 text-teal-700"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
+                  />
+                </svg>
+              </div>
+            </div>
+            <p className="mt-3 text-xs text-white">Unique categories</p>
+          </div>
+        </div>
+
+        <div className="bg-slate-800 p-8 rounded-2xl shadow-md border border-gray-200 mb-10">
+          <h2 className="text-2xl font-bold text-white mb-6">Add New Item</h2>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-xl font-semibold text-white mb-2">
                 Item Name
               </label>
               <input
                 type="text"
-                placeholder="Item name"
+                placeholder="Enter item name"
                 value={newItem.name}
                 onChange={(e) =>
                   setNewItem({ ...newItem, name: e.target.value })
                 }
-                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                className="w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-gray-50 transition"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-xl font-semibold text-white mb-2">
                 Quantity
               </label>
               <input
                 type="number"
-                placeholder="Qty"
+                placeholder="Enter quantity"
                 value={newItem.quantity}
                 onChange={(e) =>
                   setNewItem({ ...newItem, quantity: e.target.value })
                 }
-                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                className="w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-gray-50 transition"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-xl font-semibold text-white mb-2">
                 Category
               </label>
               <select
@@ -294,10 +463,21 @@ const GroceryList = () => {
                   setNewItem({ ...newItem, category: e.target.value })
                 }
                 value={newItem.category}
-                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                className="w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-gray-50 transition"
               >
                 <option value="">Select Category</option>
-                {categories.map((cat, index) => (
+                {[
+                  "Vegetables",
+                  "Fruits",
+                  "Dairy Products",
+                  "Meat & Fish",
+                  "Beverages",
+                  "Snacks",
+                  "Household Items",
+                  "Personal Care",
+                  "Spices",
+                  "Other",
+                ].map((cat, index) => (
                   <option key={index} value={cat}>
                     {cat}
                   </option>
@@ -305,17 +485,19 @@ const GroceryList = () => {
               </select>
             </div>
           </div>
-          <button
-            onClick={addItem}
-            className="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-medium px-5 py-2.5 rounded-lg shadow-sm transition flex items-center justify-center space-x-2"
-          >
-            <FaPlus />
-            <span>Add Item</span>
-          </button>
+
+          <div className="flex justify-center mt-6">
+            <button
+              onClick={addItem}
+              className="inline-flex items-center gap-2 bg-red-700 text-white font-semibold px-6 py-3 rounded-lg shadow-md transition-all"
+            >
+              <FaPlus className="text-lg" />
+              <span>Add Item</span>
+            </button>
+          </div>
         </div>
 
-        {/* Filter and Search */}
-        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div className="bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div className="flex space-x-2 overflow-x-auto pb-2 md:pb-0 w-full md:w-auto">
             <button
               onClick={() => setActiveTab("all")}
@@ -371,48 +553,36 @@ const GroceryList = () => {
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
             />
           </div>
+          <button
+            onClick={generatePDF}
+            className="w-full md:w-auto bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-medium px-4 py-3 rounded-lg shadow-sm transition flex items-center justify-center space-x-2"
+          >
+            <FaFilePdf />
+            <span>Export PDF</span>
+          </button>
         </div>
 
-        {/* Grocery List Table */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mb-8">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-800 overflow-hidden mb-8">
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+            <table className="min-w-full divide-y divide-gray-900">
+              <thead className="bg-gray-800">
                 <tr>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
+                  <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                     Status
                   </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
+                  <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                     Item
                   </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
+                  <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                     Quantity
                   </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
+                  <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                     Category
                   </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
+                  <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                     Date Added
                   </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
+                  <th className="px-6 py-3 text-right text-xs font-medium text-white uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
@@ -466,7 +636,7 @@ const GroceryList = () => {
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {new Date(item.createdAt).toLocaleDateString() || "-"}
+                        {formatDate(item.createdAt)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <div className="flex justify-end space-x-2">
@@ -503,39 +673,81 @@ const GroceryList = () => {
           </div>
         </div>
 
-        {/* Analytics and Actions */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
           <div className="lg:col-span-2 bg-white p-6 rounded-xl shadow-sm border border-gray-100">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-800">
-                Items by Category
+                Category Analytics
               </h3>
               <div className="flex items-center space-x-2 text-sm text-gray-500">
                 <FaChartLine />
                 <span>Analytics</span>
               </div>
             </div>
-            <div className="h-64">
-              <Bar
-                data={chartData}
-                options={{
-                  responsive: true,
-                  maintainAspectRatio: false,
-                  scales: {
-                    y: {
-                      beginAtZero: true,
-                      ticks: {
-                        precision: 0,
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="h-64">
+                <h4 className="text-sm font-medium text-gray-600 mb-2">
+                  Items by Category
+                </h4>
+                {categories.length > 0 ? (
+                  <Bar
+                    data={chartData.itemsByCategory}
+                    options={{
+                      responsive: true,
+                      maintainAspectRatio: false,
+                      scales: {
+                        y: {
+                          beginAtZero: true,
+                          ticks: {
+                            precision: 0,
+                            stepSize: 1,
+                          },
+                        },
                       },
-                    },
-                  },
-                  plugins: {
-                    legend: {
-                      position: "top",
-                    },
-                  },
-                }}
-              />
+                      plugins: {
+                        legend: {
+                          display: false,
+                        },
+                      },
+                    }}
+                  />
+                ) : (
+                  <div className="h-full flex items-center justify-center text-gray-500">
+                    No category data available
+                  </div>
+                )}
+              </div>
+              <div className="h-64">
+                <h4 className="text-sm font-medium text-gray-600 mb-2">
+                  Quantity by Category
+                </h4>
+                {categories.length > 0 ? (
+                  <Bar
+                    data={chartData.quantitiesByCategory}
+                    options={{
+                      responsive: true,
+                      maintainAspectRatio: false,
+                      scales: {
+                        y: {
+                          beginAtZero: true,
+                          ticks: {
+                            precision: 0,
+                          },
+                        },
+                      },
+                      plugins: {
+                        legend: {
+                          display: false,
+                        },
+                      },
+                    }}
+                  />
+                ) : (
+                  <div className="h-full flex items-center justify-center text-gray-500">
+                    No quantity data available
+                  </div>
+                )}
+              </div>
             </div>
           </div>
           <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col">
@@ -577,7 +789,6 @@ const GroceryList = () => {
           </div>
         </div>
 
-        {/* Edit Modal */}
         {isModalOpen && itemToEdit && (
           <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 p-4">
             <div className="bg-white rounded-xl shadow-xl w-full max-w-md">
@@ -653,7 +864,18 @@ const GroceryList = () => {
                       className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
                     >
                       <option value="">Select Category</option>
-                      {categories.map((cat, index) => (
+                      {[
+                        "Vegetables",
+                        "Fruits",
+                        "Dairy Products",
+                        "Meat & Fish",
+                        "Beverages",
+                        "Snacks",
+                        "Household Items",
+                        "Personal Care",
+                        "Spices",
+                        "Other",
+                      ].map((cat, index) => (
                         <option key={index} value={cat}>
                           {cat}
                         </option>
