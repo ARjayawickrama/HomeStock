@@ -1,7 +1,11 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 import { WiFire } from "react-icons/wi";
 
-const GasDisplay = ({ gasValue, loading }) => {
+const GasDisplay = () => {
+  const [gasValue, setGasValue] = useState(null);
+  const [loading, setLoading] = useState(true);
+
   const getGasLevel = (ppm) => {
     if (ppm === undefined || ppm === null) return "LOADING";
     if (ppm > 1000) return "DANGER";
@@ -10,6 +14,7 @@ const GasDisplay = ({ gasValue, loading }) => {
   };
 
   const gasLevel = getGasLevel(gasValue);
+
   const levelColors = {
     DANGER: "bg-red-500",
     WARNING: "bg-yellow-500",
@@ -23,6 +28,25 @@ const GasDisplay = ({ gasValue, loading }) => {
     NORMAL: "text-green-500",
     LOADING: "text-gray-500",
   };
+
+  useEffect(() => {
+    const fetchGasData = async () => {
+      try {
+        const response = await axios.get("http://192.168.228.103/gas");
+        setGasValue(response.data.gas); // Adjust this based on your API response structure
+      } catch (error) {
+        console.error("Error fetching gas data:", error);
+        setGasValue(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchGasData();
+
+    const interval = setInterval(fetchGasData, 5000); // Refresh every 5 seconds
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div className="max-w-md mx-auto p-6 bg-gray-800 rounded-xl shadow-lg text-white">
