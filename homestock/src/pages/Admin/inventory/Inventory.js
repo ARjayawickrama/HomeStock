@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+ import React, { useState, useEffect } from "react";
 import {
   FaPlus,
   FaSearch,
@@ -21,8 +21,9 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
+import { jsPDF } from "jspdf";
+import { autoTable } from "jspdf-autotable";// Register ChartJS components
 
-// Register ChartJS components
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -171,6 +172,57 @@ const Inventory = () => {
       },
     },
   };
+
+    // Function to generate PDF
+    const generatePDF = () => {
+      const doc = new jsPDF();
+      
+      // Add title
+      doc.setFontSize(20);
+      doc.text("Inventory Report", 105, 15, { align: 'center' });
+      
+      // Add date
+      doc.setFontSize(12);
+      doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 105, 25, { align: 'center' });
+      
+      // Add summary information
+      doc.setFontSize(14);
+      doc.text("Summary", 14, 35);
+      doc.setFontSize(10);
+      doc.text(`Total Items: ${items.length}`, 14, 45);
+      doc.text(`Low Stock Items: ${lowStockItems.length}`, 14, 55);
+      doc.text(`Categories: ${[...new Set(items.map((item) => item.category))].length}`, 14, 65);
+      
+      // Add table with inventory data
+      doc.setFontSize(14);
+      doc.text("Inventory Items", 14, 80);
+      
+      const tableData = items.map(item => [
+        item.itemNumber,
+        item.name,
+        item.category,
+        item.quantity,
+        item.manufactureDate.split('T')[0],
+        item.expiryDate.split('T')[0],
+        item.temperature,
+        item.status
+      ]);
+      
+      autoTable(doc, {
+        startY: 85,
+        head: [['Item #','Name','Category','Qty','Mfg Date','Expiry Date','Temp','Status']],
+        body: tableData,
+        theme: 'grid',
+        headStyles: { fillColor: [54,162,235], textColor:255, fontStyle:'bold' },
+        alternateRowStyles: { fillColor: [240,240,240] },
+        margin: { top: 85 }
+      });
+      
+      // Add chart image if needed (would require converting chart to image first)
+      
+      // Save the PDF
+      doc.save(`inventory_report_${new Date().toISOString().slice(0, 10)}.pdf`);
+    };
 
   // All your existing handler functions remain exactly the same
   const toggleForm = () => {
@@ -573,7 +625,10 @@ const Inventory = () => {
                     Low Stock
                   </span>
                 </button>
-                <button className="flex flex-col items-center justify-center p-4 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors">
+                <button 
+                  className="flex flex-col items-center justify-center p-4 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors"
+                  onClick={generatePDF}
+                >
                   <div className="p-3 rounded-full bg-purple-100 text-purple-600 mb-2">
                     <FaFileExport />
                   </div>
