@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { WiFire } from "react-icons/wi";
+import { FaExclamationTriangle, FaCheckCircle, FaClock } from "react-icons/fa";
 
 const GasDisplay = () => {
   const [gasValue, setGasValue] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [lastUpdated, setLastUpdated] = useState(new Date());
 
   const getGasLevel = (ppm) => {
     if (ppm === undefined || ppm === null) return "LOADING";
@@ -29,19 +32,29 @@ const GasDisplay = () => {
     LOADING: "text-gray-500",
   };
 
-  useEffect(() => {
-    const fetchGasData = async () => {
-      try {
-        const response = await axios.get("http://192.168.228.103/gas");
-        setGasValue(response.data.gas); // Adjust this based on your API response structure
-      } catch (error) {
-        console.error("Error fetching gas data:", error);
-        setGasValue(null);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const levelIcons = {
+    DANGER: <FaExclamationTriangle className="mr-1" />,
+    WARNING: <FaExclamationTriangle className="mr-1" />,
+    NORMAL: <FaCheckCircle className="mr-1" />,
+    LOADING: <FaClock className="mr-1" />,
+  };
 
+  const fetchGasData = async () => {
+    try {
+      const response = await axios.get("http://192.168.228.103/gas");
+      setGasValue(response.data.gas_value); // Adjusted to match your API response
+      setLastUpdated(new Date());
+      setError(null);
+    } catch (error) {
+      console.error("Error fetching gas data:", error);
+      setError("Failed to fetch gas data");
+      setGasValue(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchGasData();
 
     const interval = setInterval(fetchGasData, 5000); // Refresh every 5 seconds
@@ -51,12 +64,22 @@ const GasDisplay = () => {
   return (
     <div className="max-w-md mx-auto p-6 bg-gray-800 rounded-xl shadow-lg text-white">
       <h2 className="text-2xl font-bold mb-6 text-center flex items-center justify-center">
-        <WiFire className="mr-2" /> Gas Concentration Monitor
+        <WiFire className="mr-2 text-3xl" /> Gas Concentration Monitor
       </h2>
 
       <div className="bg-gray-700 p-6 rounded-lg">
-        {loading ? (
-          <div className="animate-pulse flex flex-col items-center">
+        {error ? (
+          <div className="text-center py-4 text-red-400">
+            <p className="font-medium">{error}</p>
+            <button
+              onClick={fetchGasData}
+              className="mt-2 px-4 py-2 bg-gray-600 rounded hover:bg-gray-500 transition"
+            >
+              Retry
+            </button>
+          </div>
+        ) : loading ? (
+          <div className="animate-pulse flex flex-col items-center py-4">
             <div className="h-8 w-32 bg-gray-600 rounded mb-2"></div>
             <div className="h-6 w-24 bg-gray-600 rounded"></div>
           </div>
@@ -66,14 +89,15 @@ const GasDisplay = () => {
               <div>
                 <p className="text-sm text-gray-300">Current Reading</p>
                 <p className="text-3xl font-bold">
-                  {gasValue?.toFixed?.(2) ?? "N/A"}{" "}
+                  {gasValue !== null ? gasValue.toFixed(2) : "N/A"}{" "}
                   <span className="text-lg">ppm</span>
                 </p>
               </div>
               <div
-                className={`px-4 py-2 rounded-full ${levelColors[gasLevel]}`}
+                className={`px-4 py-2 rounded-full flex items-center ${levelColors[gasLevel]}`}
               >
-                <span className="font-medium">{gasLevel}</span>
+                {levelIcons[gasLevel]}
+                <span className="font-medium ml-1">{gasLevel}</span>
               </div>
             </div>
 
@@ -94,19 +118,24 @@ const GasDisplay = () => {
 
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div className="bg-gray-600/50 p-3 rounded-lg">
-                <p className="text-gray-300">Value</p>
-                <p className="text-xl font-mono">{gasValue ?? "N/A"}</p>
+                <p className="text-gray-300">Gas Concentration</p>
+                <p className="text-xl font-mono">
+                  {gasValue !== null ? gasValue.toFixed(2) : "N/A"} ppm
+                </p>
               </div>
               <div className="bg-gray-600/50 p-3 rounded-lg">
                 <p className="text-gray-300">Status</p>
-                <p className={`text-xl ${levelTextColors[gasLevel]}`}>
+                <p
+                  className={`text-xl flex items-center ${levelTextColors[gasLevel]}`}
+                >
+                  {levelIcons[gasLevel]}
                   {gasLevel === "DANGER"
-                    ? "⚠️ Danger"
+                    ? " Danger"
                     : gasLevel === "WARNING"
-                    ? "⚠️ Warning"
+                    ? " Warning"
                     : gasLevel === "LOADING"
-                    ? "⌛ Loading"
-                    : "✅ Normal"}
+                    ? " Loading"
+                    : " Normal"}
                 </p>
               </div>
             </div>
@@ -115,7 +144,7 @@ const GasDisplay = () => {
       </div>
 
       <div className="mt-4 text-center text-sm text-gray-400">
-        <p>Last updated: {new Date().toLocaleTimeString()}</p>
+        <p>Last updated: {lastUpdated.toLocaleTimeString()}</p>
       </div>
     </div>
   );
