@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Wallet, TrendingUp,ArrowUpRight,ArrowDownRight, Receipt, PieChart,Calendar, Filter } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-
+import Notification from "../budgeting/Notification"
 
 function BudgetDash({ setActiveTab }) {
   
@@ -34,6 +34,7 @@ function BudgetDash({ setActiveTab }) {
 
   return (
     <main className="p-4 bg-white rounded-lg ">
+          
     <div className="space-y-6">
     <div className="flex items-center justify-between mb-8">
         <h1 className="text-3xl font-bold text-gray-900">Financial Overview</h1>
@@ -46,9 +47,11 @@ function BudgetDash({ setActiveTab }) {
             <Filter className="w-4 h-4 mr-2" />
             Filter
           </button>
+          
         </div>
+        
       </div>
-
+      <Notification />
       <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
         {/* budget card */}
         <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-6 text-white cursor-pointer transform transition-transform hover:scale-[1.02]" onClick={() => setActiveTab('BudgetDetails')}>
