@@ -1,11 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Bell, Mail, Globe, Home as HomeIcon, LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Inventory from "./inventory/Inventory";
 import Grocery_ist from "./grocery_ist/grocery_ist";
 import Budgeting from "./budgeting/budgeting";
 import Iot from "./iot/iot";
-import Home from "./home";
+import AdminHome from "./adminhome";
 import Allusers from "../Login/Allusers";
 import backgroundImage from "../../../src/assets/map2.png";
 import Logo from "../../../src/assets/2.jpg";
@@ -20,7 +20,20 @@ import {
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("home");
+  const [isConnected, setIsConnected] = useState(false);
+  const [pulse, setPulse] = useState(false);
   const navigate = useNavigate();
+
+  // IoT connection simulation
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIsConnected((prev) => !prev);
+      setPulse(true);
+      setTimeout(() => setPulse(false), 1000);
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -28,12 +41,13 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="h-screen flex">
-      <aside className="w-64 h-screen fixed left-0 top-0 bg-gradient-to-r  from-black to-slate-800 shadow-2xl p-6">
+    <div className="h-screen flex bg-gray-900">
+      {/* Sidebar with enhanced dark theme */}
+      <aside className="w-64 h-screen fixed left-0 top-0 bg-gradient-to-br from-gray-800 to-gray-900 shadow-2xl p-6 border-r border-gray-700">
         <div className="flex flex-col items-center text-center mb-6">
-          <div className="w-24 h-24 rounded-full overflow-hidden mb-4">
+          <div className="w-24 h-24 rounded-full overflow-hidden mb-4 border-2 border-indigo-500 shadow-lg">
             <div
-              className="w-full h-full  flex items-center justify-center"
+              className="w-full h-full flex items-center justify-center"
               style={{
                 backgroundImage: `url(${Logo})`,
                 backgroundSize: "cover",
@@ -42,8 +56,38 @@ const Dashboard = () => {
             ></div>
           </div>
           <h2 className="text-xl font-semibold text-white">Home Stock</h2>
-          <p className="text-sm text-white">System Unit</p>
+          <p className="text-sm text-gray-300">Smart Home System</p>
         </div>
+
+        {/* IoT Status Indicator */}
+        <div
+          className={`mb-6 p-3 rounded-md ${
+            isConnected ? "bg-green-900/30" : "bg-red-900/30"
+          } border ${
+            isConnected ? "border-green-500" : "border-red-500"
+          } transition-all duration-500`}
+        >
+          <div className="flex items-center justify-center gap-2">
+            <span
+              className={`relative flex h-3 w-3 ${pulse ? "animate-ping" : ""}`}
+            >
+              <span
+                className={`absolute inline-flex h-full w-full rounded-full ${
+                  isConnected ? "bg-green-400" : "bg-red-400"
+                } opacity-75`}
+              ></span>
+              <span
+                className={`relative inline-flex rounded-full h-3 w-3 ${
+                  isConnected ? "bg-green-500" : "bg-red-500"
+                }`}
+              ></span>
+            </span>
+            <span className="text-sm font-medium text-white">
+              IoT {isConnected ? "Connected" : "Disconnected"}
+            </span>
+          </div>
+        </div>
+
         <ul className="space-y-2">
           {[
             { name: "Home", icon: <FaHome className="w-5 h-5" /> },
@@ -55,49 +99,134 @@ const Dashboard = () => {
           ].map((tab) => (
             <li
               key={tab.name}
-              className={`flex items-center gap-3 p-3 rounded-md cursor-pointer transition-colors duration-300 ${
+              className={`flex items-center gap-3 p-3 rounded-md cursor-pointer transition-all duration-300 ${
                 activeTab === tab.name.toLowerCase()
-                  ? "bg-gradient-to-r from-blue-500 to-indigo-900 text-white font-medium"
-                  : "hover:bg-blue-400 text-white"
+                  ? "bg-gradient-to-r from-indigo-600 to-indigo-800 text-white font-medium shadow-lg"
+                  : "hover:bg-gray-700 text-gray-300 hover:text-white"
               }`}
               onClick={() => setActiveTab(tab.name.toLowerCase())}
             >
               {tab.icon}
               <span>{tab.name}</span>
+              {tab.name === "IoT" && (
+                <span
+                  className={`ml-auto h-2 w-2 rounded-full ${
+                    isConnected ? "bg-green-500" : "bg-red-500"
+                  } ${
+                    pulse && tab.name.toLowerCase() === activeTab
+                      ? "animate-pulse"
+                      : ""
+                  }`}
+                ></span>
+              )}
             </li>
           ))}
         </ul>
       </aside>
 
-      <div className="flex-1 ml-64 flex flex-col h-screen">
-        <nav className="bg-gradient-to-r from-slate-800 to-black text-white p-4 flex justify-between items-center shadow-md">
+      <div className="flex-1 ml-64 flex flex-col h-screen overflow-hidden">
+        {/* Enhanced Navbar with glass effect */}
+        <nav className="bg-gray-800/80 backdrop-blur-md text-white p-4 flex justify-between items-center shadow-lg border-b border-gray-700">
           <div className="flex items-center gap-4">
-            <span className="text-lg font-semibold relative right-4">
+            <span className="text-lg font-semibold bg-gradient-to-r from-indigo-300 to-indigo-100 bg-clip-text text-transparent">
               Home Stock Dashboard
             </span>
           </div>
           <div className="flex items-center gap-4">
-            <Globe className="w-5 h-5 cursor-pointer hover:text-indigo-300 transition-colors" />
-            <Mail className="w-5 h-5 cursor-pointer hover:text-indigo-300 transition-colors" />
+            <div className="relative group">
+              <Globe className="w-5 h-5 cursor-pointer text-gray-300 hover:text-indigo-300 transition-colors" />
+              <div className="absolute hidden group-hover:block -right-2 top-full mt-2 w-48 bg-gray-800 rounded-md shadow-xl z-10 p-2 border border-gray-700">
+                <p className="text-sm text-gray-300 p-2">Global Settings</p>
+              </div>
+            </div>
+
+            <div className="relative group">
+              <Mail className="w-5 h-5 cursor-pointer text-gray-300 hover:text-indigo-300 transition-colors" />
+              <span className="absolute -top-1 -right-1 bg-indigo-600 text-xs px-1.5 py-0.5 rounded-full">
+                2
+              </span>
+            </div>
+
+            <div className="relative group">
+              <Bell className="w-5 h-5 cursor-pointer text-gray-300 hover:text-indigo-300 transition-colors" />
+              <span className="absolute -top-1 -right-1 bg-red-600 text-xs px-1.5 py-0.5 rounded-full">
+                3
+              </span>
+            </div>
 
             <button
               onClick={handleLogout}
-              className="flex items-center bg-red-600 px-3 py-2 rounded-md text-sm font-medium hover:bg-red-700 transition-colors"
+              className="flex items-center bg-gradient-to-r from-red-600 to-red-700 px-3 py-2 rounded-md text-sm font-medium hover:from-red-700 hover:to-red-800 transition-all shadow-md"
             >
               <LogOut className="w-4 h-4 mr-1" /> Logout
             </button>
           </div>
         </nav>
 
-        <main className=" bg-white p-4 rounded-lg  ">
-          {activeTab === "home" && <Home />}
-          {activeTab === "inventory" && <Inventory />}
-          {activeTab === "grocery" && <Grocery_ist />}
-          {activeTab === "budgeting" && <Budgeting />}
-          {activeTab === "iot" && <Iot />}
-          {activeTab === "allusers" && <Allusers />}
+        {/* Main content area with subtle animation */}
+        <main className="flex-1 bg-gradient-to-br overflow-y-auto">
+          <div
+            className={`bg-gray-800/80 rounded-xl p-6 shadow-2xl border border-gray-700 transition-all duration-300 ${
+              activeTab === "iot" ? "ring-2 ring-indigo-500/30" : ""
+            }`}
+          >
+            {activeTab === "home" && <AdminHome />}
+            {activeTab === "inventory" && <Inventory />}
+            {activeTab === "grocery" && <Grocery_ist />}
+            {activeTab === "budgeting" && <Budgeting />}
+            {activeTab === "iot" && (
+              <Iot isConnected={isConnected} pulse={pulse} />
+            )}
+            {activeTab === "allusers" && <Allusers />}
+          </div>
+
+          {/* IoT Floating Elements (only visible on IoT tab) */}
+          {activeTab === "iot" && (
+            <>
+              <div
+                className={`absolute bottom-10 right-10 w-16 h-16 rounded-full bg-indigo-600/20 ${
+                  pulse ? "animate-ping" : ""
+                }`}
+              ></div>
+              <div className="absolute top-1/4 left-1/4 w-8 h-8 rounded-full bg-blue-500/10 animate-float"></div>
+              <div className="absolute top-1/3 right-1/3 w-6 h-6 rounded-full bg-green-500/10 animate-float-delay"></div>
+            </>
+          )}
         </main>
       </div>
+
+      {/* Add these styles to your CSS or use a CSS-in-JS solution */}
+      <style jsx>{`
+        @keyframes float {
+          0% {
+            transform: translateY(0px);
+          }
+          50% {
+            transform: translateY(-15px);
+          }
+          100% {
+            transform: translateY(0px);
+          }
+        }
+        @keyframes float-delay {
+          0% {
+            transform: translateY(-10px);
+          }
+          50% {
+            transform: translateY(5px);
+          }
+          100% {
+            transform: translateY(-10px);
+          }
+        }
+        .animate-float {
+          animation: float 6s ease-in-out infinite;
+        }
+        .animate-float-delay {
+          animation: float-delay 7s ease-in-out infinite;
+          animation-delay: 1s;
+        }
+      `}</style>
     </div>
   );
 };

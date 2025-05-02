@@ -1,5 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { FaTemperatureHigh, FaFan, FaFireExtinguisher } from "react-icons/fa";
+import {
+  FaTemperatureHigh,
+  FaFan,
+  FaFireExtinguisher,
+  FaMoon,
+  FaSun,
+} from "react-icons/fa";
 import { WiHumidity } from "react-icons/wi";
 import axios from "axios";
 import TmpChart from "../Charts/TmpChart";
@@ -19,6 +25,21 @@ function Temperature({ temperaturePercentage }) {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [darkMode, setDarkMode] = useState(false);
+
+  // Toggle dark mode
+  const toggleDarkMode = () => {
+    setDarkMode(!darkMode);
+  };
+
+  // Apply dark mode class to body
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, [darkMode]);
 
   // Color thresholds
   const getStatusColor = (percentage) => {
@@ -75,9 +96,24 @@ function Temperature({ temperaturePercentage }) {
   const gasStatus = getGasStatus(sensorData.gas);
 
   return (
-    <div className="space-y-8">
+    <div className={`space-y-8 ${darkMode ? "dark" : ""}`}>
+      {/* Dark/Light mode toggle button */}
+      <div className="flex justify-end">
+        <button
+          onClick={toggleDarkMode}
+          className={`p-2 rounded-full ${
+            darkMode
+              ? "bg-gray-700 text-yellow-300"
+              : "bg-gray-200 text-gray-700"
+          }`}
+          aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
+        >
+          {darkMode ? <FaSun size={20} /> : <FaMoon size={20} />}
+        </button>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-6 text-white shadow-xl relative overflow-hidden">
+        <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-6 text-white shadow-xl relative overflow-hidden dark:from-gray-700 dark:to-gray-800">
           <div className="absolute inset-0 opacity-20">
             <img
               src={backgroundImage}
@@ -126,13 +162,13 @@ function Temperature({ temperaturePercentage }) {
           </div>
         </div>
 
-        <div className="lg:col-span-2 bg-white rounded-2xl p-6 shadow-xl border border-gray-100">
-          <TmpChart />
+        <div className="lg:col-span-2 bg-white rounded-2xl p-6 shadow-xl border border-gray-100 dark:bg-gray-800 dark:border-gray-700">
+          <TmpChart darkMode={darkMode} />
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-gradient-to-br from-red-600 to-red-800 rounded-2xl p-6 text-white shadow-xl">
+        <div className="bg-gradient-to-br from-red-600 to-red-800 rounded-2xl p-6 text-white shadow-xl dark:from-red-700 dark:to-red-900">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-xl font-semibold flex items-center">
               <FaTemperatureHigh className="mr-3" /> Temperature
@@ -160,7 +196,7 @@ function Temperature({ temperaturePercentage }) {
           </div>
         </div>
 
-        <div className="bg-gradient-to-br from-blue-600 to-blue-800 rounded-2xl p-6 text-white shadow-xl">
+        <div className="bg-gradient-to-br from-blue-600 to-blue-800 rounded-2xl p-6 text-white shadow-xl dark:from-blue-700 dark:to-blue-900">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-xl font-semibold flex items-center">
               <WiHumidity className="text-2xl mr-3" /> Humidity
@@ -193,7 +229,7 @@ function Temperature({ temperaturePercentage }) {
           </div>
         </div>
 
-        <div className="bg-gradient-to-br from-gray-700 to-gray-800 rounded-2xl p-6 text-white shadow-xl">
+        <div className="bg-gradient-to-br from-gray-700 to-gray-800 rounded-2xl p-6 text-white shadow-xl dark:from-gray-600 dark:to-gray-700">
           <h3 className="text-xl font-semibold mb-6">Device Controls</h3>
 
           <div className="space-y-4">
@@ -249,7 +285,7 @@ function Temperature({ temperaturePercentage }) {
       </div>
 
       {error && (
-        <div className="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded">
+        <div className="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded dark:bg-red-900 dark:bg-opacity-20 dark:text-red-200">
           <p className="font-medium">Error:</p>
           <p>{error}</p>
         </div>
