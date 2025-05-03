@@ -210,16 +210,36 @@ const GroceryList = () => {
   };
 
   const generatePDF = () => {
-    const doc = new jsPDF();
-    const date = new Date().toLocaleDateString();
+    const doc = new jsPDF({
+      orientation: "portrait",
+      unit: "mm",
+      format: "a4",
+    });
 
-    // Title
-    doc.setFontSize(20);
-    doc.text("Grocery List", 105, 15, { align: "center" });
-    doc.setFontSize(12);
-    doc.text(`Generated on: ${date}`, 105, 22, { align: "center" });
+    // ====== DESIGN CONSTANTS ======
+    const PRIMARY_COLOR = [44, 62, 80]; // Dark blue
+    const SECONDARY_COLOR = [70, 130, 180]; // Steel blue
+    const LIGHT_BG = [248, 248, 248];
+    const DARK_TEXT = [51, 51, 51];
+    const MUTED_TEXT = [119, 119, 119];
+    const date = new Date();
 
-    // Table data
+    // ====== HEADER ======
+    doc.setFillColor(...PRIMARY_COLOR);
+    doc.rect(0, 0, 210, 30, "F");
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(16);
+    doc.setTextColor(255, 255, 255);
+    doc.text("GROCERY LIST", 105, 18, { align: "center" });
+
+    doc.setFontSize(10);
+    doc.setTextColor(...SECONDARY_COLOR);
+    doc.text(`Generated on: ${date.toLocaleDateString()}`, 105, 27, {
+      align: "center",
+    });
+
+    // ====== TABLE ======
     const tableData = filteredItems.map((item) => [
       item.completed ? "✓" : "",
       item.name,
@@ -228,31 +248,60 @@ const GroceryList = () => {
       formatDate(item.createdAt),
     ]);
 
-    // Table
     autoTable(doc, {
       head: [["Status", "Item", "Quantity", "Category", "Date Added"]],
       body: tableData,
-      startY: 30,
+      startY: 35,
       styles: {
         halign: "center",
+        fontSize: 9,
+        textColor: DARK_TEXT,
       },
       headStyles: {
-        fillColor: [64, 65, 66],
+        fillColor: SECONDARY_COLOR,
+        textColor: 255,
+        fontStyle: "bold",
+      },
+      alternateRowStyles: {
+        fillColor: LIGHT_BG,
       },
     });
 
-    // Summary
+    // ====== SUMMARY ======
     const pendingCount = groceries.filter((item) => !item.completed).length;
     const purchasedCount = groceries.filter((item) => item.completed).length;
     const summaryY = doc.lastAutoTable.finalY + 10;
 
-    doc.setFontSize(12);
-    doc.text("Summary", 14, summaryY);
-    doc.text(`Pending items: ${pendingCount}`, 14, summaryY + 7);
-    doc.text(`Purchased items: ${purchasedCount}`, 14, summaryY + 14);
-    doc.text(`Total items: ${groceries.length}`, 14, summaryY + 21);
+    doc.setFontSize(11);
+    doc.setTextColor(...DARK_TEXT);
+    doc.setFont("helvetica", "bold");
+    doc.text("Summary", 15, summaryY);
 
-    doc.save(`grocery-list-${date}.pdf`);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(...MUTED_TEXT);
+    doc.text(`Pending items: ${pendingCount}`, 15, summaryY + 7);
+    doc.text(`Purchased items: ${purchasedCount}`, 15, summaryY + 14);
+    doc.text(`Total items: ${groceries.length}`, 15, summaryY + 21);
+
+    // ====== FOOTER ======
+    const footerY = 280;
+    doc.setDrawColor(200, 200, 200);
+    doc.line(15, footerY, 195, footerY);
+
+    doc.setFontSize(8);
+    doc.setTextColor(...MUTED_TEXT);
+    doc.text("Confidential - Internal Use Only", 15, footerY + 5);
+    doc.text("Page 1 of 1", 195, footerY + 5, { align: "right" });
+
+    // ====== WATERMARK ======
+    doc.setFontSize(60);
+    doc.setTextColor(230, 230, 230);
+    doc.setGState(new doc.GState({ opacity: 0.1 }));
+    doc.text("DRAFT", 105, 150, { align: "center", angle: 45 });
+
+    // ====== SAVE FILE ======
+    const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+    doc.save(`grocery-list-${timestamp}.pdf`);
   };
 
   // Chart data
