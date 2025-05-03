@@ -34,44 +34,6 @@ const GroceryList = () => {
     message: "",
   });
 
-  // Professional color palette
-  const colors = {
-    primary: {
-      main: "#4F46E5", // Indigo
-      light: "#6366F1",
-      dark: "#4338CA",
-    },
-    secondary: {
-      main: "#10B981", // Emerald
-      light: "#34D399",
-      dark: "#059669",
-    },
-    accent: {
-      main: "#F59E0B", // Amber
-      light: "#FBBF24",
-      dark: "#D97706",
-    },
-    danger: {
-      main: "#EF4444", // Red
-      light: "#F87171",
-      dark: "#DC2626",
-    },
-    background: {
-      light: "#F9FAFB", // Gray 50
-      dark: "#1F2937", // Gray 800
-    },
-    text: {
-      primary: "#111827", // Gray 900
-      secondary: "#6B7280", // Gray 500
-      light: "#F3F4F6", // Gray 100
-    },
-    status: {
-      pending: "#F59E0B", // Amber 500
-      purchased: "#10B981", // Emerald 500
-      completed: "#6B7280", // Gray 500
-    },
-  };
-
   const formatDate = (dateString) => {
     if (!dateString) return "N/A";
     const options = { year: "numeric", month: "short", day: "numeric" };
@@ -135,22 +97,38 @@ const GroceryList = () => {
 
   const addItem = async () => {
     if (!newItem.name || !newItem.quantity) return;
+
     try {
       const today = new Date().toISOString().split("T")[0];
       const itemWithDate = {
         ...newItem,
+        quantity: Number(newItem.quantity), // Convert to number
         completed: false,
         dateAdded: today,
       };
+
+      // Validation check
+      if (isNaN(itemWithDate.quantity) || itemWithDate.quantity <= 0) {
+        showNotification("Quantity must be a positive number");
+        return;
+      }
+
       const res = await axios.post(
         "http://localhost:5000/api/groceries",
-        itemWithDate
+        itemWithDate,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
       );
+
       setGroceries([res.data, ...groceries]);
       setNewItem({ name: "", quantity: "", category: "" });
       showNotification(`${newItem.name} added to grocery list`);
     } catch (err) {
-      console.error(err);
+      console.error("Full error:", err.response?.data || err.message);
+      showNotification(err.response?.data?.message || "Failed to add item");
     }
   };
 
@@ -259,11 +237,7 @@ const GroceryList = () => {
         halign: "center",
       },
       headStyles: {
-        fillColor: [79, 70, 229], // Indigo 600
-        textColor: 255,
-      },
-      alternateRowStyles: {
-        fillColor: [249, 250, 251], // Gray 50
+        fillColor: [64, 65, 66],
       },
     });
 
@@ -273,11 +247,7 @@ const GroceryList = () => {
     const summaryY = doc.lastAutoTable.finalY + 10;
 
     doc.setFontSize(12);
-    doc.setTextColor(79, 70, 229); // Indigo 600
-    doc.setFont("helvetica", "bold");
     doc.text("Summary", 14, summaryY);
-    doc.setTextColor(0, 0, 0);
-    doc.setFont("helvetica", "normal");
     doc.text(`Pending items: ${pendingCount}`, 14, summaryY + 7);
     doc.text(`Purchased items: ${purchasedCount}`, 14, summaryY + 14);
     doc.text(`Total items: ${groceries.length}`, 14, summaryY + 21);
@@ -285,7 +255,7 @@ const GroceryList = () => {
     doc.save(`grocery-list-${date}.pdf`);
   };
 
-  // Chart data with new color scheme
+  // Chart data
   const chartData = {
     itemsByCategory: {
       labels: categories,
@@ -298,8 +268,8 @@ const GroceryList = () => {
                 (item) => (item.category || "Uncategorized") === cat
               ).length
           ),
-          backgroundColor: `${colors.primary.main}80`, // 50% opacity
-          borderColor: colors.primary.main,
+          backgroundColor: "rgba(79, 70, 229, 0.7)",
+          borderColor: "rgba(79, 70, 229, 1)",
           borderWidth: 1,
         },
       ],
@@ -314,8 +284,8 @@ const GroceryList = () => {
               .filter((item) => (item.category || "Uncategorized") === cat)
               .reduce((sum, item) => sum + parseInt(item.quantity || 0), 0)
           ),
-          backgroundColor: `${colors.secondary.main}80`, // 50% opacity
-          borderColor: colors.secondary.main,
+          backgroundColor: "rgba(16, 185, 129, 0.7)",
+          borderColor: "rgba(16, 185, 129, 1)",
           borderWidth: 1,
         },
       ],
@@ -323,38 +293,27 @@ const GroceryList = () => {
   };
 
   return (
-    <div className="min-h-screen p-6 mt-11 bg-gray-50">
+    <div className="min-h-screen p-6 bg-gray-50">
       <Notification onLowStockItemClick={handleLowStockItemClick} />
 
       {notification.show && (
-        <div
-          className="fixed top-4 right-4 px-4 py-2 rounded-lg shadow-lg z-50 text-white font-medium"
-          style={{ backgroundColor: colors.secondary.main }}
-        >
+        <div className="fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50">
           {notification.message}
         </div>
       )}
 
       <div
         id="grocery-form"
-        className="bg-white p-6 rounded-xl shadow-md border border-gray-200 mb-8"
-        style={{
-          boxShadow:
-            "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
-        }}
+        className="bg-white p-8 rounded-2xl shadow-md border border-gray-200 mb-8 transition-all duration-300"
       >
-        <h2
-          className="text-2xl font-semibold mb-5 text-center"
-          style={{ color: colors.primary.dark }}
-        >
-          Add New Item
+        <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center tracking-wide">
+          🛒 Add New Grocery Item
         </h2>
+
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          {/* Item Name */}
           <div className="md:col-span-2">
-            <label
-              className="block text-sm font-medium mb-1"
-              style={{ color: colors.text.primary }}
-            >
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
               Item Name
             </label>
             <input
@@ -362,26 +321,17 @@ const GroceryList = () => {
               placeholder="Enter item name"
               value={newItem.name}
               onChange={(e) => {
-                // Remove any numbers or special characters using regex
                 const filteredValue = e.target.value.replace(
                   /[^a-zA-Z\s]/g,
                   ""
                 );
                 setNewItem({ ...newItem, name: filteredValue });
               }}
-              className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-offset-1 focus:outline-none transition-all"
-              style={{
-                borderColor: colors.text.secondary,
-                focusBorderColor: colors.primary.main,
-                focusRingColor: colors.primary.light,
-              }}
-              onKeyPress={(e) => {
-                // Prevent typing invalid characters in the first place
-                if (!/[a-zA-Z\s]/.test(e.key)) {
-                  e.preventDefault();
-                }
-              }}
-              pattern="[a-zA-Z\s]*" // HTML5 pattern validation as fallback
+              className={`w-full bg-white border ${
+                newItem.name && /[^a-zA-Z\s]/.test(newItem.name)
+                  ? "border-red-500"
+                  : "border-gray-300"
+              } rounded-lg px-4 py-2 text-gray-800 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all`}
             />
             {newItem.name && /[^a-zA-Z\s]/.test(newItem.name) && (
               <p className="mt-1 text-sm text-red-500">
@@ -389,33 +339,30 @@ const GroceryList = () => {
               </p>
             )}
           </div>
+
+          {/* Quantity */}
           <div>
-            <label
-              className="block text-sm font-medium mb-1"
-              style={{ color: colors.text.primary }}
-            >
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
               Quantity
             </label>
             <input
               type="number"
+              min="0"
               placeholder="Qty"
               value={newItem.quantity}
-              onChange={(e) =>
-                setNewItem({ ...newItem, quantity: e.target.value })
-              }
-              className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-offset-1 focus:outline-none transition-all"
-              style={{
-                borderColor: colors.text.secondary,
-                focusBorderColor: colors.primary.main,
-                focusRingColor: colors.primary.light,
+              onChange={(e) => {
+                const value = e.target.value;
+                if (value === "" || Number(value) >= 0) {
+                  setNewItem({ ...newItem, quantity: value });
+                }
               }}
+              className="w-full bg-white border border-gray-300 rounded-lg px-4 py-2 text-gray-800 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
             />
           </div>
+
+          {/* Category */}
           <div>
-            <label
-              className="block text-sm font-medium mb-1"
-              style={{ color: colors.text.primary }}
-            >
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
               Category
             </label>
             <select
@@ -423,14 +370,11 @@ const GroceryList = () => {
                 setNewItem({ ...newItem, category: e.target.value })
               }
               value={newItem.category}
-              className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-offset-1 focus:outline-none transition-all"
-              style={{
-                borderColor: colors.text.secondary,
-                focusBorderColor: colors.primary.main,
-                focusRingColor: colors.primary.light,
-              }}
+              className="w-full bg-white border border-gray-300 rounded-lg px-4 py-2 text-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
             >
-              <option value="">Select Category</option>
+              <option value="" className="bg-white text-gray-400">
+                Select Category
+              </option>
               {[
                 "Vegetables",
                 "Fruits",
@@ -442,7 +386,7 @@ const GroceryList = () => {
                 "Personal Care",
                 "Other",
               ].map((cat, index) => (
-                <option key={index} value={cat}>
+                <option key={index} value={cat} className="bg-white">
                   {cat}
                 </option>
               ))}
@@ -450,15 +394,11 @@ const GroceryList = () => {
           </div>
         </div>
 
-        <div className="flex justify-center mt-6">
+        {/* Add Button */}
+        <div className="flex justify-center mt-8">
           <button
             onClick={addItem}
-            className="px-6 py-2 rounded-lg shadow-md hover:shadow-lg transition-all flex items-center gap-2 font-medium"
-            style={{
-              backgroundColor: colors.primary.main,
-              color: "white",
-              hoverBackgroundColor: colors.primary.dark,
-            }}
+            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2.5 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105 flex items-center gap-2"
           >
             <FaPlus className="text-sm" />
             <span>Add Item</span>
@@ -470,54 +410,31 @@ const GroceryList = () => {
         <div className="flex space-x-2 overflow-x-auto pb-2 md:pb-0 w-full md:w-auto">
           <button
             onClick={() => setActiveTab("all")}
-            className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
+            className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap ${
               activeTab === "all"
-                ? "text-white"
-                : "bg-white text-gray-700 hover:bg-gray-100"
+                ? "bg-blue-600 text-white"
+                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
             }`}
-            style={{
-              backgroundColor: activeTab === "all" ? colors.primary.main : "",
-              border:
-                activeTab !== "all"
-                  ? `1px solid ${colors.text.secondary}`
-                  : "none",
-            }}
           >
             All Items
           </button>
           <button
             onClick={() => setActiveTab("pending")}
-            className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
+            className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap ${
               activeTab === "pending"
-                ? "text-white"
-                : "bg-white text-gray-700 hover:bg-gray-100"
+                ? "bg-amber-500 text-white"
+                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
             }`}
-            style={{
-              backgroundColor:
-                activeTab === "pending" ? colors.accent.main : "",
-              border:
-                activeTab !== "pending"
-                  ? `1px solid ${colors.text.secondary}`
-                  : "none",
-            }}
           >
             Pending
           </button>
           <button
             onClick={() => setActiveTab("purchased")}
-            className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
+            className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap ${
               activeTab === "purchased"
-                ? "text-white"
-                : "bg-white text-gray-700 hover:bg-gray-100"
+                ? "bg-green-600 text-white"
+                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
             }`}
-            style={{
-              backgroundColor:
-                activeTab === "purchased" ? colors.secondary.main : "",
-              border:
-                activeTab !== "purchased"
-                  ? `1px solid ${colors.text.secondary}`
-                  : "none",
-            }}
           >
             Purchased
           </button>
@@ -525,49 +442,29 @@ const GroceryList = () => {
             <button
               key={cat}
               onClick={() => setActiveTab(cat)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
+              className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap ${
                 activeTab === cat
-                  ? "text-white"
-                  : "bg-white text-gray-700 hover:bg-gray-100"
+                  ? "bg-purple-600 text-white"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
               }`}
-              style={{
-                backgroundColor: activeTab === cat ? colors.primary.light : "",
-                border:
-                  activeTab !== cat
-                    ? `1px solid ${colors.text.secondary}`
-                    : "none",
-              }}
             >
               {cat}
             </button>
           ))}
         </div>
         <div className="relative w-full md:w-64">
-          <FaSearch
-            className="absolute left-3 top-1/2 transform -translate-y-1/2"
-            style={{ color: colors.text.secondary }}
-          />
+          <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
           <input
             type="text"
             placeholder="Search items..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-offset-1 focus:outline-none transition"
-            style={{
-              borderColor: colors.text.secondary,
-              focusBorderColor: colors.primary.main,
-              focusRingColor: colors.primary.light,
-            }}
+            className="w-full pl-10 pr-4 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
           />
         </div>
         <button
           onClick={generatePDF}
-          className="w-full md:w-auto px-4 py-3 rounded-lg shadow-sm transition flex items-center justify-center space-x-2 font-medium"
-          style={{
-            backgroundColor: colors.danger.main,
-            color: "white",
-            hoverBackgroundColor: colors.danger.dark,
-          }}
+          className="w-full md:w-auto bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-medium px-4 py-3 rounded-lg shadow-sm transition flex items-center justify-center space-x-2"
         >
           <FaFilePdf />
           <span>Export PDF</span>
@@ -576,54 +473,30 @@ const GroceryList = () => {
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-8">
         <div className="overflow-x-auto">
-          <table
-            className="min-w-full divide-y"
-            style={{ divideColor: colors.text.secondary }}
-          >
+          <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th
-                  className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
-                  style={{ color: colors.text.primary }}
-                >
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Status
                 </th>
-                <th
-                  className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
-                  style={{ color: colors.text.primary }}
-                >
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Item
                 </th>
-                <th
-                  className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
-                  style={{ color: colors.text.primary }}
-                >
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Quantity
                 </th>
-                <th
-                  className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
-                  style={{ color: colors.text.primary }}
-                >
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Category
                 </th>
-                <th
-                  className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
-                  style={{ color: colors.text.primary }}
-                >
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Date Added
                 </th>
-                <th
-                  className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider"
-                  style={{ color: colors.text.primary }}
-                >
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody
-              className="bg-white divide-y"
-              style={{ divideColor: colors.text.secondary }}
-            >
+            <tbody className="bg-white divide-y divide-gray-200">
               {filteredItems.length > 0 ? (
                 filteredItems.map((item) => (
                   <tr
@@ -639,24 +512,17 @@ const GroceryList = () => {
                         onChange={() =>
                           toggleComplete(item._id, item.completed, item.name)
                         }
-                        className="h-5 w-5 rounded cursor-pointer transition"
-                        style={{
-                          accentColor: colors.secondary.main,
-                          hoverBorderColor: colors.primary.main,
-                        }}
+                        className="h-5 w-5 text-green-600 focus:ring-green-500 border-gray-300 rounded cursor-pointer"
                       />
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <span
                           className={`font-medium ${
-                            item.completed ? "line-through" : ""
+                            item.completed
+                              ? "text-gray-500 line-through"
+                              : "text-gray-900"
                           }`}
-                          style={{
-                            color: item.completed
-                              ? colors.text.secondary
-                              : colors.text.primary,
-                          }}
                         >
                           {item.name}
                         </span>
@@ -664,51 +530,36 @@ const GroceryList = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span
-                        className="px-3 py-1 rounded-full text-sm font-medium"
-                        style={{
-                          backgroundColor: item.completed
-                            ? `${colors.secondary.light}30`
-                            : `${colors.primary.light}30`,
-                          color: item.completed
-                            ? colors.secondary.dark
-                            : colors.primary.dark,
-                        }}
+                        className={`px-3 py-1 rounded-full text-sm font-medium ${
+                          item.completed
+                            ? "bg-green-100 text-green-800"
+                            : "bg-blue-100 text-blue-800"
+                        }`}
                       >
                         {item.quantity}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span
-                        className="px-2 py-1 text-xs font-medium rounded"
-                        style={{
-                          backgroundColor: `${colors.primary.light}20`,
-                          color: colors.primary.dark,
-                        }}
-                      >
+                      <span className="px-2 py-1 text-xs font-medium rounded bg-purple-100 text-purple-800">
                         {item.category || "Uncategorized"}
                       </span>
                     </td>
-                    <td
-                      className="px-6 py-4 whitespace-nowrap text-sm"
-                      style={{ color: colors.text.secondary }}
-                    >
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {formatDate(item.createdAt)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex justify-end space-x-2">
                         <button
                           onClick={() => openEditModal(item)}
-                          className="p-1 rounded-full hover:bg-gray-100 transition"
+                          className="text-blue-600 hover:text-blue-900 p-1 rounded-full hover:bg-blue-50 transition"
                           title="Edit"
-                          style={{ color: colors.primary.main }}
                         >
                           <FaEdit className="h-5 w-5" />
                         </button>
                         <button
                           onClick={() => deleteItem(item._id, item.name)}
-                          className="p-1 rounded-full hover:bg-gray-100 transition"
+                          className="text-red-600 hover:text-red-900 p-1 rounded-full hover:bg-red-50 transition"
                           title="Delete"
-                          style={{ color: colors.danger.main }}
                         >
                           <FaTrash className="h-5 w-5" />
                         </button>
@@ -720,8 +571,7 @@ const GroceryList = () => {
                 <tr>
                   <td
                     colSpan="6"
-                    className="px-6 py-4 text-center"
-                    style={{ color: colors.text.secondary }}
+                    className="px-6 py-4 text-center text-gray-500"
                   >
                     No items found. Add some items to your grocery list.
                   </td>
@@ -735,26 +585,17 @@ const GroceryList = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
         <div className="lg:col-span-2 bg-white p-6 rounded-xl shadow-sm border border-gray-200">
           <div className="flex items-center justify-between mb-4">
-            <h3
-              className="text-lg font-semibold"
-              style={{ color: colors.text.primary }}
-            >
+            <h3 className="text-lg font-semibold text-gray-800">
               Category Analytics
             </h3>
-            <div
-              className="flex items-center space-x-2 text-sm"
-              style={{ color: colors.text.secondary }}
-            >
+            <div className="flex items-center space-x-2 text-sm text-gray-500">
               <FaChartLine />
               <span>Analytics</span>
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="h-64">
-              <h4
-                className="text-sm font-medium mb-2"
-                style={{ color: colors.text.secondary }}
-              >
+              <h4 className="text-sm font-medium text-gray-600 mb-2">
                 Items by Category
               </h4>
               {categories.length > 0 ? (
@@ -770,14 +611,6 @@ const GroceryList = () => {
                           precision: 0,
                           stepSize: 1,
                         },
-                        grid: {
-                          color: colors.text.secondary,
-                        },
-                      },
-                      x: {
-                        grid: {
-                          display: false,
-                        },
                       },
                     },
                     plugins: {
@@ -788,19 +621,13 @@ const GroceryList = () => {
                   }}
                 />
               ) : (
-                <div
-                  className="h-full flex items-center justify-center"
-                  style={{ color: colors.text.secondary }}
-                >
+                <div className="h-full flex items-center justify-center text-gray-500">
                   No category data available
                 </div>
               )}
             </div>
             <div className="h-64">
-              <h4
-                className="text-sm font-medium mb-2"
-                style={{ color: colors.text.secondary }}
-              >
+              <h4 className="text-sm font-medium text-gray-600 mb-2">
                 Quantity by Category
               </h4>
               {categories.length > 0 ? (
@@ -815,14 +642,6 @@ const GroceryList = () => {
                         ticks: {
                           precision: 0,
                         },
-                        grid: {
-                          color: colors.text.secondary,
-                        },
-                      },
-                      x: {
-                        grid: {
-                          display: false,
-                        },
                       },
                     },
                     plugins: {
@@ -833,10 +652,7 @@ const GroceryList = () => {
                   }}
                 />
               ) : (
-                <div
-                  className="h-full flex items-center justify-center"
-                  style={{ color: colors.text.secondary }}
-                >
+                <div className="h-full flex items-center justify-center text-gray-500">
                   No quantity data available
                 </div>
               )}
@@ -844,53 +660,31 @@ const GroceryList = () => {
           </div>
         </div>
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 flex flex-col">
-          <h3
-            className="text-lg font-semibold mb-4"
-            style={{ color: colors.text.primary }}
-          >
+          <h3 className="text-lg font-semibold text-gray-800 mb-4">
             Quick Actions
           </h3>
           <div className="space-y-4 flex-1 flex flex-col justify-between">
             <div className="space-y-3">
               <button
                 onClick={buyItems}
-                className="w-full px-4 py-3 rounded-lg shadow-sm transition flex items-center justify-center space-x-2 font-medium"
-                style={{
-                  backgroundColor: colors.secondary.main,
-                  color: "white",
-                  hoverBackgroundColor: colors.secondary.dark,
-                }}
+                className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-medium px-4 py-3 rounded-lg shadow-sm transition flex items-center justify-center space-x-2"
               >
                 <FaShoppingCart />
                 <span>Mark as Purchased</span>
               </button>
               <button
                 onClick={generatePDF}
-                className="w-full px-4 py-3 rounded-lg shadow-sm transition flex items-center justify-center space-x-2 font-medium"
-                style={{
-                  backgroundColor: colors.danger.main,
-                  color: "white",
-                  hoverBackgroundColor: colors.danger.dark,
-                }}
+                className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-medium px-4 py-3 rounded-lg shadow-sm transition flex items-center justify-center space-x-2"
               >
                 <FaFilePdf />
                 <span>Export as PDF</span>
               </button>
             </div>
-            <div
-              className="p-4 rounded-lg border"
-              style={{
-                backgroundColor: `${colors.primary.light}10`,
-                borderColor: colors.primary.light,
-              }}
-            >
-              <h4
-                className="text-sm font-medium mb-2"
-                style={{ color: colors.primary.dark }}
-              >
+            <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+              <h4 className="text-sm font-medium text-blue-800 mb-2">
                 Summary
               </h4>
-              <p className="text-xs" style={{ color: colors.text.secondary }}>
+              <p className="text-xs text-blue-600">
                 {groceries.filter((item) => !item.completed).length} pending
                 items
                 <br />
@@ -909,15 +703,12 @@ const GroceryList = () => {
           <div className="bg-white rounded-xl shadow-xl w-full max-w-md">
             <div className="p-6">
               <div className="flex justify-between items-center mb-4">
-                <h3
-                  className="text-xl font-semibold"
-                  style={{ color: colors.text.primary }}
-                >
+                <h3 className="text-xl font-semibold text-gray-800">
                   Edit Item
                 </h3>
                 <button
                   onClick={() => setIsModalOpen(false)}
-                  style={{ color: colors.text.secondary }}
+                  className="text-gray-400 hover:text-gray-500"
                 >
                   <svg
                     className="h-6 w-6"
@@ -937,10 +728,7 @@ const GroceryList = () => {
 
               <div className="space-y-4">
                 <div>
-                  <label
-                    className="block text-sm font-medium mb-1"
-                    style={{ color: colors.text.primary }}
-                  >
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     Item Name
                   </label>
                   <input
@@ -949,20 +737,12 @@ const GroceryList = () => {
                     onChange={(e) =>
                       setItemToEdit({ ...itemToEdit, name: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-offset-1 focus:outline-none transition"
-                    style={{
-                      borderColor: colors.text.secondary,
-                      focusBorderColor: colors.primary.main,
-                      focusRingColor: colors.primary.light,
-                    }}
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
                   />
                 </div>
 
                 <div>
-                  <label
-                    className="block text-sm font-medium mb-1"
-                    style={{ color: colors.text.primary }}
-                  >
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     Quantity
                   </label>
                   <input
@@ -974,20 +754,12 @@ const GroceryList = () => {
                         quantity: e.target.value,
                       })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-offset-1 focus:outline-none transition"
-                    style={{
-                      borderColor: colors.text.secondary,
-                      focusBorderColor: colors.primary.main,
-                      focusRingColor: colors.primary.light,
-                    }}
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
                   />
                 </div>
 
                 <div>
-                  <label
-                    className="block text-sm font-medium mb-1"
-                    style={{ color: colors.text.primary }}
-                  >
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     Category
                   </label>
                   <select
@@ -998,12 +770,7 @@ const GroceryList = () => {
                         category: e.target.value,
                       })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-offset-1 focus:outline-none transition"
-                    style={{
-                      borderColor: colors.text.secondary,
-                      focusBorderColor: colors.primary.main,
-                      focusRingColor: colors.primary.light,
-                    }}
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
                   >
                     <option value="">Select Category</option>
                     {[
@@ -1029,22 +796,13 @@ const GroceryList = () => {
               <div className="mt-6 flex justify-end space-x-3">
                 <button
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 border rounded-lg font-medium transition"
-                  style={{
-                    borderColor: colors.text.secondary,
-                    color: colors.text.primary,
-                    hoverBackgroundColor: colors.background.light,
-                  }}
+                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={saveEditedItem}
-                  className="px-4 py-2 rounded-lg text-white font-medium transition"
-                  style={{
-                    backgroundColor: colors.primary.main,
-                    hoverBackgroundColor: colors.primary.dark,
-                  }}
+                  className="px-4 py-2 bg-blue-600 rounded-lg text-white font-medium hover:bg-blue-700 transition"
                 >
                   Save Changes
                 </button>

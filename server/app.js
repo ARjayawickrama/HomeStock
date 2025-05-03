@@ -11,9 +11,6 @@ const inventoryRoutes = require("./routes/inventory/inventoryRoutes");
 
 const groceryRoutes = require("./routes/GroceryRoute/grocery");
 
-
-const productRoutes = require("./routes/iot/productRoutes");
-
 const bodyParser = require("body-parser");
 const cors = require("cors");
 
@@ -25,7 +22,7 @@ connectDB();
 
 app.use(
   cors({
-    origin: ["http://localhost:3000", "http://192.168.8.118:19000"], // Allow React and React Native apps
+    origin: ["http://localhost:3000", "http://192.168.37.1:19000"], // Allow React and React Native apps
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   })
@@ -37,7 +34,6 @@ app.use(bodyParser.json());
 app.use("/api", signupRouter);
 app.use("/auth", loginRouter);
 app.use("/api", barcodeRoutes);
-app.use("/api/products", productRoutes);
 
 // Budgeting routes
 app.use("/api", budgetingRoutes);

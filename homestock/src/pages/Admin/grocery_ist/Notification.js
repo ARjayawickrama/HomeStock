@@ -14,7 +14,6 @@ function Notification({ onLowStockItemClick }) {
   const [notifications, setNotifications] = useState([]);
   const [isPrinting, setIsPrinting] = useState(false);
 
-
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -61,7 +60,6 @@ function Notification({ onLowStockItemClick }) {
 
   return (
     <div className="absolute right-11 z-50 top-24">
- 
       <button
         onClick={toggleNotificationPanel}
         className={`text-3xl relative ${
