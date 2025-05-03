@@ -123,7 +123,6 @@ const ProductDashboard = () => {
     // ====== DESIGN CONSTANTS ======
     const PRIMARY_COLOR = [44, 62, 80]; // Dark blue
     const SECONDARY_COLOR = [70, 130, 180]; // Steel blue
-    const ACCENT_COLOR = [0, 150, 136]; // Teal for highlights
     const LIGHT_BG = [248, 248, 248];
     const DARK_TEXT = [51, 51, 51];
     const MUTED_TEXT = [119, 119, 119];
@@ -155,22 +154,18 @@ const ProductDashboard = () => {
       align: "right",
     });
 
-    // ====== ENHANCED TABLE DESIGN ======
+    // ====== TABLE DESIGN ======
     const startY = 50;
     const columnWidths = [100, 80]; // Product name wider than category
     const rowHeight = 10;
-    const tableWidth = columnWidths.reduce((a, b) => a + b, 0);
-    const tableEndY = startY + rowHeight + products.length * rowHeight;
 
-    // Table Header - Enhanced with better styling
-    doc.setFillColor(...PRIMARY_COLOR);
-    doc.roundedRect(
+    // Table Header
+    doc.setFillColor(...SECONDARY_COLOR);
+    doc.rect(
       15,
       startY,
-      tableWidth,
+      columnWidths.reduce((a, b) => a + b, 0),
       rowHeight,
-      2, // border radius
-      2,
       "F"
     );
 
@@ -178,70 +173,35 @@ const ProductDashboard = () => {
     doc.setFontSize(10);
     doc.setTextColor(255, 255, 255);
 
-    // Add subtle shadow effect to header
-    doc.setDrawColor(180, 180, 180);
-    doc.setLineWidth(0.2);
-    doc.line(15, startY + rowHeight, 15 + tableWidth, startY + rowHeight);
-
     let xPos = 20;
     ["PRODUCT NAME", "CATEGORY"].forEach((text, i) => {
       doc.text(text, xPos, startY + 7);
       xPos += columnWidths[i];
     });
 
-    // Table Rows - Enhanced with better styling
+    // Table Rows
     doc.setFont("helvetica", "normal");
     doc.setFontSize(9);
 
     products.forEach((product, index) => {
       const yPos = startY + rowHeight + index * rowHeight;
 
-      // Alternate row colors with better contrast
+      // Alternate row colors
       if (index % 2 === 0) {
         doc.setFillColor(...LIGHT_BG);
-        doc.rect(15, yPos, tableWidth, rowHeight, "F");
+        doc.rect(
+          15,
+          yPos,
+          columnWidths.reduce((a, b) => a + b, 0),
+          rowHeight,
+          "F"
+        );
       }
 
-      // Add subtle borders between rows
-      doc.setDrawColor(220, 220, 220);
-      doc.setLineWidth(0.1);
-      doc.line(15, yPos + rowHeight, 15 + tableWidth, yPos + rowHeight);
-
-      // Product name with ellipsis if too long
-      const productName = doc.splitTextToSize(
-        product.name,
-        columnWidths[0] - 5
-      );
       doc.setTextColor(...DARK_TEXT);
-      doc.text(productName, 20, yPos + 7);
-
-      // Category with colored pill background
-      const categoryText = product.category.toUpperCase();
-      const textWidth =
-        (doc.getStringUnitWidth(categoryText) * doc.internal.getFontSize()) /
-        doc.internal.scaleFactor;
-
-      // Draw pill background
-      doc.setFillColor(...ACCENT_COLOR);
-      doc.roundedRect(
-        120 - 2, // x position with padding
-        yPos + 3, // y position with padding
-        textWidth + 6, // width with padding
-        6, // height
-        3, // border radius
-        3,
-        "F"
-      );
-
-      // Category text
-      doc.setTextColor(255, 255, 255);
-      doc.text(categoryText, 120, yPos + 7);
+      doc.text(product.name, 20, yPos + 7);
+      doc.text(product.category.toUpperCase(), 120, yPos + 7);
     });
-
-    // Add border around entire table
-    doc.setDrawColor(200, 200, 200);
-    doc.setLineWidth(0.5);
-    doc.roundedRect(15, startY, tableWidth, tableEndY - startY, 2, 2, "S");
 
     // ====== FOOTER ======
     const footerY = 280;
