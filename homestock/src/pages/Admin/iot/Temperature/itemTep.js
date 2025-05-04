@@ -32,7 +32,7 @@ const ProductDashboard = () => {
   const fetchSensorData = async () => {
     try {
       setSensorPulse(true);
-      const res = await axios.get("http://192.168.228.103/temperature");
+      const res = await axios.get("http://192.168.229.103/temperature");
       setSensorData({
         temperature: res.data.temperature,
         humidity: res.data.humidity,

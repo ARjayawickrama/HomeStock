@@ -10,7 +10,7 @@ import { WiHumidity } from "react-icons/wi";
 import axios from "axios";
 import TmpChart from "../Charts/TmpChart";
 import backgroundImage from "../../../../assets/g2.png";
-import GasDisplay from "../Temperature/GasDisplay"
+import GasDisplay from "../Temperature/GasDisplay";
 function Temperature({ temperaturePercentage }) {
   // State management
   const [controls, setControls] = useState({
@@ -62,8 +62,8 @@ function Temperature({ temperaturePercentage }) {
       try {
         setLoading(true);
         const [tempRes, gasRes] = await Promise.all([
-          axios.get("http://192.168.228.103/temperature"),
-          axios.get("http://192.168.228.103/gas"),
+          axios.get("http://192.168.229.103/temperature"),
+          axios.get("http://192.168.229.103/gas"),
         ]);
 
         setSensorData({
@@ -113,8 +113,7 @@ function Temperature({ temperaturePercentage }) {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-       
-        <GasDisplay/>
+        <GasDisplay />
 
         <div className="lg:col-span-2 bg-white rounded-2xl p-6 shadow-xl border border-gray-100 dark:bg-gray-800 dark:border-gray-700">
           <TmpChart darkMode={darkMode} />

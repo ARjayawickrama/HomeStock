@@ -41,7 +41,7 @@ const GasDisplay = () => {
 
   const fetchGasData = async () => {
     try {
-      const response = await axios.get("http://192.168.228.103/gas");
+      const response = await axios.get("http://192.168.229.103/gas");
       setGasValue(response.data.gas_value); // Adjusted to match your API response
       setLastUpdated(new Date());
       setError(null);

@@ -20,7 +20,7 @@ function TmpTracker() {
 
   const fetchData = async () => {
     try {
-      const response = await axios.get("http://192.168.228.103/temperature");
+      const response = await axios.get("http://92.168.229.103/temperature");
       setTemperature(response.data.temperature);
       setHumidity(response.data.humidity);
       setIsLoading(false);
