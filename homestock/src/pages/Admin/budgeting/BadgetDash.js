@@ -30,7 +30,7 @@ function BudgetDash({ setActiveTab }) {
     { name: 'Jun', budget: 1000, expenses: 880 },
   ];
 
-  
+
 
   return (
     <main className="p-4 bg-white rounded-lg ">
@@ -41,12 +41,12 @@ function BudgetDash({ setActiveTab }) {
         <div className="flex gap-3">
           <button className="flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
             <Calendar className="w-4 h-4 mr-2" />
-            March 2024
+            April 2025
           </button>
-          <button className="flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
+          {/* <button className="flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
             <Filter className="w-4 h-4 mr-2" />
             Filter
-          </button>
+          </button> */}
           
         </div>
         

@@ -58,6 +58,7 @@ const AddBudgetModal =  ({ onSubmit, onClose, initialData }) =>  {
                 onChange={(e) => setFormData({ ...formData, period: e.target.value })}
                 className="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
               >
+                <option value="Not select">Select</option>
                 <option value="Monthly">Monthly</option>
                 <option value="Weekly">Weekly</option>
                 <option value="Yearly">Yearly</option>
