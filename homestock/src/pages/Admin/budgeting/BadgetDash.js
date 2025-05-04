@@ -46,7 +46,7 @@ function BudgetDash({ setActiveTab }) {
             </div>
             <p className="text-lg font-medium opacity-90">Total Budget</p>
             <p className="mt-2 text-3xl font-bold">Rs.{totalBudget.toLocaleString()}</p>
-            <p className="mt-2 text-sm opacity-75">Monthly allocation</p>
+            
           </div>
 
           {/* Total Spent Card */}
@@ -57,7 +57,7 @@ function BudgetDash({ setActiveTab }) {
             </div>
             <p className="text-lg font-medium opacity-90">Total Spent</p>
             <p className="mt-2 text-3xl font-bold">Rs.{totalSpent.toLocaleString()}</p>
-            <p className="mt-2 text-sm opacity-75">This month</p>
+            
           </div>
 
           {/* Remaining Budget Card */}
